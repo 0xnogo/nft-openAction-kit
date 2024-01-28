@@ -1,14 +1,14 @@
 import { Chain } from "viem";
-import { NFTExtraction } from "./nftPlatforms";
+import { NFTExtraction, UIData } from "../types";
 
-export interface UIData {
-  platformName: string;
-  platformLogoUrl: string;
-  nftName: string;
-  nftUri: string;
-  nftCreatorAddress: string;
-}
-
+/**
+ * Interface for platform services
+ * @interface IPlatformService
+ * @param getMintSignature - returns the signature of the mint function
+ * @param getUIData - returns the UI data for the NFT
+ * @param getPrice - returns the price of the NFT
+ * @param getArgs - returns the arguments for the mint function
+ */
 export interface IPlatformService {
   getMintSignature(nftDetails: NFTExtraction): Promise<string | undefined>;
   getUIData(

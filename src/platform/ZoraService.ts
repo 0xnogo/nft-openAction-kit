@@ -7,21 +7,25 @@ import {
   http,
   parseEther,
 } from "viem";
-import { IPlatformService, UIData } from "./IPlatformService";
-import { NFTExtraction, NFT_PLATFORM_CONFIG } from "./nftPlatforms";
+import { IPlatformService } from "../interfaces/IPlatformService";
+import { NFT_PLATFORM_CONFIG } from "./nftPlatforms";
 
 import ERC721DropAbi from "../config/abis/ERC721Drop.json";
 import MetadataRendererABI from "../config/abis/MetadataRenderer.json";
 import ZoraCreator1155ImplABI from "../config/abis/ZoraCreator1155Impl.json";
 import ZoraCreatorFixedPriceSaleStrategyABI from "../config/abis/ZoraCreatorFixedPriceSaleStrategy.json";
-import { ZoraExtendedChain } from "../config/constants";
+import { NFTExtraction, UIData } from "../types";
 
-interface Sale {
+type Sale = {
   saleStart: number;
   saleEnd: number;
   totalMinted: bigint;
   maxSupply: bigint;
   price: bigint;
+};
+
+export interface ZoraExtendedChain extends Chain {
+  erc1155ZoraMinter: string;
 }
 
 export class ZoraService implements IPlatformService {

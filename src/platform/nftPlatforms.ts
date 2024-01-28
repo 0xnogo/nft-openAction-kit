@@ -1,25 +1,6 @@
-import { Chain } from "viem";
 import { ZORA_CHAIN_ID_MAPPING } from "../config/constants";
-import { IPlatformService } from "./IPlatformService";
+import { NFTExtraction, NFTPlatform } from "../types";
 import { ZoraService } from "./ZoraService";
-
-export type PlatformServiceConstructor = new (chain: Chain) => IPlatformService;
-
-export type NFTPlatform = {
-  platformName: string;
-  platformLogoUrl: string;
-  urlPattern: RegExp;
-  urlExtractor: (url: string) => NFTExtraction | undefined;
-  platformService: PlatformServiceConstructor;
-};
-
-export type NFTExtraction = {
-  platform: NFTPlatform;
-  chain: Chain;
-  contractAddress: string;
-  nftId: string;
-  service: IPlatformService;
-};
 
 export const NFT_PLATFORM_CONFIG: { [key: string]: NFTPlatform } = {
   Zora: {

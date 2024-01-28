@@ -1,22 +1,6 @@
-import { Chain, base, mainnet, optimism, zora } from "viem/chains";
-
-interface ChainConfig {
-  openActionContractAddress: string;
-  lensHubProxyAddress: string;
-  collectActionContractAddress: string;
-  simpleCollectModuleContractAddress: string;
-  decentOpenActionContractAddress: string;
-  wMatic: string;
-}
-
-export enum NftType {
-  ERC721 = "ERC721",
-  ERC1155 = "ERC1155",
-}
-
-export interface ZoraExtendedChain extends Chain {
-  erc1155ZoraMinter: string;
-}
+import { base, mainnet, optimism, zora } from "viem/chains";
+import { ZoraExtendedChain } from "../platform/ZoraService";
+import { ChainConfig } from "../types";
 
 export const CHAIN_ID_TO_KEY: { [id: number]: string } = {
   [mainnet.id]: "eth",
@@ -72,6 +56,3 @@ export const CHAIN_CONFIG: ChainConfig =
           "0x48Cc077E082365F1be696cAad2ccF91cEb08D9f9",
         wMatic: "0x9c3C9283D3e44854697Cd22D3Faa240Cfb032889",
       };
-
-export const DECENT_API_KEY = process.env.DECENT_API_KEY;
-export const BASE_URL = "https://box-v1.api.decent.xyz/api/getBoxAction";

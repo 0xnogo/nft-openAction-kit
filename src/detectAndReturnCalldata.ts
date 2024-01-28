@@ -1,20 +1,13 @@
 import { encodeAbiParameters, encodePacked, parseUnits } from "viem";
 import { ZERO_ADDRESS } from "./config/constants";
-import { IPlatformService } from "./platform/IPlatformService";
+import { IPlatformService } from "./interfaces/IPlatformService";
 import { detectNFTDetails } from "./platform/nftPlatforms";
 
-// NEEDS CLARITY:
-// We can mint || collect an nft || buy from secondary market (opensea link)
-// mint = erc721Drop or erc1155Zora stuff
-// collect = independant nft (https://zora.co/collect/base:0x566352022e0ded6b9ec425c94b6f6e476a11952c)
-// seem to be using seaport but i don't know what it is and how to create
-// is it just scrapping nft collection and calling the mint method on it?
-
-// Also how collection which has sell that is closed are working?
-// example: https://zora.co/collect/base:0x32cff5c2a7233097efe3e8dc708d1df141780d69/3
-// seems like it is calling a sell method on the contract but not sure as everything is
-// behind a weird token (multicall??)
-
+/**
+ * Detects NFT details from URL and returns calldata for minting
+ * @param contentURI URL of the NFT
+ * @returns calldata for minting
+ */
 export async function detectAndReturnCalldata(
   contentURI: string
 ): Promise<string | undefined> {
@@ -81,15 +74,3 @@ function calldataGenerator(
     ]
   );
 }
-
-// detectAndReturnCalldata(
-//   "https://zora.co/collect/base:0x751362d366f66ecb70bf67e0d941daa7e34635f5/0"
-// ).then((calldata) => console.log(calldata));
-
-// "https://zora.co/collect/base:0x751362d366f66ecb70bf67e0d941daa7e34635f5/0"; ERC721Drop on BASE
-// "https://zora.co/collect/zora:0xe7d32d3bfa4b62599cfe4ba46d414e34635754a5/18"; ERC1155 on ZORA
-//
-
-// https://zora.co/collect/base:0x8b4076f75ba69260586c0772c1e15e83021e4dc0 NFT on BASE
-
-//https://zora.co/collect/zora:0xdd6dbda01fd6fea031eda285a70649a8b83d6a1f/2 erc1155 with price
