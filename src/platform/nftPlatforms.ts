@@ -1,6 +1,5 @@
-import { ZORA_CHAIN_ID_MAPPING } from "../config/constants";
 import { NFTExtraction, NFTPlatform } from "../types";
-import { ZoraService } from "./ZoraService";
+import { ZORA_CHAIN_ID_MAPPING, ZoraService } from "./ZoraService";
 
 export const NFT_PLATFORM_CONFIG: { [key: string]: NFTPlatform } = {
   Zora: {

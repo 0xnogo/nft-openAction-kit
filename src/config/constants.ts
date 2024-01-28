@@ -1,32 +1,5 @@
-import { base, mainnet, optimism, zora } from "viem/chains";
-import { ZoraExtendedChain } from "../platform/ZoraService";
+import { base, mainnet, optimism, polygon, zora } from "viem/chains";
 import { ChainConfig } from "../types";
-
-export const CHAIN_ID_TO_KEY: { [id: number]: string } = {
-  [mainnet.id]: "eth",
-  [zora.id]: "zora",
-  [base.id]: "base",
-  [optimism.id]: "oeth",
-};
-
-export const ZORA_CHAIN_ID_MAPPING: { [key: string]: ZoraExtendedChain } = {
-  zora: {
-    ...zora,
-    erc1155ZoraMinter: "0x04E2516A2c207E84a1839755675dfd8eF6302F0a",
-  },
-  eth: {
-    ...mainnet,
-    erc1155ZoraMinter: "0x04E2516A2c207E84a1839755675dfd8eF6302F0a",
-  },
-  base: {
-    ...base,
-    erc1155ZoraMinter: "0x04E2516A2c207E84a1839755675dfd8eF6302F0a",
-  },
-  oeth: {
-    ...optimism,
-    erc1155ZoraMinter: "0x3678862f04290E565cCA2EF163BAeb92Bb76790C",
-  },
-};
 
 export const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
 
@@ -56,3 +29,5 @@ export const CHAIN_CONFIG: ChainConfig =
           "0x48Cc077E082365F1be696cAad2ccF91cEb08D9f9",
         wMatic: "0x9c3C9283D3e44854697Cd22D3Faa240Cfb032889",
       };
+
+export const DESTINATION_CHAINS = [zora, optimism, base, mainnet, polygon];

@@ -1,3 +1,6 @@
+import { Chain, extractChain } from "viem";
+import { DESTINATION_CHAINS } from "../config/constants";
+
 export const bigintSerializer = (key: string, value: unknown): unknown => {
   if (typeof value === "bigint") {
     return value.toString() + "n";
@@ -12,4 +15,11 @@ export const bigintDeserializer = (key: string, value: unknown): unknown => {
   }
 
   return value;
+};
+
+export const idToChain = (id: number): Chain => {
+  return extractChain({
+    chains: DESTINATION_CHAINS,
+    id: id as any,
+  });
 };

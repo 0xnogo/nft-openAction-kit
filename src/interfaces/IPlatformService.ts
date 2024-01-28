@@ -1,4 +1,3 @@
-import { Chain } from "viem";
 import { NFTExtraction, UIData } from "../types";
 
 /**
@@ -17,16 +16,10 @@ export interface IPlatformService {
     tokenId: bigint
   ): Promise<UIData | undefined>;
   getPrice(
-    chain: Chain,
     contractAddress: string,
     nftId: bigint,
     signature: string,
     unit?: bigint
   ): Promise<bigint | undefined>;
-  getArgs(
-    tokenId: bigint,
-    senderAddress: string,
-    minter: string,
-    signature: string
-  ): any[];
+  getArgs(tokenId: bigint, senderAddress: string, signature: string): any[];
 }

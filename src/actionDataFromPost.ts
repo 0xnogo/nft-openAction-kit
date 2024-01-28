@@ -1,13 +1,9 @@
 import { Address, decodeAbiParameters } from "viem";
-import {
-  CHAIN_CONFIG,
-  CHAIN_ID_TO_KEY,
-  ZORA_CHAIN_ID_MAPPING,
-} from "./config/constants";
+import { CHAIN_CONFIG } from "./config/constants";
 import { BASE_URL } from "./config/endpoints";
 import { NFT_PLATFORM_CONFIG } from "./platform/nftPlatforms";
 import { PlatformServiceConstructor, PostCreatedEventFormatted } from "./types";
-import { bigintDeserializer, bigintSerializer } from "./utils";
+import { bigintDeserializer, bigintSerializer, idToChain } from "./utils";
 
 const DECENT_API_KEY = process.env.DECENT_API_KEY;
 
@@ -28,25 +24,21 @@ export async function actionDataFromPost(
   const [contract, tokenId, token, dstChainId, _, signature, platform] =
     fetchParams(post)!;
 
-  const dstChain = ZORA_CHAIN_ID_MAPPING[CHAIN_ID_TO_KEY[Number(dstChainId)]];
   const PlateformService: PlatformServiceConstructor =
     NFT_PLATFORM_CONFIG[platform].platformService;
 
+  // from id to the viem chain object
+  const dstChain = idToChain(Number(dstChainId));
   const plateformService = new PlateformService(dstChain);
 
   // logic to fetch the price + fee from the platform
-  const cost = await plateformService.getPrice(
-    dstChain,
-    contract,
-    tokenId,
-    signature
-  );
+  const cost = await plateformService.getPrice(contract, tokenId, signature);
 
   const actionRequest = {
     sender: senderAddress,
     srcChainId: parseInt(srcChainId.toString()),
     srcToken: CHAIN_CONFIG.wMatic,
-    dstChainId: dstChain.id,
+    dstChainId,
     dstToken: token,
     slippage: 3, // 1%
     actionType: "lens-open-action",
@@ -55,18 +47,13 @@ export async function actionDataFromPost(
       pubId: post.args.pubId,
       profileId: post.args.postParams.profileId,
       contractAddress: contract,
-      chainId: dstChain.id,
+      chainId: dstChainId,
       cost: {
         isNative: true,
         amount: cost,
       },
       signature,
-      args: plateformService.getArgs(
-        tokenId,
-        senderAddress,
-        dstChain.erc1155ZoraMinter,
-        signature
-      ),
+      args: plateformService.getArgs(tokenId, senderAddress, signature),
     },
   };
 
