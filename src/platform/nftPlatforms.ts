@@ -1,7 +1,7 @@
 import { Chain } from "viem";
-import { IPlatformService } from "../platform/IPlatformService";
-import { ZoraService } from "../platform/ZoraService";
-import { ZORA_CHAIN_ID_MAPPING } from "./constants";
+import { ZORA_CHAIN_ID_MAPPING } from "../config/constants";
+import { IPlatformService } from "./IPlatformService";
+import { ZoraService } from "./ZoraService";
 
 export type PlatformServiceConstructor = new (chain: Chain) => IPlatformService;
 

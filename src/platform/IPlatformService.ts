@@ -1,5 +1,5 @@
 import { Chain } from "viem";
-import { NFTExtraction } from "../config/nftPlatformsConfig";
+import { NFTExtraction } from "./nftPlatforms";
 
 export interface UIData {
   platformName: string;

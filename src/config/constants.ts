@@ -72,3 +72,6 @@ export const CHAIN_CONFIG: ChainConfig =
           "0x48Cc077E082365F1be696cAad2ccF91cEb08D9f9",
         wMatic: "0x9c3C9283D3e44854697Cd22D3Faa240Cfb032889",
       };
+
+export const DECENT_API_KEY = process.env.DECENT_API_KEY;
+export const BASE_URL = "https://box-v1.api.decent.xyz/api/getBoxAction";

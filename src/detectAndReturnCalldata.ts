@@ -1,10 +1,7 @@
 import { encodeAbiParameters, encodePacked, parseUnits } from "viem";
 import { ZERO_ADDRESS } from "./config/constants";
-import { detectNFTDetails } from "./config/nftPlatformsConfig";
 import { IPlatformService } from "./platform/IPlatformService";
-
-// TODO:
-// [] rename function 1
+import { detectNFTDetails } from "./platform/nftPlatforms";
 
 // NEEDS CLARITY:
 // We can mint || collect an nft || buy from secondary market (opensea link)
@@ -18,7 +15,7 @@ import { IPlatformService } from "./platform/IPlatformService";
 // seems like it is calling a sell method on the contract but not sure as everything is
 // behind a weird token (multicall??)
 
-export async function function1(
+export async function detectAndReturnCalldata(
   contentURI: string
 ): Promise<string | undefined> {
   const nftDetails = detectNFTDetails(contentURI);
@@ -32,7 +29,7 @@ export async function function1(
 
     const nftAddress = nftDetails.contractAddress;
     const nftId = nftDetails.nftId != null ? BigInt(nftDetails.nftId) : 0n;
-    const paymentToken = ZERO_ADDRESS; // workaround - payment token fetched in function2
+    const paymentToken = ZERO_ADDRESS;
     const cost = parseUnits("0", 18); // workaround - price fetched in function2
     const dstChainId = nftDetails.chain.id;
     return calldataGenerator(
@@ -85,9 +82,9 @@ function calldataGenerator(
   );
 }
 
-function1(
-  "https://zora.co/collect/base:0x751362d366f66ecb70bf67e0d941daa7e34635f5/0"
-).then((calldata) => console.log(calldata));
+// detectAndReturnCalldata(
+//   "https://zora.co/collect/base:0x751362d366f66ecb70bf67e0d941daa7e34635f5/0"
+// ).then((calldata) => console.log(calldata));
 
 // "https://zora.co/collect/base:0x751362d366f66ecb70bf67e0d941daa7e34635f5/0"; ERC721Drop on BASE
 // "https://zora.co/collect/zora:0xe7d32d3bfa4b62599cfe4ba46d414e34635754a5/18"; ERC1155 on ZORA

@@ -7,11 +7,8 @@ import {
   http,
   parseEther,
 } from "viem";
-import {
-  NFTExtraction,
-  NFT_PLATFORM_CONFIG,
-} from "../config/nftPlatformsConfig";
 import { IPlatformService, UIData } from "./IPlatformService";
+import { NFTExtraction, NFT_PLATFORM_CONFIG } from "./nftPlatforms";
 
 import ERC721DropAbi from "../config/abis/ERC721Drop.json";
 import MetadataRendererABI from "../config/abis/MetadataRenderer.json";
@@ -96,7 +93,6 @@ export class ZoraService implements IPlatformService {
         abi: ZoraCreator1155ImplABI,
         client: this.client,
       });
-      console.log(await erc1155Contract.read.uri([tokenId]));
       nftName = (await erc1155Contract.read.name()) as string;
       nftCreatorAddress = (await erc1155Contract.read.owner()) as string;
 
@@ -223,7 +219,6 @@ export class ZoraService implements IPlatformService {
         };
       } catch (error) {
         // do nothing
-        console.log(error);
         console.log("unrecognized contract");
       }
     }
@@ -275,8 +270,6 @@ export class ZoraService implements IPlatformService {
     });
 
     const salesDetails: any = await erc721DropContract.read.saleDetails();
-
-    console.log(salesDetails);
 
     if (!salesDetails) {
       return;
