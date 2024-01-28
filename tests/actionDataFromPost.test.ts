@@ -2,12 +2,10 @@ import { parseEther } from "viem";
 import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
 import { zora } from "viem/chains";
 import { actionDataFromPost } from "../src/actionDataFromPost";
-import {
-  CHAIN_CONFIG,
-  PostCreatedEventFormatted,
-} from "../src/config/constants";
+import { CHAIN_CONFIG } from "../src/config/constants";
 import { ZoraService } from "../src/platform/ZoraService";
 import { NFT_PLATFORM_CONFIG } from "../src/platform/nftPlatforms";
+import { PostCreatedEventFormatted } from "../src/types";
 import { bigintSerializer } from "../src/utils";
 
 jest.mock("../src/platform/ZoraService");

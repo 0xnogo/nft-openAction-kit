@@ -2,8 +2,8 @@ import { Chain } from "viem";
 import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
 import { zora } from "viem/chains";
 import { detectAndReturnCalldata } from "../src";
-import { UIData } from "../src/interfaces/IPlatformService";
-import { NFTExtraction, detectNFTDetails } from "../src/platform/nftPlatforms";
+import { detectNFTDetails } from "../src/platform/nftPlatforms";
+import { NFTExtraction, UIData } from "../src/types";
 
 // Mock the nftPlatformsConfig module
 jest.mock("../src/platform/nftPlatforms", () => ({
