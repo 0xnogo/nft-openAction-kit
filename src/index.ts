@@ -3,3 +3,4 @@ dotenv.config();
 
 export { actionDataFromPost } from "./actionDataFromPost";
 export { detectAndReturnCalldata } from "./detectAndReturnCalldata";
+export * from "./types";

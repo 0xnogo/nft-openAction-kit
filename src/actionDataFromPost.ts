@@ -5,8 +5,6 @@ import { NFT_PLATFORM_CONFIG } from "./platform/nftPlatforms";
 import { PlatformServiceConstructor, PostCreatedEventFormatted } from "./types";
 import { bigintDeserializer, bigintSerializer, idToChain } from "./utils";
 
-const DECENT_API_KEY = process.env.DECENT_API_KEY;
-
 /**
  * Fetches action data from post
  * @param post Post object
@@ -19,7 +17,8 @@ export async function actionDataFromPost(
   post: PostCreatedEventFormatted,
   profileId: string,
   senderAddress: string,
-  srcChainId: bigint
+  srcChainId: string,
+  decentApiKey: string
 ): Promise<any | undefined> {
   const [contract, tokenId, token, dstChainId, _, signature, platform] =
     fetchParams(post)!;
@@ -36,7 +35,7 @@ export async function actionDataFromPost(
 
   const actionRequest = {
     sender: senderAddress,
-    srcChainId: parseInt(srcChainId.toString()),
+    srcChainId: parseInt(srcChainId),
     srcToken: CHAIN_CONFIG.wMatic,
     dstChainId,
     dstToken: token,
@@ -64,7 +63,7 @@ export async function actionDataFromPost(
 
   const response = await fetch(url, {
     headers: {
-      "x-api-key": DECENT_API_KEY!,
+      "x-api-key": decentApiKey!,
     },
   });
   const data = await response.text();
