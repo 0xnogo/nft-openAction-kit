@@ -18,6 +18,19 @@ export type UIData = {
   nftCreatorAddress: string;
 };
 
+export type ActionData = {
+  actArguments: {
+    publicationActedProfileId: bigint;
+    publicationActedId: bigint;
+    actorProfileId: bigint;
+    referrerProfileIds: bigint[];
+    referrerPubIds: bigint[];
+    actionModuleAddress: string;
+    actionModuleData: `0x${string}`;
+  };
+  uiData: UIData;
+};
+
 export type PostCreatedEventFormatted = {
   args: {
     postParams: {

@@ -250,6 +250,7 @@ export class ZoraService implements IPlatformService {
       } catch (error) {
         // do nothing
         console.log("unrecognized contract");
+        throw new Error("Unrecognized contract");
       }
     }
   }

@@ -2,7 +2,11 @@ import { Address, decodeAbiParameters } from "viem";
 import { CHAIN_CONFIG } from "./config/constants";
 import { BASE_URL } from "./config/endpoints";
 import { NFT_PLATFORM_CONFIG } from "./platform/nftPlatforms";
-import { PlatformServiceConstructor, PostCreatedEventFormatted } from "./types";
+import {
+  ActionData,
+  PlatformServiceConstructor,
+  PostCreatedEventFormatted,
+} from "./types";
 import { bigintDeserializer, bigintSerializer, idToChain } from "./utils";
 
 /**
@@ -19,7 +23,7 @@ export async function actionDataFromPost(
   senderAddress: string,
   srcChainId: string,
   decentApiKey: string
-): Promise<any | undefined> {
+): Promise<ActionData> {
   const [contract, tokenId, token, dstChainId, _, signature, platform] =
     fetchParams(post)!;
 
@@ -88,6 +92,10 @@ export async function actionDataFromPost(
   };
 
   const uiData = await plateformService.getUIData(signature, contract, tokenId);
+
+  if (!uiData) {
+    throw new Error("No UI data");
+  }
 
   return { actArguments, uiData };
 }
