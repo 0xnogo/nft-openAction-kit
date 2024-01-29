@@ -6,14 +6,14 @@ https://docs.google.com/document/d/1YH-IIyrZZd1yextDIT_a-_KEiIihUDWxMvpW9tkg9Zs/
 
 ## Features
 
-* Function 1: `detectAndReturnCalldata``. Detects the NFT platform and returns the calldata to be used in the post action.
-* Function 2: `actionDataFromPost``. Returns the encoded calldata from Decent and UI data for the post action.
+* Function 1: `detectAndReturnCalldata`. Detects the NFT platform and returns the calldata to be used in the post action.
+* Function 2: `actionDataFromPost`. Returns the encoded calldata from Decent and UI data for the post action.
 * Extensible: the kit is extensible to add new NFT platforms with the usage of `IPlatformService` interface.
 * Zora detection logic: detect collections with an active sale (ZoraCreatorFixedPriceSaleStrategy for ERC1155 or contract collection for ERC721). All other cases are discarded as they don't represent a minting event (require specific handling - e.g. Seaport integration).
 
-| `actionDataFromPost` is returing `undefined` as the actionResponse from Decent is empty.
+> `actionDataFromPost` is returing `undefined` as the actionResponse from Decent is empty.
 
-| The route from Polygon to Zora is not configured in the Decent API.
+> The route from Polygon to Zora is not configured in the Decent API.
 
 ## Installation
 
@@ -32,7 +32,7 @@ https://docs.google.com/document/d/1YH-IIyrZZd1yextDIT_a-_KEiIihUDWxMvpW9tkg9Zs/
 
 ## Usage
 
-| The package is not published. To use is locally, run `yarn link` in the root directory and `yarn link nft-openAction-kit` in the project you want to use it.
+> The package is not published. To use is locally, run `yarn link` in the root directory and `yarn link nft-openAction-kit` in the project you want to use it.
 
 1. Create a .env file in the root directory and add the following variables:
     ```sh
@@ -88,6 +88,8 @@ const post: PostCreatedEventFormatted = {
       console.log(error);
     }
 ```
+
+> The `actionDataFromPost` function is accepting as input a PostCreatedEventFormatted object (as defined in https://github.com/wkantaros/lens-openAction). Another interface could be defined if needed (as long as it has the required fields).
 
 ## Add a new NFT platform
 
