@@ -1,9 +1,11 @@
-import { ZORA_CHAIN_ID_MAPPING } from "../../src/config/constants";
 import {
   detectNFTDetails,
   NFT_PLATFORM_CONFIG,
 } from "../../src/platform/nftPlatforms";
-import { ZoraService } from "../../src/platform/ZoraService";
+import {
+  ZORA_CHAIN_ID_MAPPING,
+  ZoraService,
+} from "../../src/platform/ZoraService";
 
 describe("detectNFTDetails", () => {
   it("should extract NFT details for a valid Zora URL", () => {

@@ -109,7 +109,8 @@ describe("actionDataFromPost", () => {
       mockPost,
       "50000",
       "0x444483c2d87a6C298f44c223C0638A3eAc7B6ea0",
-      137n
+      "137",
+      "DUMMY_API_KEY"
     );
 
     expect(result).toBeDefined();
@@ -139,7 +140,8 @@ describe("actionDataFromPost", () => {
         mockPost,
         "50000",
         "0x444483c2d87a6C298f44c223C0638A3eAc7B6ea0",
-        137n
+        "137",
+        "DUMMY_API_KEY"
       )
     ).rejects.toThrow();
   });
