@@ -23,7 +23,7 @@ export async function detectAndReturnCalldata(
     const nftAddress = nftDetails.contractAddress;
     const nftId = nftDetails.nftId != null ? BigInt(nftDetails.nftId) : 0n;
     const paymentToken = ZERO_ADDRESS;
-    const cost = parseUnits("0", 18); // workaround - price fetched in function2
+    const cost = parseUnits("0", 18); // workaround - price fetched in actionDataFromPost
     const dstChainId = nftDetails.chain.id;
     return calldataGenerator(
       nftAddress,
