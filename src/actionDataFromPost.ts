@@ -49,14 +49,21 @@ export async function actionDataFromPost(
       functionCall: "processPublicationAction",
       pubId: post.args.pubId,
       profileId: post.args.postParams.profileId,
-      contractAddress: contract,
+      contractAddress:
+        (await plateformService.getMinterAddress(contract, tokenId)) ??
+        contract,
       chainId: dstChainId,
       cost: {
         isNative: true,
         amount: cost,
       },
       signature,
-      args: plateformService.getArgs(tokenId, senderAddress, signature),
+      args: plateformService.getArgs(
+        contract,
+        tokenId,
+        senderAddress,
+        signature
+      ),
     },
   };
 
@@ -74,12 +81,15 @@ export async function actionDataFromPost(
 
   const resp = JSON.parse(data, bigintDeserializer);
 
-  if (resp.success == "false" || !resp.actionResponse) {
-    throw new Error("No action response");
-  }
+  console.log(resp);
+
+  // TODO: commented for now as Decent API is not returning actionResponse
+  // if (resp.success == "false" || !resp.actionResponse) {
+  //   throw new Error("No action response");
+  // }
 
   // TODO: check with Decent team why actionResponse is not present in the response
-  const encodedActionData = resp.actionResponse!.arbitraryData.lensActionData;
+  // const encodedActionData = resp.actionResponse!.arbitraryData.lensActionData;
 
   const actArguments = {
     publicationActedProfileId: BigInt(post.args.postParams.profileId),
@@ -88,7 +98,8 @@ export async function actionDataFromPost(
     referrerProfileIds: [],
     referrerPubIds: [],
     actionModuleAddress: CHAIN_CONFIG.decentOpenActionContractAddress,
-    actionModuleData: encodedActionData as `0x${string}`,
+    // actionModuleData: encodedActionData as `0x${string}`,
+    actionModuleData: "0x123456789" as `0x${string}`,
   };
 
   const uiData = await plateformService.getUIData(signature, contract, tokenId);
