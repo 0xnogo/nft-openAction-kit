@@ -1,4 +1,6 @@
+import { mainnet } from "viem/chains";
 import { NFTExtraction, NFTPlatform } from "../types";
+import { ArtBlocksService } from "./ArtBlocksService";
 import { ZORA_CHAIN_ID_MAPPING, ZoraService } from "./ZoraService";
 
 export const NFT_PLATFORM_CONFIG: { [key: string]: NFTPlatform } = {
@@ -24,7 +26,27 @@ export const NFT_PLATFORM_CONFIG: { [key: string]: NFTPlatform } = {
     },
     platformService: ZoraService,
   },
-  // ... other platforms can be added here
+  ArtBlocks: {
+    platformName: "ArtBlocks",
+    platformLogoUrl: "https://www.artblocks.io/favicon.ico",
+    urlPattern:
+      /https:\/\/www\.artblocks\.io\/collections\/curated\/projects\/0x99a9b7c1116f9ceeb1652de04d5969cce509b069\/(\d+)/, // other GenArt ommited as no more active projects
+    urlExtractor: (url: string): NFTExtraction | undefined => {
+      const match = url.match(
+        /https:\/\/www\.artblocks\.io\/collections\/curated\/projects\/(0x[a-fA-F0-9]{40})\/(\d+)/
+      );
+      if (match) {
+        return {
+          platform: NFT_PLATFORM_CONFIG["ArtBlocks"],
+          chain: mainnet,
+          contractAddress: match[1],
+          nftId: match[2], // corresponds to a project ID in ArtBlocks
+          service: new ArtBlocksService(mainnet),
+        };
+      }
+    },
+    platformService: ArtBlocksService,
+  },
 };
 
 // Function to detect NFT details from URL

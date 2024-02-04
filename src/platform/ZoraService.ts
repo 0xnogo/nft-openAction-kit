@@ -11,10 +11,10 @@ import { IPlatformService } from "../interfaces/IPlatformService";
 import { NFT_PLATFORM_CONFIG } from "./nftPlatforms";
 
 import { base, mainnet, optimism, zora } from "viem/chains";
-import ERC721DropAbi from "../config/abis/ERC721Drop.json";
-import MetadataRendererABI from "../config/abis/MetadataRenderer.json";
-import ZoraCreator1155ImplABI from "../config/abis/ZoraCreator1155Impl.json";
-import ZoraCreatorFixedPriceSaleStrategyABI from "../config/abis/ZoraCreatorFixedPriceSaleStrategy.json";
+import ERC721DropAbi from "../config/abis/Zora/ERC721Drop.json";
+import MetadataRendererABI from "../config/abis/Zora/MetadataRenderer.json";
+import ZoraCreator1155ImplABI from "../config/abis/Zora/ZoraCreator1155Impl.json";
+import ZoraCreatorFixedPriceSaleStrategyABI from "../config/abis/Zora/ZoraCreatorFixedPriceSaleStrategy.json";
 import { NFTExtraction, UIData } from "../types";
 
 type Sale = {
@@ -68,6 +68,13 @@ export class ZoraService implements IPlatformService {
       chain: chain,
       transport: http(),
     });
+  }
+
+  getMinterAddress(
+    contract: string,
+    tokenId: bigint
+  ): Promise<string | undefined> {
+    return Promise.resolve(undefined);
   }
 
   async getMintSignature(
@@ -169,7 +176,12 @@ export class ZoraService implements IPlatformService {
     };
   }
 
-  getArgs(tokenId: bigint, senderAddress: string, signature: string): any[] {
+  getArgs(
+    contract: string,
+    tokenId: bigint,
+    senderAddress: string,
+    signature: string
+  ): any[] {
     const minter =
       ZORA_CHAIN_ID_MAPPING[CHAIN_ID_TO_KEY[Number(this.client.chain!.id)]]
         .erc1155ZoraMinter;
