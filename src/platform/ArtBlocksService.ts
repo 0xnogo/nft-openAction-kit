@@ -144,7 +144,8 @@ export class ArtBlocksService implements IPlatformService {
     contract: string,
     tokenId: bigint,
     senderAddress: string,
-    signature: string
+    signature: string,
+    price: bigint
   ): any[] {
     return [contract, tokenId, senderAddress];
   }

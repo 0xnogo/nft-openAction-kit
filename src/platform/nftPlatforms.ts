@@ -1,6 +1,7 @@
 import { mainnet } from "viem/chains";
 import { NFTExtraction, NFTPlatform } from "../types";
 import { ArtBlocksService } from "./ArtBlocksService";
+import { SUPER_RARE_ADDRESS, SuperRareService } from "./SuperRareService";
 import { ZORA_CHAIN_ID_MAPPING, ZoraService } from "./ZoraService";
 
 export const NFT_PLATFORM_CONFIG: { [key: string]: NFTPlatform } = {
@@ -46,6 +47,37 @@ export const NFT_PLATFORM_CONFIG: { [key: string]: NFTPlatform } = {
       }
     },
     platformService: ArtBlocksService,
+  },
+  SuperRare: {
+    platformName: "SuperRare",
+    platformLogoUrl: "https://superrare.com/favicon.ico",
+    urlPattern:
+      /https:\/\/superrare\.com\/(?:artwork-v2\/)?(?:0x[a-fA-F0-9]{40}\/)?[\w-]+(?:\:\s?[\w-]+)?-(\d+)/,
+    urlExtractor: (url: string): NFTExtraction | undefined => {
+      const match = url.match(
+        /https:\/\/superrare\.com\/(?:artwork-v2\/)?(?:0x[a-fA-F0-9]{40}\/)?[\w-]+(?:\:\s?[\w-]+)?-(\d+)/
+      );
+      if (match) {
+        const nftId = match[1];
+        let contractAddress = SUPER_RARE_ADDRESS; // Default contract address
+        // Attempt to extract the contract address if present
+        const contractMatch = url.match(
+          /https:\/\/superrare\.com\/(0x[a-fA-F0-9]{40})/
+        );
+        if (contractMatch) {
+          contractAddress = contractMatch[1];
+        }
+
+        return {
+          platform: NFT_PLATFORM_CONFIG["SuperRare"],
+          chain: mainnet, // Assuming SuperRare is on Ethereum
+          contractAddress,
+          nftId,
+          service: new SuperRareService(mainnet), // Placeholder for actual service
+        };
+      }
+    },
+    platformService: SuperRareService,
   },
 };
 

@@ -180,7 +180,8 @@ export class ZoraService implements IPlatformService {
     contract: string,
     tokenId: bigint,
     senderAddress: string,
-    signature: string
+    signature: string,
+    price: bigint
   ): any[] {
     const minter =
       ZORA_CHAIN_ID_MAPPING[CHAIN_ID_TO_KEY[Number(this.client.chain!.id)]]
