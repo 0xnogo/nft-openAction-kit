@@ -35,7 +35,11 @@ export async function actionDataFromPost(
   const plateformService = new PlateformService(dstChain);
 
   // logic to fetch the price + fee from the platform
-  const cost = await plateformService.getPrice(contract, tokenId, signature);
+  const price = await plateformService.getPrice(contract, tokenId, signature);
+
+  if (!price) {
+    throw new Error("No price");
+  }
 
   const actionRequest = {
     sender: senderAddress,
@@ -55,14 +59,15 @@ export async function actionDataFromPost(
       chainId: dstChainId,
       cost: {
         isNative: true,
-        amount: cost,
+        amount: price,
       },
       signature,
       args: plateformService.getArgs(
         contract,
         tokenId,
         senderAddress,
-        signature
+        signature,
+        price
       ),
     },
   };
