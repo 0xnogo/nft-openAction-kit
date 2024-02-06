@@ -15,7 +15,7 @@ export type UIData = {
   platformLogoUrl: string;
   nftName: string;
   nftUri: string;
-  nftCreatorAddress: string;
+  nftCreatorAddress?: string;
 };
 
 export type ActionData = {

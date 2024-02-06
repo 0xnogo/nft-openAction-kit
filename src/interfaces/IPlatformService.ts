@@ -29,6 +29,7 @@ export interface IPlatformService {
     contractAddress: string,
     tokenId: bigint,
     senderAddress: string,
-    signature: string
+    signature: string,
+    price: bigint
   ): any[];
 }
