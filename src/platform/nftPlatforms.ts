@@ -82,11 +82,17 @@ export const NFT_PLATFORM_CONFIG: { [key: string]: NFTPlatform } = {
 };
 
 // Function to detect NFT details from URL
-export function detectNFTDetails(url: string): NFTExtraction | undefined {
+export async function detectNFTDetails(url: string): Promise<NFTExtraction | undefined> {
   for (const key in NFT_PLATFORM_CONFIG) {
     const platform = NFT_PLATFORM_CONFIG[key];
     if (platform.urlPattern.test(url)) {
-      return platform.urlExtractor(url);
+      if (!!platform.urlExtractor) {
+        return platform.urlExtractor(url);
+      } else if (!!platform.asyncUrlExtractor) {
+        return await platform.asyncUrlExtractor(url);
+      } else {
+        return undefined
+      }
     }
   }
 }
