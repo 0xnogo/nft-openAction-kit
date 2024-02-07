@@ -130,6 +130,22 @@ type SdkConfig = {
 
 2. Modify the initializePlatformConfig function in `src/DetectionEngine.ts` and add the new platform config following the type:
 
+```
+type NFTPlatform = {
+  platformName: string;
+  platformLogoUrl: string;
+  urlPattern: RegExp;
+  urlExtractor: (url: string) => Promise<NFTExtraction | undefined>;
+  platformService: PlatformServiceConstructor;
+};
+```
+
+If NFT contract details can be accessed directly from the URL, then the urlExtractor() should be implemented.
+
+If there is an additional lookup to an API, subgraph, on-chain registry, etc. required to parse data from the URL, then asyncUrlExtractor() should be implemented instead.
+
+2. Create a new file in `src/platform` and add the platform service class. The class should implement the `IPlatformService` interface.
+
 ```js
 export type NFTPlatform = {
   platformName: string;
