@@ -1,6 +1,6 @@
 import {
-  Chain,
   PublicClient,
+  type Transport,
   createPublicClient,
   encodeAbiParameters,
   getContract,
@@ -13,7 +13,7 @@ import { NFT_PLATFORM_CONFIG } from "./nftPlatforms";
 import { base, mainnet, optimism, zora } from "viem/chains";
 import ZoraCreator1155ImplABI from "../config/abis/Zora/ZoraCreator1155Impl.json";
 import ZoraCreatorFixedPriceSaleStrategyABI from "../config/abis/Zora/ZoraCreatorFixedPriceSaleStrategy.json";
-import { NFTExtraction, UIData } from "../types";
+import type { NFTExtraction, UIData } from "../types";
 
 type Sale = {
   saleStart: number;
@@ -23,43 +23,35 @@ type Sale = {
   price: bigint;
 };
 
-const CHAIN_ID_TO_KEY: { [id: number]: string } = {
-  [mainnet.id]: "eth",
-  [zora.id]: "zora",
-  [base.id]: "base",
-  [optimism.id]: "oeth",
-};
-
-export const ZORA_CHAIN_ID_MAPPING: { [key: string]: ZoraExtendedChain } = {
-  zora: {
+export const PODS_CHAIN_ID_MAPPING = {
+  [zora.id]: {
     ...zora,
     erc1155ZoraMinter: "0x04E2516A2c207E84a1839755675dfd8eF6302F0a",
   },
-  eth: {
-    ...mainnet,
-    erc1155ZoraMinter: "0x04E2516A2c207E84a1839755675dfd8eF6302F0a",
-  },
-  base: {
+  [base.id]: {
     ...base,
     erc1155ZoraMinter: "0x04E2516A2c207E84a1839755675dfd8eF6302F0a",
   },
-  oeth: {
+  [mainnet.id]: {
+    ...mainnet,
+    erc1155ZoraMinter: "0x04E2516A2c207E84a1839755675dfd8eF6302F0a",
+  },
+  [optimism.id]: {
     ...optimism,
     erc1155ZoraMinter: "0x3678862f04290E565cCA2EF163BAeb92Bb76790C",
   },
-};
+} as const;
 
-export interface ZoraExtendedChain extends Chain {
-  erc1155ZoraMinter: string;
-}
+export type PodsSupportedChain =
+  (typeof PODS_CHAIN_ID_MAPPING)[keyof typeof PODS_CHAIN_ID_MAPPING];
 
-export class ZoraService implements IPlatformService {
-  private client: PublicClient;
+export class PodsService implements IPlatformService {
+  private client: PublicClient<Transport, PodsSupportedChain>;
 
   private erc1155MintSignature =
     "function mintWithRewards(address minter, uint256 tokenId, uint256 quantity, bytes calldata minterArguments, address mintReferral)";
 
-  constructor(chain: Chain) {
+  constructor(chain: PodsSupportedChain) {
     this.client = createPublicClient({
       chain: chain,
       transport: http(),
@@ -74,7 +66,7 @@ export class ZoraService implements IPlatformService {
   }
 
   async getMintSignature(
-    nftDetails: NFTExtraction
+    nftDetails: NFTExtraction<PodsSupportedChain>
   ): Promise<string | undefined> {
     const contractTypeResult = await this.getContractType(nftDetails);
     if (!contractTypeResult) {
@@ -90,12 +82,10 @@ export class ZoraService implements IPlatformService {
     signature: string,
     unit: bigint = 1n
   ): Promise<bigint | undefined> {
-    const chain = this.client.chain!;
-
     const sale = await this.getERC1155SaleData(
-      ZORA_CHAIN_ID_MAPPING[CHAIN_ID_TO_KEY[chain.id]],
+      PODS_CHAIN_ID_MAPPING[this.client.chain.id],
       contractAddress,
-      nftId.toString(),
+      nftId.toString()
     );
 
     if (!sale) {
@@ -128,7 +118,7 @@ export class ZoraService implements IPlatformService {
     const uri = (await erc1155Contract.read.uri([tokenId])) as string;
     const cid = uri.split("/").pop();
     const response = await fetch(
-      `https://ipfs.decentralized-content.com/ipfs/${cid}`,
+      `https://ipfs.decentralized-content.com/ipfs/${cid}`
     );
     const metadata: any = await response.json();
     nftUri = metadata.image;
@@ -148,28 +138,37 @@ export class ZoraService implements IPlatformService {
     senderAddress: string,
     signature: string,
     price: bigint
-  ): any[] {
+  ) {
     const minter =
-      ZORA_CHAIN_ID_MAPPING[CHAIN_ID_TO_KEY[Number(this.client.chain!.id)]]
-        .erc1155ZoraMinter;
-    return [
-      minter,
-      tokenId,
-      1n,
-      encodeAbiParameters(
-        [{ type: "address" }],
-        [senderAddress as `0x${string}`],
-      ),
-      "0x0000000000000000000000000000000000000000",
-    ];
+      PODS_CHAIN_ID_MAPPING[this.client.chain.id].erc1155ZoraMinter;
+    if (signature === this.erc1155MintSignature) {
+      return [
+        minter,
+        tokenId,
+        1n,
+        encodeAbiParameters(
+          [{ type: "address" }],
+          [senderAddress as `0x${string}`]
+        ),
+        "0x0000000000000000000000000000000000000000",
+      ];
+    } else {
+      throw new Error("Invalid function signature");
+    }
   }
 
   private async getContractType(
-    nftDetails: NFTExtraction
+    nftDetails: NFTExtraction<PodsSupportedChain>
   ): Promise<{ type: string; signature: string } | undefined> {
+    if (!(nftDetails.chain.id in PODS_CHAIN_ID_MAPPING)) {
+      return;
+    }
+
     try {
       const sale = await this.getERC1155SaleData(
-        ZORA_CHAIN_ID_MAPPING[CHAIN_ID_TO_KEY[nftDetails.chain.id]],
+        PODS_CHAIN_ID_MAPPING[
+          nftDetails.chain.id as keyof typeof PODS_CHAIN_ID_MAPPING
+        ],
         nftDetails.contractAddress,
         nftDetails.nftId
       );
@@ -191,14 +190,13 @@ export class ZoraService implements IPlatformService {
         signature: this.erc1155MintSignature,
       };
     } catch (error) {
-      // do nothing
       console.log("unrecognized contract");
       throw new Error("Unrecognized contract");
     }
   }
 
   private async getERC1155SaleData(
-    chain: ZoraExtendedChain,
+    chain: PodsSupportedChain,
     contractAddress: string,
     nftId: string
   ): Promise<Sale | undefined> {
@@ -247,8 +245,6 @@ export class ZoraService implements IPlatformService {
   }
 
   private getFees(): bigint {
-    // Minting fees
-    // https://support.zora.co/en/articles/4981037-zora-mint-collect-fees
-    return parseEther("0.000777");
+    return parseEther("0.0007");
   }
 }

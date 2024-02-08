@@ -1,9 +1,17 @@
 import { mainnet } from "viem/chains";
-import { NFTExtraction, NFTPlatform } from "../types";
+import type {
+  NFTExtraction,
+  NFTPlatform,
+  PlatformServiceConstructor,
+} from "../types";
 import { ArtBlocksService } from "./ArtBlocksService";
 import { SUPER_RARE_ADDRESS, SuperRareService } from "./SuperRareService";
 import { ZORA_CHAIN_ID_MAPPING, ZoraService } from "./ZoraService";
-import { PODS_CHAIN_MAPPING, PodsService } from "./PodsService";
+import {
+  PODS_CHAIN_ID_MAPPING,
+  PodsService,
+  type PodsSupportedChain,
+} from "./PodsService";
 
 export const NFT_PLATFORM_CONFIG: { [key: string]: NFTPlatform } = {
   Zora: {
@@ -45,18 +53,27 @@ export const NFT_PLATFORM_CONFIG: { [key: string]: NFTPlatform } = {
         const data = (await response.json()) as
           | { chainId: number; contractAddress: `0x${string}`; tokenId: string }
           | undefined;
+
         if (data && data.chainId && data.contractAddress && data.tokenId) {
-          return {
-            platform: NFT_PLATFORM_CONFIG["Pods"],
-            chain: PODS_CHAIN_MAPPING[data.chainId],
-            contractAddress: data.contractAddress,
-            nftId: data.tokenId, // all are 1155s, this is the episode tokenId
-            service: new PodsService(PODS_CHAIN_MAPPING[data.chainId]),
-          } satisfies NFTExtraction;
+          if (data.chainId in PODS_CHAIN_ID_MAPPING) {
+            const chainId = data.chainId as keyof typeof PODS_CHAIN_ID_MAPPING;
+            return {
+              platform: NFT_PLATFORM_CONFIG["Pods"],
+              chain: PODS_CHAIN_ID_MAPPING[chainId],
+              contractAddress: data.contractAddress,
+              nftId: data.tokenId, // all are 1155s, this is the episode tokenId
+              service: new PodsService(PODS_CHAIN_ID_MAPPING[chainId]),
+            } satisfies NFTExtraction<PodsSupportedChain>;
+          }
         }
+        throw new Error("Failed to parse Pods URL");
       }
     },
-    platformService: PodsService,
+    /*
+     * this type coercion is necessary because the constructor signature is not compatible with
+     * the IPlatformService interface, and we're referencing it in the initializer
+     */
+    platformService: PodsService as unknown as PlatformServiceConstructor,
   },
   ArtBlocks: {
     platformName: "ArtBlocks",
