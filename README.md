@@ -140,10 +140,6 @@ type NFTPlatform = {
 };
 ```
 
-If NFT contract details can be accessed directly from the URL, then the urlExtractor() should be implemented.
-
-If there is an additional lookup to an API, subgraph, on-chain registry, etc. required to parse data from the URL, then asyncUrlExtractor() should be implemented instead.
-
 2. Create a new file in `src/platform` and add the platform service class. The class should implement the `IPlatformService` interface.
 
 ```js
