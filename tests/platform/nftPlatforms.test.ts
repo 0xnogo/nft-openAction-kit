@@ -8,11 +8,11 @@ import {
 } from "../../src/platform/ZoraService";
 
 describe("detectNFTDetails", () => {
-  it("should extract NFT details for a valid Zora URL", () => {
+  it("should extract NFT details for a valid Zora URL", async () => {
     const zoraURL =
       "https://zora.co/collect/eth:0x1234567890123456789012345678901234567890/123";
     const expectedChain = ZORA_CHAIN_ID_MAPPING["eth"];
-    const result = detectNFTDetails(zoraURL);
+    const result = await detectNFTDetails(zoraURL);
 
     expect(result).toBeDefined();
     expect(result?.platform).toBe(NFT_PLATFORM_CONFIG["Zora"]);
@@ -24,16 +24,16 @@ describe("detectNFTDetails", () => {
     expect(result?.service).toBeInstanceOf(ZoraService);
   });
 
-  it("should return undefined for a URL not matching any platform", () => {
+  it("should return undefined for a URL not matching any platform", async () => {
     const invalidURL = "https://invalid.url";
-    const result = detectNFTDetails(invalidURL);
+    const result = await detectNFTDetails(invalidURL);
     expect(result).toBeUndefined();
   });
 
-  it("should handle URLs without a token ID", () => {
+  it("should handle URLs without a token ID", async () => {
     const zoraURLWithoutTokenId =
       "https://zora.co/collect/eth:0x1234567890123456789012345678901234567890";
-    const result = detectNFTDetails(zoraURLWithoutTokenId);
+    const result = await detectNFTDetails(zoraURLWithoutTokenId);
 
     expect(result).toBeDefined();
     expect(result?.nftId).toBeUndefined();
