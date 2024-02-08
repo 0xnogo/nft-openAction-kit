@@ -11,8 +11,6 @@ import { IPlatformService } from "../interfaces/IPlatformService";
 import { NFT_PLATFORM_CONFIG } from "./nftPlatforms";
 
 import { base, mainnet, optimism, zora } from "viem/chains";
-import ERC721DropAbi from "../config/abis/Zora/ERC721Drop.json";
-import MetadataRendererABI from "../config/abis/Zora/MetadataRenderer.json";
 import ZoraCreator1155ImplABI from "../config/abis/Zora/ZoraCreator1155Impl.json";
 import ZoraCreatorFixedPriceSaleStrategyABI from "../config/abis/Zora/ZoraCreatorFixedPriceSaleStrategy.json";
 import { NFTExtraction, UIData } from "../types";
@@ -60,8 +58,6 @@ export class ZoraService implements IPlatformService {
 
   private erc1155MintSignature =
     "function mintWithRewards(address minter, uint256 tokenId, uint256 quantity, bytes calldata minterArguments, address mintReferral)";
-  private erc721DropMintSignature =
-    "function mintWithRewards(address recipient, uint256 quantity, string calldata comment, address mintReferral)";
 
   constructor(chain: Chain) {
     this.client = createPublicClient({
@@ -96,16 +92,11 @@ export class ZoraService implements IPlatformService {
   ): Promise<bigint | undefined> {
     const chain = this.client.chain!;
 
-    let sale;
-    if (this.isERC1155(signature)) {
-      sale = await this.getERC1155SaleData(
-        ZORA_CHAIN_ID_MAPPING[CHAIN_ID_TO_KEY[chain.id]],
-        contractAddress,
-        nftId.toString()
-      );
-    } else {
-      sale = await this.getERC721DropSaleData(contractAddress);
-    }
+    const sale = await this.getERC1155SaleData(
+      ZORA_CHAIN_ID_MAPPING[CHAIN_ID_TO_KEY[chain.id]],
+      contractAddress,
+      nftId.toString(),
+    );
 
     if (!sale) {
       return;
@@ -126,46 +117,21 @@ export class ZoraService implements IPlatformService {
     let nftUri: string = "";
     let nftCreatorAddress: string = "";
 
-    if (this.isERC1155(signature)) {
-      const erc1155Contract = getContract({
-        address: contract as `0x${string}`,
-        abi: ZoraCreator1155ImplABI,
-        client: this.client,
-      });
-      nftName = (await erc1155Contract.read.name()) as string;
-      nftCreatorAddress = (await erc1155Contract.read.owner()) as string;
+    const erc1155Contract = getContract({
+      address: contract as `0x${string}`,
+      abi: ZoraCreator1155ImplABI,
+      client: this.client,
+    });
+    nftName = (await erc1155Contract.read.name()) as string;
+    nftCreatorAddress = (await erc1155Contract.read.owner()) as string;
 
-      const uri = (await erc1155Contract.read.uri([tokenId])) as string;
-      const cid = uri.split("/").pop();
-      const response = await fetch(
-        `https://ipfs.decentralized-content.com/ipfs/${cid}`
-      );
-      const metadata: any = await response.json();
-      nftUri = metadata.image;
-    } else {
-      const erc721DropContract = getContract({
-        address: contract as `0x${string}`,
-        abi: ERC721DropAbi,
-        client: this.client,
-      });
-
-      nftName = (await erc721DropContract.read.name()) as string;
-      nftCreatorAddress = (await erc721DropContract.read.owner()) as string;
-
-      const metadataRendererAddress =
-        (await erc721DropContract.read.metadataRenderer()) as `0x${string}`;
-
-      const metadata: any = await this.client.readContract({
-        address: metadataRendererAddress,
-        abi: MetadataRendererABI,
-        functionName: "tokenInfos",
-        args: [contract as `0x${string}`],
-      });
-
-      if (metadata) {
-        nftUri = metadata[1];
-      }
-    }
+    const uri = (await erc1155Contract.read.uri([tokenId])) as string;
+    const cid = uri.split("/").pop();
+    const response = await fetch(
+      `https://ipfs.decentralized-content.com/ipfs/${cid}`,
+    );
+    const metadata: any = await response.json();
+    nftUri = metadata.image;
 
     return {
       platformName: NFT_PLATFORM_CONFIG["Zora"].platformName,
@@ -186,29 +152,16 @@ export class ZoraService implements IPlatformService {
     const minter =
       ZORA_CHAIN_ID_MAPPING[CHAIN_ID_TO_KEY[Number(this.client.chain!.id)]]
         .erc1155ZoraMinter;
-    if (signature === this.erc721DropMintSignature) {
-      return [
-        senderAddress,
-        1n,
-        "",
-        "0x0000000000000000000000000000000000000000",
-      ];
-    } else {
-      return [
-        minter,
-        tokenId,
-        1n,
-        encodeAbiParameters(
-          [{ type: "address" }],
-          [senderAddress as `0x${string}`]
-        ),
-        "0x0000000000000000000000000000000000000000",
-      ];
-    }
-  }
-
-  private isERC1155(signature: string): boolean {
-    return signature === this.erc1155MintSignature;
+    return [
+      minter,
+      tokenId,
+      1n,
+      encodeAbiParameters(
+        [{ type: "address" }],
+        [senderAddress as `0x${string}`],
+      ),
+      "0x0000000000000000000000000000000000000000",
+    ];
   }
 
   private async getContractType(
@@ -238,33 +191,9 @@ export class ZoraService implements IPlatformService {
         signature: this.erc1155MintSignature,
       };
     } catch (error) {
-      // If the above call fail, it might be an ERC721Drop
-      try {
-        const sale = await this.getERC721DropSaleData(
-          nftDetails.contractAddress
-        );
-
-        if (
-          sale &&
-          !this.isSaleValid(
-            sale.saleStart,
-            sale.saleEnd,
-            sale.totalMinted,
-            sale.maxSupply
-          )
-        ) {
-          throw new Error("Not a valid ERC721Drop");
-        }
-
-        return {
-          type: "ERC721Drop",
-          signature: this.erc721DropMintSignature,
-        };
-      } catch (error) {
-        // do nothing
-        console.log("unrecognized contract");
-        throw new Error("Unrecognized contract");
-      }
+      // do nothing
+      console.log("unrecognized contract");
+      throw new Error("Unrecognized contract");
     }
   }
 
@@ -301,29 +230,6 @@ export class ZoraService implements IPlatformService {
       totalMinted: tokenInfo.totalMinted,
       maxSupply: tokenInfo.maxSupply,
       price: result.pricePerToken,
-    };
-  }
-
-  private async getERC721DropSaleData(
-    contractAddress: string
-  ): Promise<Sale | undefined> {
-    const erc721DropContract = getContract({
-      address: contractAddress as `0x${string}`,
-      abi: ERC721DropAbi,
-      client: this.client,
-    });
-
-    const salesDetails: any = await erc721DropContract.read.saleDetails();
-
-    if (!salesDetails) {
-      return;
-    }
-    return {
-      saleStart: salesDetails.publicSaleStart,
-      saleEnd: salesDetails.publicSaleEnd,
-      totalMinted: salesDetails.totalMinted,
-      maxSupply: salesDetails.maxSupply,
-      price: salesDetails.publicSalePrice,
     };
   }
 
