@@ -11,18 +11,20 @@ export const NFT_PLATFORM_CONFIG: { [key: string]: NFTPlatform } = {
     urlPattern:
       /https:\/\/zora\.co\/collect\/([a-z]+):(0x[a-fA-F0-9]{40})(?:\/(\d+))?/,
 
-    urlExtractor: (url: string): NFTExtraction | undefined => {
+    urlExtractor: (url: string): Promise<NFTExtraction | undefined> => {
       const match = url.match(
         /https:\/\/zora\.co\/collect\/([a-z]+):(0x[a-fA-F0-9]{40})(?:\/(\d+))?/
       );
       if (match && ZORA_CHAIN_ID_MAPPING[match[1]]) {
-        return {
+        return Promise.resolve({
           platform: NFT_PLATFORM_CONFIG["Zora"],
           chain: ZORA_CHAIN_ID_MAPPING[match[1]],
           contractAddress: match[2],
           nftId: match[3],
           service: new ZoraService(ZORA_CHAIN_ID_MAPPING[match[1]]),
-        };
+        });
+      } else {
+        return Promise.resolve(undefined);
       }
     },
     platformService: ZoraService,
@@ -32,18 +34,20 @@ export const NFT_PLATFORM_CONFIG: { [key: string]: NFTPlatform } = {
     platformLogoUrl: "https://www.artblocks.io/favicon.ico",
     urlPattern:
       /https:\/\/www\.artblocks\.io\/collections\/curated\/projects\/0x99a9b7c1116f9ceeb1652de04d5969cce509b069\/(\d+)/, // other GenArt ommited as no more active projects
-    urlExtractor: (url: string): NFTExtraction | undefined => {
+    urlExtractor: (url: string): Promise<NFTExtraction | undefined> => {
       const match = url.match(
         /https:\/\/www\.artblocks\.io\/collections\/curated\/projects\/(0x[a-fA-F0-9]{40})\/(\d+)/
       );
       if (match) {
-        return {
+        return Promise.resolve({
           platform: NFT_PLATFORM_CONFIG["ArtBlocks"],
           chain: mainnet,
           contractAddress: match[1],
           nftId: match[2], // corresponds to a project ID in ArtBlocks
           service: new ArtBlocksService(mainnet),
-        };
+        });
+      } else {
+        return Promise.resolve(undefined);
       }
     },
     platformService: ArtBlocksService,
@@ -53,7 +57,7 @@ export const NFT_PLATFORM_CONFIG: { [key: string]: NFTPlatform } = {
     platformLogoUrl: "https://superrare.com/favicon.ico",
     urlPattern:
       /https:\/\/superrare\.com\/(?:artwork-v2\/)?(?:0x[a-fA-F0-9]{40}\/)?[\w-]+(?:\:\s?[\w-]+)?-(\d+)/,
-    urlExtractor: (url: string): NFTExtraction | undefined => {
+    urlExtractor: (url: string): Promise<NFTExtraction | undefined> => {
       const match = url.match(
         /https:\/\/superrare\.com\/(?:artwork-v2\/)?(?:0x[a-fA-F0-9]{40}\/)?[\w-]+(?:\:\s?[\w-]+)?-(\d+)/
       );
@@ -68,13 +72,15 @@ export const NFT_PLATFORM_CONFIG: { [key: string]: NFTPlatform } = {
           contractAddress = contractMatch[1];
         }
 
-        return {
+        return Promise.resolve({
           platform: NFT_PLATFORM_CONFIG["SuperRare"],
           chain: mainnet, // Assuming SuperRare is on Ethereum
           contractAddress,
           nftId,
           service: new SuperRareService(mainnet), // Placeholder for actual service
-        };
+        });
+      } else {
+        return Promise.resolve(undefined);
       }
     },
     platformService: SuperRareService,
@@ -86,13 +92,8 @@ export async function detectNFTDetails(url: string): Promise<NFTExtraction | und
   for (const key in NFT_PLATFORM_CONFIG) {
     const platform = NFT_PLATFORM_CONFIG[key];
     if (platform.urlPattern.test(url)) {
-      if (!!platform.urlExtractor) {
-        return platform.urlExtractor(url);
-      } else if (!!platform.asyncUrlExtractor) {
-        return await platform.asyncUrlExtractor(url);
-      } else {
-        return undefined
-      }
+      return await platform.urlExtractor(url);
     }
   }
+  return Promise.resolve(undefined);
 }
