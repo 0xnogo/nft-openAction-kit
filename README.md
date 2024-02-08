@@ -135,16 +135,11 @@ export type NFTPlatform = {
   platformName: string;
   platformLogoUrl: string;
   urlPattern: RegExp;
-  urlExtractor?: (url: string) => NFTExtraction | undefined;
-  asyncUrlExtractor?: (url: string) => NFTExtraction | undefined;
+  urlExtractor: (url: string) => Promise<NFTExtraction | undefined>;
   platformService: PlatformServiceConstructor;
   apiKey?: string;
 };
 ```
-
-If NFT contract details can be accessed directly from the URL, then the urlExtractor() should be implemented.
-
-If there is an additional lookup to an API, subgraph, on-chain registry, etc. required to parse data from the URL, then asyncUrlExtractor() should be implemented instead.
 
 > If an api key is required, make sure to add it in the `DetectionEngine` class and handle it in the `initializePlatformConfig` function. The Rareble detection is an example of how to handle an api key.
 
