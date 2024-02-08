@@ -3,6 +3,7 @@ import { NFTExtraction, NFTPlatform } from "../types";
 import { ArtBlocksService } from "./ArtBlocksService";
 import { SUPER_RARE_ADDRESS, SuperRareService } from "./SuperRareService";
 import { ZORA_CHAIN_ID_MAPPING, ZoraService } from "./ZoraService";
+import { PODS_CHAIN_MAPPING, PodsService } from "./PodsService";
 
 export const NFT_PLATFORM_CONFIG: { [key: string]: NFTPlatform } = {
   Zora: {
@@ -28,6 +29,34 @@ export const NFT_PLATFORM_CONFIG: { [key: string]: NFTPlatform } = {
       }
     },
     platformService: ZoraService,
+  },
+  Pods: {
+    platformName: "Pods",
+    platformLogoUrl: "https://pods.media/icon.svg",
+    urlPattern: /(https?:\/\/)?pods\.media(\/.+)/,
+    urlExtractor: async (url) => {
+      const match = url.match(/(https?:\/\/)?pods\.media(\/.+)/);
+      if (match) {
+        const response = await fetch(
+          `https://pods.media/api/tokenInfo?route=${encodeURIComponent(
+            match[2]
+          )}`
+        );
+        const data = (await response.json()) as
+          | { chainId: number; contractAddress: `0x${string}`; tokenId: string }
+          | undefined;
+        if (data && data.chainId && data.contractAddress && data.tokenId) {
+          return {
+            platform: NFT_PLATFORM_CONFIG["Pods"],
+            chain: PODS_CHAIN_MAPPING[data.chainId],
+            contractAddress: data.contractAddress,
+            nftId: data.tokenId, // all are 1155s, this is the episode tokenId
+            service: new PodsService(PODS_CHAIN_MAPPING[data.chainId]),
+          } satisfies NFTExtraction;
+        }
+      }
+    },
+    platformService: PodsService,
   },
   ArtBlocks: {
     platformName: "ArtBlocks",
@@ -88,7 +117,9 @@ export const NFT_PLATFORM_CONFIG: { [key: string]: NFTPlatform } = {
 };
 
 // Function to detect NFT details from URL
-export async function detectNFTDetails(url: string): Promise<NFTExtraction | undefined> {
+export async function detectNFTDetails(
+  url: string
+): Promise<NFTExtraction | undefined> {
   for (const key in NFT_PLATFORM_CONFIG) {
     const platform = NFT_PLATFORM_CONFIG[key];
     if (platform.urlPattern.test(url)) {
