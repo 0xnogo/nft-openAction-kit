@@ -112,7 +112,7 @@ type NFTPlatform = {
   platformName: string;
   platformLogoUrl: string;
   urlPattern: RegExp;
-  urlExtractor: (url: string) => NFTExtraction | undefined;
+  urlExtractor: (url: string) => Promise<NFTExtraction | undefined>;
   platformService: PlatformServiceConstructor;
 };
 ```

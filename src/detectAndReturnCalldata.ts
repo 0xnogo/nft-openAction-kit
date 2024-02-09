@@ -11,7 +11,7 @@ import { detectNFTDetails } from "./platform/nftPlatforms";
 export async function detectAndReturnCalldata(
   contentURI: string
 ): Promise<string | undefined> {
-  const nftDetails = detectNFTDetails(contentURI);
+  const nftDetails = await detectNFTDetails(contentURI);
 
   if (nftDetails) {
     const service: IPlatformService = nftDetails.service;
