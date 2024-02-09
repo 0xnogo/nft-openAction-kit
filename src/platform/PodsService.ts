@@ -221,7 +221,7 @@ export class PodsService implements IPlatformService {
 
     const result: any = await fixedPriceSaleStrategyContract.read.sale([
       contractAddress as `0x${string}`,
-      nftId,
+      BigInt(nftId),
     ]);
     const erc1155Contract = getContract({
       address: contractAddress as `0x${string}`,
@@ -229,7 +229,9 @@ export class PodsService implements IPlatformService {
       client: this.client,
     });
 
-    const tokenInfo: any = await erc1155Contract.read.getTokenInfo([nftId]);
+    const tokenInfo: any = await erc1155Contract.read.getTokenInfo([
+      BigInt(nftId),
+    ]);
 
     if (!result || !tokenInfo) {
       return;
