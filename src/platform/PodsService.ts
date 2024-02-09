@@ -8,11 +8,20 @@ import {
 import { base, mainnet, optimism, zora } from "viem/chains";
 import type { Address, PublicClient, Transport } from "viem";
 
-import ZoraCreator1155ImplABI from "../config/abis/Zora/ZoraCreator1155Impl.json";
+import ZoraCreator1155ImplABI from "../config/abis/Pods/ZoraCreator1155Impl";
 import ZoraCreatorFixedPriceSaleStrategyABI from "../config/abis/Zora/ZoraCreatorFixedPriceSaleStrategy.json";
+import { ARWEAVE_GATEWAY } from "../config/endpoints";
 import { IPlatformService } from "../interfaces/IPlatformService";
 import { NFT_PLATFORM_CONFIG } from "./nftPlatforms";
 import type { NFTExtraction, UIData } from "../types";
+
+// Although Pods does have a versioned metadata standard, for the purposes of
+// these platform configuration bindings, this is all we need to care about for
+// now.
+//
+// It may make sense to enhance this in the future based on client capabilities
+// (e.g. audio and video support).
+type PodsMetadataStandard = { image: string };
 
 // Given a Pods route, lookup the chain ID, contract address, and token ID.
 export type TokenInfoAPIResponse = {
@@ -109,33 +118,31 @@ export class PodsService implements IPlatformService {
     contract: string,
     tokenId: bigint
   ): Promise<UIData | undefined> {
-    let nftName: string = "";
-    let nftUri: string = "";
-    let nftCreatorAddress: string = "";
+    try {
+      const podcastContract = getContract({
+        address: contract as `0x${string}`,
+        // Pods makes use of Zora Protocol 1155 contracts, this is intentional.
+        abi: ZoraCreator1155ImplABI,
+        client: this.client,
+      });
 
-    const erc1155Contract = getContract({
-      address: contract as `0x${string}`,
-      abi: ZoraCreator1155ImplABI,
-      client: this.client,
-    });
-    nftName = (await erc1155Contract.read.name()) as string;
-    nftCreatorAddress = (await erc1155Contract.read.owner()) as string;
+      const metadataURI = (await podcastContract.read.uri([tokenId])).replace(
+        // Ensure `ar://` scheme is replaced with an Arweave gateway instead.
+        /^ar:\/\//,
+        `${ARWEAVE_GATEWAY}/`,
+      );
+      const response = await fetch(metadataURI);
 
-    const uri = (await erc1155Contract.read.uri([tokenId])) as string;
-    const cid = uri.split("/").pop();
-    const response = await fetch(
-      `https://ipfs.decentralized-content.com/ipfs/${cid}`
-    );
-    const metadata: any = await response.json();
-    nftUri = metadata.image;
-
-    return {
-      platformName: NFT_PLATFORM_CONFIG["Zora"].platformName,
-      platformLogoUrl: NFT_PLATFORM_CONFIG["Zora"].platformLogoUrl,
-      nftName,
-      nftUri,
-      nftCreatorAddress,
-    };
+      return {
+        platformName: NFT_PLATFORM_CONFIG["Pods"].platformName,
+        platformLogoUrl: NFT_PLATFORM_CONFIG["Pods"].platformLogoUrl,
+        nftName: await podcastContract.read.name(),
+        nftUri: ((await response.json()) as PodsMetadataStandard).image,
+        nftCreatorAddress: await podcastContract.read.owner(),
+      };
+    } catch (err) {
+      console.error(err);
+    }
   }
 
   getArgs(
