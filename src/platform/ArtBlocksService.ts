@@ -1,10 +1,7 @@
 import { PublicClient, createPublicClient, getContract, http } from "viem";
-import {
-  IPlatformService,
-  ServiceConfig,
-} from "../interfaces/IPlatformService";
+import { IPlatformService } from "../interfaces/IPlatformService";
 
-import { NFTExtraction, UIData } from "../types";
+import { NFTExtraction, ServiceConfig, UIData } from "../types";
 
 import GenArt721CoreV3ABI from "../config/abis/ArtBlocks/GenArt721CoreV3.json";
 import MinterDAExpSettlementV3 from "../config/abis/ArtBlocks/MinterDAExpSettlementV3.json";

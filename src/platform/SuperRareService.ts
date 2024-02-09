@@ -1,14 +1,11 @@
 import { PublicClient, createPublicClient, getContract, http } from "viem";
-import { NFTExtraction, UIData } from "..";
+import { NFTExtraction, ServiceConfig, UIData } from "..";
 import ERC721ABI from "../config/abis/ERC721.json";
 import OwnableABI from "../config/abis/Ownable.json";
 import SuperRareMarketplaceABI from "../config/abis/SuperRare/SuperRareMarketplace.json";
 import SuperRareV2ABI from "../config/abis/SuperRare/SuperRareV2.json";
 import { ZERO_ADDRESS } from "../config/constants";
-import {
-  IPlatformService,
-  ServiceConfig,
-} from "../interfaces/IPlatformService";
+import { IPlatformService } from "../interfaces/IPlatformService";
 
 export const SUPER_RARE_ADDRESS = "0xb932a70a57673d89f4acffbe830e8ed7f75fb9e0";
 

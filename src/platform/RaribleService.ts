@@ -11,12 +11,9 @@ import {
   toHex,
 } from "viem";
 import { mainnet } from "viem/chains";
-import { NFTExtraction, UIData } from "..";
+import { NFTExtraction, ServiceConfig, UIData } from "..";
 import { ZERO_ADDRESS } from "../config/constants";
-import {
-  IPlatformService,
-  ServiceConfig,
-} from "../interfaces/IPlatformService";
+import { IPlatformService } from "../interfaces/IPlatformService";
 
 interface SellOrder {
   id: string;
