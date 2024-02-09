@@ -1,23 +1,20 @@
-import {
-  Chain,
-  PublicClient,
-  createPublicClient,
-  getContract,
-  http,
-} from "viem";
+import { PublicClient, createPublicClient, getContract, http } from "viem";
 import { NFTExtraction, UIData } from "..";
 import ERC721ABI from "../config/abis/ERC721.json";
 import OwnableABI from "../config/abis/Ownable.json";
 import SuperRareMarketplaceABI from "../config/abis/SuperRare/SuperRareMarketplace.json";
 import SuperRareV2ABI from "../config/abis/SuperRare/SuperRareV2.json";
 import { ZERO_ADDRESS } from "../config/constants";
-import { IPlatformService } from "../interfaces/IPlatformService";
-import { NFT_PLATFORM_CONFIG } from "./nftPlatforms";
+import {
+  IPlatformService,
+  ServiceConfig,
+} from "../interfaces/IPlatformService";
 
 export const SUPER_RARE_ADDRESS = "0xb932a70a57673d89f4acffbe830e8ed7f75fb9e0";
 
 export class SuperRareService implements IPlatformService {
-  readonly platformName: string = "SuperRare";
+  readonly platformName: string;
+  readonly platformLogoUrl: string;
 
   readonly superRareServiceAddress =
     "0x6D7c44773C52D396F43c2D511B81aa168E9a7a42";
@@ -27,11 +24,14 @@ export class SuperRareService implements IPlatformService {
   private mintSignature =
     "function buy(address _originContract, uint256 _tokenId, address _currencyAddress, uint256 _amount) external payable";
 
-  constructor(chain: Chain) {
+  constructor(config: ServiceConfig) {
     this.client = createPublicClient({
-      chain: chain,
+      chain: config.chain,
       transport: http(),
     });
+
+    this.platformName = config.platformName;
+    this.platformLogoUrl = config.platformLogoUrl;
   }
 
   getMinterAddress(
@@ -106,8 +106,8 @@ export class SuperRareService implements IPlatformService {
     }
 
     return {
-      platformName: NFT_PLATFORM_CONFIG["SuperRare"].platformName,
-      platformLogoUrl: NFT_PLATFORM_CONFIG["SuperRare"].platformLogoUrl,
+      platformName: this.platformName,
+      platformLogoUrl: this.platformLogoUrl,
       nftName: tokenJson.name,
       nftUri: tokenJson.image,
       ...(owner ? { nftCreatorAddress: owner } : {}),
@@ -118,6 +118,7 @@ export class SuperRareService implements IPlatformService {
     contractAddress: string,
     nftId: bigint,
     signature: string,
+    userAddress: string,
     unit: bigint = 1n
   ): Promise<bigint | undefined> {
     const salePrice = await this.getSalePrices(contractAddress, nftId);
@@ -135,8 +136,8 @@ export class SuperRareService implements IPlatformService {
     senderAddress: string,
     signature: string,
     price: bigint
-  ): any[] {
-    return [contractAddress, tokenId, ZERO_ADDRESS, price];
+  ): Promise<any[]> {
+    return Promise.resolve([contractAddress, tokenId, ZERO_ADDRESS, price]);
   }
 
   private async getSalePrices(

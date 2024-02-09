@@ -23,6 +23,7 @@ export interface IPlatformService {
     contractAddress: string,
     nftId: bigint,
     signature: string,
+    userAddress: string,
     unit?: bigint
   ): Promise<bigint | undefined>;
   getArgs(
@@ -31,5 +32,5 @@ export interface IPlatformService {
     senderAddress: string,
     signature: string,
     price: bigint
-  ): any[];
+  ): Promise<any[]>;
 }

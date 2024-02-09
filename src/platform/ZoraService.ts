@@ -8,14 +8,13 @@ import {
   parseEther,
 } from "viem";
 import { IPlatformService } from "../interfaces/IPlatformService";
-import { NFT_PLATFORM_CONFIG } from "./nftPlatforms";
 
 import { base, mainnet, optimism, zora } from "viem/chains";
 import ERC721DropAbi from "../config/abis/Zora/ERC721Drop.json";
 import MetadataRendererABI from "../config/abis/Zora/MetadataRenderer.json";
 import ZoraCreator1155ImplABI from "../config/abis/Zora/ZoraCreator1155Impl.json";
 import ZoraCreatorFixedPriceSaleStrategyABI from "../config/abis/Zora/ZoraCreatorFixedPriceSaleStrategy.json";
-import { NFTExtraction, UIData } from "../types";
+import { NFTExtraction, ServiceConfig, UIData } from "../types";
 
 type Sale = {
   saleStart: number;
@@ -56,6 +55,9 @@ export interface ZoraExtendedChain extends Chain {
 }
 
 export class ZoraService implements IPlatformService {
+  readonly platformName: string;
+  readonly platformLogoUrl: string;
+
   private client: PublicClient;
 
   private erc1155MintSignature =
@@ -63,11 +65,13 @@ export class ZoraService implements IPlatformService {
   private erc721DropMintSignature =
     "function mintWithRewards(address recipient, uint256 quantity, string calldata comment, address mintReferral)";
 
-  constructor(chain: Chain) {
+  constructor(config: ServiceConfig) {
     this.client = createPublicClient({
-      chain: chain,
+      chain: config.chain,
       transport: http(),
     });
+    this.platformName = config.platformName;
+    this.platformLogoUrl = config.platformLogoUrl;
   }
 
   getMinterAddress(
@@ -92,6 +96,7 @@ export class ZoraService implements IPlatformService {
     contractAddress: string,
     nftId: bigint,
     signature: string,
+    userAddress: string,
     unit: bigint = 1n
   ): Promise<bigint | undefined> {
     const chain = this.client.chain!;
@@ -168,8 +173,8 @@ export class ZoraService implements IPlatformService {
     }
 
     return {
-      platformName: NFT_PLATFORM_CONFIG["Zora"].platformName,
-      platformLogoUrl: NFT_PLATFORM_CONFIG["Zora"].platformLogoUrl,
+      platformName: this.platformName,
+      platformLogoUrl: this.platformLogoUrl,
       nftName,
       nftUri,
       nftCreatorAddress,
@@ -182,19 +187,19 @@ export class ZoraService implements IPlatformService {
     senderAddress: string,
     signature: string,
     price: bigint
-  ): any[] {
+  ): Promise<any[]> {
     const minter =
       ZORA_CHAIN_ID_MAPPING[CHAIN_ID_TO_KEY[Number(this.client.chain!.id)]]
         .erc1155ZoraMinter;
     if (signature === this.erc721DropMintSignature) {
-      return [
+      return Promise.resolve([
         senderAddress,
         1n,
         "",
         "0x0000000000000000000000000000000000000000",
-      ];
+      ]);
     } else {
-      return [
+      return Promise.resolve([
         minter,
         tokenId,
         1n,
@@ -203,7 +208,7 @@ export class ZoraService implements IPlatformService {
           [senderAddress as `0x${string}`]
         ),
         "0x0000000000000000000000000000000000000000",
-      ];
+      ]);
     }
   }
 
