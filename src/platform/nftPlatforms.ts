@@ -44,27 +44,30 @@ export const NFT_PLATFORM_CONFIG: { [key: string]: NFTPlatform } = {
     platformLogoUrl: "https://pods.media/icon.svg",
     urlPattern: /(https?:\/\/)?pods\.media(\/.+)/,
     urlExtractor: async (url) => {
-      const match = url.match(/(https?:\/\/)?pods\.media(\/.+)/);
-      if (match) {
-        const response = await fetch(
-          `https://pods.media/api/tokenInfo?route=${encodeURIComponent(
-            match[2]
-          )}`
-        );
-        const data = (await response.json()) as PodsTokenInfoAPIResponse;
+      try {
+        // e.g. https://pods.media/the-rollup/ep-123-data-availability-in-the-modular-stack-explained
+        const [, , route] = url.match(/(https?:\/\/)?pods\.media(\/.+)/) ?? [];
+        if (!route) return;
 
-        if (data && data.chainId && data.contractAddress && data.tokenId) {
-          if (data.chainId in PODS_CHAIN_ID_MAPPING) {
-            const chainId = data.chainId as keyof typeof PODS_CHAIN_ID_MAPPING;
-            return {
-              platform: NFT_PLATFORM_CONFIG["Pods"],
-              chain: PODS_CHAIN_ID_MAPPING[chainId],
-              contractAddress: data.contractAddress,
-              nftId: data.tokenId, // all are 1155s, this is the episode tokenId
-              service: new PodsService(PODS_CHAIN_ID_MAPPING[chainId]),
-            } satisfies NFTExtraction<PodsSupportedChain>;
-          }
+        // Given a Pods route, lookup the chain ID, contract address, and token ID.
+        // e.g. /the-rollup/ep-123-data-availability-in-the-modular-stack-explained
+        const response = await fetch(
+          `https://pods.media/api/tokenInfo?route=${encodeURIComponent(route)}`
+        );
+
+        const { chainId, contractAddress, tokenId } =
+          (await response.json()) as PodsTokenInfoAPIResponse;
+
+        if (chainId && contractAddress && tokenId) {
+          return {
+            platform: NFT_PLATFORM_CONFIG["Pods"],
+            chain: PODS_CHAIN_ID_MAPPING[chainId],
+            contractAddress,
+            nftId: tokenId, // all are 1155s, this is the episode tokenId
+            service: new PodsService(PODS_CHAIN_ID_MAPPING[chainId]),
+          } satisfies NFTExtraction<PodsSupportedChain>;
         }
+      } catch (err) {
         throw new Error("Failed to parse Pods URL");
       }
     },
