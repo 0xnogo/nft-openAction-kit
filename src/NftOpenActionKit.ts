@@ -12,6 +12,7 @@ import {
 } from "viem";
 import { CHAIN_CONFIG, ZERO_ADDRESS } from "./config/constants";
 import { BASE_URL } from "./config/endpoints";
+import { INftOpenActionKit } from "./interfaces/INftOpenActionKit";
 import { IPlatformService } from "./interfaces/IPlatformService";
 import {
   SUPER_RARE_ADDRESS,
@@ -35,11 +36,12 @@ import { bigintDeserializer, bigintSerializer, idToChain } from "./utils";
  * @param {string} decentApiKey - Decent API key
  * @param {string} raribleApiKey - Rarible API key
  */
-export class NftOpenActionKit {
+export class NftOpenActionKit implements INftOpenActionKit {
   private decentApiKey: string;
   private raribleApiKey?: string;
   private nftPlatformConfig: { [key: string]: NFTPlatform } = {};
 
+  // TODO: add the RPC url as input
   constructor(config: SdkConfig) {
     if (!config.decentApiKey) {
       throw new Error("Decent API key is mandatory.");
@@ -256,8 +258,6 @@ export class NftOpenActionKit {
       signature,
       senderAddress
     );
-
-    console.log(price);
 
     if (!price) {
       throw new Error("No price");

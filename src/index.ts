@@ -2,6 +2,7 @@ import * as dotenv from "dotenv";
 dotenv.config();
 
 export * from "./NftOpenActionKit";
+export * from "./interfaces/INftOpenActionKit";
 export * from "./types";
 
 import { NftOpenActionKit } from "./NftOpenActionKit";
