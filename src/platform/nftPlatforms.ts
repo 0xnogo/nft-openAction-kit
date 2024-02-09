@@ -11,6 +11,7 @@ import {
   PODS_CHAIN_ID_MAPPING,
   PodsService,
   type PodsSupportedChain,
+  type TokenInfoAPIResponse as PodsTokenInfoAPIResponse,
 } from "./PodsService";
 
 export const NFT_PLATFORM_CONFIG: { [key: string]: NFTPlatform } = {
@@ -50,9 +51,7 @@ export const NFT_PLATFORM_CONFIG: { [key: string]: NFTPlatform } = {
             match[2]
           )}`
         );
-        const data = (await response.json()) as
-          | { chainId: number; contractAddress: `0x${string}`; tokenId: string }
-          | undefined;
+        const data = (await response.json()) as PodsTokenInfoAPIResponse;
 
         if (data && data.chainId && data.contractAddress && data.tokenId) {
           if (data.chainId in PODS_CHAIN_ID_MAPPING) {

@@ -1,19 +1,25 @@
 import {
-  PublicClient,
-  type Transport,
   createPublicClient,
   encodeAbiParameters,
   getContract,
   http,
   parseEther,
 } from "viem";
-import { IPlatformService } from "../interfaces/IPlatformService";
-import { NFT_PLATFORM_CONFIG } from "./nftPlatforms";
-
 import { base, mainnet, optimism, zora } from "viem/chains";
+import type { Address, PublicClient, Transport } from "viem";
+
 import ZoraCreator1155ImplABI from "../config/abis/Zora/ZoraCreator1155Impl.json";
 import ZoraCreatorFixedPriceSaleStrategyABI from "../config/abis/Zora/ZoraCreatorFixedPriceSaleStrategy.json";
+import { IPlatformService } from "../interfaces/IPlatformService";
+import { NFT_PLATFORM_CONFIG } from "./nftPlatforms";
 import type { NFTExtraction, UIData } from "../types";
+
+// Given a Pods route, lookup the chain ID, contract address, and token ID.
+export type TokenInfoAPIResponse = {
+  chainId: PodsSupportedChain["id"];
+  contractAddress: Address;
+  tokenId: string;
+};
 
 type Sale = {
   saleStart: number;
