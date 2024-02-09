@@ -59,12 +59,12 @@ export class NftOpenActionKit implements INftOpenActionKit {
       urlPattern:
         /https:\/\/zora\.co\/collect\/([a-z]+):(0x[a-fA-F0-9]{40})(?:\/(\d+))?/,
 
-      urlExtractor: (url: string): NFTExtraction | undefined => {
+      urlExtractor: (url: string): Promise<NFTExtraction | undefined> => {
         const match = url.match(
           /https:\/\/zora\.co\/collect\/([a-z]+):(0x[a-fA-F0-9]{40})(?:\/(\d+))?/
         );
         if (match && ZORA_CHAIN_ID_MAPPING[match[1]]) {
-          return {
+          return Promise.resolve({
             platform: this.nftPlatformConfig["Zora"],
             chain: ZORA_CHAIN_ID_MAPPING[match[1]],
             contractAddress: match[2],
@@ -74,8 +74,9 @@ export class NftOpenActionKit implements INftOpenActionKit {
               platformName: this.nftPlatformConfig["Zora"].platformName,
               platformLogoUrl: this.nftPlatformConfig["Zora"].platformLogoUrl,
             }),
-          };
+          });
         }
+        return Promise.resolve(undefined);
       },
       platformService: ZoraService,
     };
@@ -85,12 +86,12 @@ export class NftOpenActionKit implements INftOpenActionKit {
       platformLogoUrl: "https://www.artblocks.io/favicon.ico",
       urlPattern:
         /https:\/\/www\.artblocks\.io\/collections\/curated\/projects\/0x99a9b7c1116f9ceeb1652de04d5969cce509b069\/(\d+)/, // other GenArt ommited as no more active projects
-      urlExtractor: (url: string): NFTExtraction | undefined => {
+      urlExtractor: (url: string): Promise<NFTExtraction | undefined> => {
         const match = url.match(
           /https:\/\/www\.artblocks\.io\/collections\/curated\/projects\/(0x[a-fA-F0-9]{40})\/(\d+)/
         );
         if (match) {
-          return {
+          return Promise.resolve({
             platform: this.nftPlatformConfig["ArtBlocks"],
             chain: mainnet,
             contractAddress: match[1],
@@ -101,8 +102,9 @@ export class NftOpenActionKit implements INftOpenActionKit {
               platformLogoUrl:
                 this.nftPlatformConfig["ArtBlocks"].platformLogoUrl,
             }),
-          };
+          });
         }
+        return Promise.resolve(undefined);
       },
       platformService: ArtBlocksService,
     };
@@ -112,7 +114,7 @@ export class NftOpenActionKit implements INftOpenActionKit {
       platformLogoUrl: "https://superrare.com/favicon.ico",
       urlPattern:
         /https:\/\/superrare\.com\/(?:artwork-v2\/)?(?:0x[a-fA-F0-9]{40}\/)?[\w-]+(?:\:\s?[\w-]+)?-(\d+)/,
-      urlExtractor: (url: string): NFTExtraction | undefined => {
+      urlExtractor: (url: string): Promise<NFTExtraction | undefined> => {
         const match = url.match(
           /https:\/\/superrare\.com\/(?:artwork-v2\/)?(?:0x[a-fA-F0-9]{40}\/)?[\w-]+(?:\:\s?[\w-]+)?-(\d+)/
         );
@@ -126,8 +128,7 @@ export class NftOpenActionKit implements INftOpenActionKit {
           if (contractMatch) {
             contractAddress = contractMatch[1];
           }
-
-          return {
+          return Promise.resolve({
             platform: this.nftPlatformConfig["SuperRare"],
             chain: mainnet,
             contractAddress,
@@ -138,8 +139,9 @@ export class NftOpenActionKit implements INftOpenActionKit {
               platformLogoUrl:
                 this.nftPlatformConfig["SuperRare"].platformLogoUrl,
             }),
-          };
+          });
         }
+        return Promise.resolve(undefined);
       },
       platformService: SuperRareService,
     };
@@ -151,7 +153,7 @@ export class NftOpenActionKit implements INftOpenActionKit {
         platformLogoUrl: "https://rarible.com/favicon.ico",
         urlPattern:
           /https:\/\/rarible\.com\/token\/(?:polygon\/)?(0x[a-fA-F0-9]{40}):(\d+)/,
-        urlExtractor: (url: string): NFTExtraction | undefined => {
+        urlExtractor: (url: string): Promise<NFTExtraction | undefined> => {
           const match = url.match(
             /https:\/\/rarible\.com\/token\/(?:polygon\/)?(0x[a-fA-F0-9]{40}):(\d+)/
           );
@@ -164,10 +166,10 @@ export class NftOpenActionKit implements INftOpenActionKit {
 
             // Return undefined for unsupported chains (Rari Chain, ZkSync Era, Immutable X)
             if (![mainnet.name, polygon.name].includes(chain.name)) {
-              return undefined;
+              return Promise.resolve(undefined);
             }
 
-            return {
+            return Promise.resolve({
               platform: this.nftPlatformConfig["Rarible"],
               chain: chain,
               contractAddress,
@@ -179,8 +181,9 @@ export class NftOpenActionKit implements INftOpenActionKit {
                   this.nftPlatformConfig["Rarible"].platformLogoUrl,
                 apiKey: this.raribleApiKey!,
               }),
-            };
+            });
           }
+          return Promise.resolve(undefined);
         },
         platformService: RaribleService,
         apiKey: this.raribleApiKey,
@@ -196,7 +199,7 @@ export class NftOpenActionKit implements INftOpenActionKit {
   public async detectAndReturnCalldata(
     contentURI: string
   ): Promise<string | undefined> {
-    const nftDetails = this.detectNFTDetails(contentURI);
+    const nftDetails = await this.detectNFTDetails(contentURI);
 
     if (nftDetails) {
       const service: IPlatformService = nftDetails.service;
@@ -342,7 +345,9 @@ export class NftOpenActionKit implements INftOpenActionKit {
     return { actArguments, uiData };
   }
 
-  private detectNFTDetails(url: string): NFTExtraction | undefined {
+  private async detectNFTDetails(
+    url: string
+  ): Promise<NFTExtraction | undefined> {
     for (const key in this.nftPlatformConfig) {
       const platform = this.nftPlatformConfig[key];
       if (platform.urlPattern.test(url)) {

@@ -11,7 +11,7 @@ import { PostCreatedEventFormatted } from "./types";
 
 const sdk = new NftOpenActionKit({
   decentApiKey: "9b4c169dba54a9d9b1ed3b10a963159e",
-  // raribleApiKey: "19a238f1-2795-4147-9311-cde8146c5cf6",
+  raribleApiKey: "19a238f1-2795-4147-9311-cde8146c5cf6",
 });
 
 // https://rarible.com/token/0x57f1887a8bf19b14fc0df6fd9b2acc9af147ea85:97210543356365947583903670903433638628829406556346000984525494880998375939932
