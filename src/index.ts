@@ -1,13 +1,12 @@
 import * as dotenv from "dotenv";
+import { NftOpenActionKit } from "./NftOpenActionKit";
+import { CHAIN_CONFIG } from "./config/constants";
+import { PostCreatedEventFormatted } from "./types";
 dotenv.config();
 
 export * from "./NftOpenActionKit";
 export * from "./interfaces/INftOpenActionKit";
 export * from "./types";
-
-import { NftOpenActionKit } from "./NftOpenActionKit";
-import { CHAIN_CONFIG } from "./config/constants";
-import { PostCreatedEventFormatted } from "./types";
 
 const sdk = new NftOpenActionKit({
   decentApiKey: "9b4c169dba54a9d9b1ed3b10a963159e",

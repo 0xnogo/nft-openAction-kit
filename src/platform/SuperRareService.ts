@@ -71,7 +71,6 @@ export class SuperRareService implements IPlatformService {
       });
 
       owner = await superRareContract.read.tokenCreator([tokenId]);
-      console.log(owner);
     } else {
       try {
         owner = await this.client.readContract({

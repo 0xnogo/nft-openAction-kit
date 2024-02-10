@@ -279,7 +279,6 @@ export class RaribleService implements IPlatformService {
     chain: "ETHEREUM" | "POLYGON"
   ): Promise<SellOrder[]> {
     const platform = "RARIBLE";
-    // const status = "FILLED";
     const status = "ACTIVE";
     const itemId = `${chain.toUpperCase()}:${contractAddress}:${tokenId}`;
 

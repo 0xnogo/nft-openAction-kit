@@ -8,6 +8,8 @@ export type ServiceConfig = {
   apiKey?: string;
 };
 
+export type NftPlatformConfig = { [key: string]: NFTPlatform };
+
 export type SdkConfig = {
   decentApiKey: string;
   raribleApiKey?: string;
@@ -77,7 +79,6 @@ export type NFTPlatform = {
 };
 
 export type NFTExtraction = {
-  platform: NFTPlatform;
   chain: Chain;
   contractAddress: string;
   nftId: string;
