@@ -76,7 +76,7 @@ const fetchCalldata = async () => {
 };
 ```
 
-3. Use `actionDataFromPost`
+4. Use `actionDataFromPost`
 
 ```js
 const post: PostCreatedEventFormatted = {
@@ -130,7 +130,7 @@ type SdkConfig = {
 
 2. Modify the initializePlatformConfig function in `src/DetectionEngine.ts` and add the new platform config following the type:
 
-```
+```js
 type NFTPlatform = {
   platformName: string;
   platformLogoUrl: string;
@@ -140,7 +140,7 @@ type NFTPlatform = {
 };
 ```
 
-2. Create a new file in `src/platform` and add the platform service class. The class should implement the `IPlatformService` interface.
+3. Create a new file in `src/platform` and add the platform service class. The class should implement the `IPlatformService` interface.
 
 ```js
 export type NFTPlatform = {
@@ -157,7 +157,7 @@ export type NFTPlatform = {
 > If an api key is required, make sure to add it in the `DetectionEngine` class and handle it in the `initializePlatformConfig` function. The Rareble detection is an example of how to handle an api key.
 
 
-3. Create a new file in `src/platform` and add the platform service class. The class should implement the `IPlatformService` interface.
+4. Create a new file in `src/platform` and add the platform service class. The class should implement the `IPlatformService` interface.
 
 ```js
 interface IPlatformService {
