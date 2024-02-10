@@ -2,10 +2,6 @@ export * from "./NftOpenActionKit";
 export * from "./interfaces/INftOpenActionKit";
 export * from "./types";
 
-import { NftOpenActionKit } from "./NftOpenActionKit";
-import { CHAIN_CONFIG } from "./config/constants";
-import { PostCreatedEventFormatted } from "./types";
-
 const sdk = new NftOpenActionKit({
   decentApiKey: "9b4c169dba54a9d9b1ed3b10a963159e",
   raribleApiKey: "19a238f1-2795-4147-9311-cde8146c5cf6",
