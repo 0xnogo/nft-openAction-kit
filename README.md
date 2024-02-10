@@ -136,6 +136,7 @@ export type NFTPlatform = {
   platformLogoUrl: string;
   urlPattern: RegExp;
   urlExtractor: (url: string) => Promise<NFTExtraction | undefined>;
+  urlExtractor: (url: string) => Promise<NFTExtraction | undefined>;
   platformService: PlatformServiceConstructor;
   apiKey?: string;
 };
