@@ -1,6 +1,20 @@
 import { Chain } from "viem";
 import { IPlatformService } from "../interfaces/IPlatformService";
 
+export type ServiceConfig = {
+  chain: Chain;
+  platformName: string;
+  platformLogoUrl: string;
+  apiKey?: string;
+};
+
+export type NftPlatformConfig = { [key: string]: NFTPlatform };
+
+export type SdkConfig = {
+  decentApiKey: string;
+  raribleApiKey?: string;
+};
+
 export type ChainConfig = {
   openActionContractAddress: string;
   lensHubProxyAddress: string;
@@ -51,7 +65,9 @@ export type PostCreatedEventFormatted = {
   transactionHash: string;
 };
 
-export type PlatformServiceConstructor = new (chain: Chain) => IPlatformService;
+export type PlatformServiceConstructor = new (
+  config: ServiceConfig
+) => IPlatformService;
 
 export type NFTPlatform = {
   platformName: string;
@@ -59,10 +75,10 @@ export type NFTPlatform = {
   urlPattern: RegExp;
   urlExtractor: (url: string) => Promise<NFTExtraction | undefined>;
   platformService: PlatformServiceConstructor;
+  apiKey?: string;
 };
 
 export type NFTExtraction = {
-  platform: NFTPlatform;
   chain: Chain;
   contractAddress: string;
   nftId: string;
