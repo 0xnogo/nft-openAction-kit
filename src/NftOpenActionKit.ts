@@ -19,8 +19,7 @@ import { bigintDeserializer, bigintSerializer, idToChain } from "./utils";
  * @class
  * @classdesc NFTOpenActionKit class: Detects NFT details from URL and returns calldata for minting
  * @constructor
- * @param {string} decentApiKey - Decent API key
- * @param {string} raribleApiKey - Rarible API key
+ * @param {SdkConfig} config - SDK configuration
  */
 export class NftOpenActionKit implements INftOpenActionKit {
   private decentApiKey: string;

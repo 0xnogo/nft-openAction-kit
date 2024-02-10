@@ -47,14 +47,28 @@ When a post appears in a Lens application feed with the NFT minting action attac
 
    ```sh
    DECENT_API_KEY=api-key
+   RARIBLE_API_KEY=api-key
    ```
 
-2. Use `detectAndReturnCalldata`
+2. Instantiate the `NFTOpenActionKit` class and use the `detectAndReturnCalldata` and `actionDataFromPost` methods.
+
+```js
+import { NFTOpenActionKit } from "nft-openaction-kit";
+
+const nftOpenActionKit = new NFTOpenActionKit({
+  decentApiKey: process.env.DECENT_API_KEY,
+  raribleApiKey: process.env.RARIBLE_API_KEY,
+});
+```
+
+> Only the `decentApiKey` is required. The `raribleApiKey` is optional, which would make the Rareble detection available.
+
+3. Use `detectAndReturnCalldata`
 
 ```js
 const fetchCalldata = async () => {
   try {
-    const result = await detectAndReturnCalldata(url);
+    const result = await nftOpenActionKit.detectAndReturnCalldata(url);
     console.log(result || "No calldata found");
   } catch (err) {
     console.log(err);
@@ -89,7 +103,7 @@ const post: PostCreatedEventFormatted = {
 
 try {
   // Call the async function and pass the link
-  const result: ResultData = await actionDataFromPost(
+  const result: ResultData = await nftOpenActionKit.actionDataFromPost(
     post,
     profileId,
     senderAddress,
@@ -105,22 +119,40 @@ try {
 
 ## Add a new NFT platform
 
-1. Modify the NFT_PLATFORM_CONFIG object in `src/platform/nftPlatform.ts` and add the new platform config follwing the type:
+1. If an api is required, modify the SdkConfig type in `src/types/index.ts`:
 
-```
-type NFTPlatform = {
-  platformName: string;
-  platformLogoUrl: string;
-  urlPattern: RegExp;
-  urlExtractor: (url: string) => NFTExtraction | undefined;
-  platformService: PlatformServiceConstructor;
+```js
+type SdkConfig = {
+  decentApiKey: string;
+  raribleApiKey?: string;
 };
 ```
 
-2. Create a new file in `src/platform` and add the platform service class. The class should implement the `IPlatformService` interface.
+2. Modify the initializePlatformConfig function in `src/DetectionEngine.ts` and add the new platform config following the type:
 
 ```js
-export interface IPlatformService {
+export type NFTPlatform = {
+  platformName: string;
+  platformLogoUrl: string;
+  urlPattern: RegExp;
+  urlExtractor: (url: string) => Promise<NFTExtraction | undefined>;
+  platformService: PlatformServiceConstructor;
+  apiKey?: string;
+};
+```
+
+> If an api key is required, make sure to add it in the `DetectionEngine` class and handle it in the `initializePlatformConfig` function. The Rareble detection is an example of how to handle an api key.
+
+
+3. Create a new file in `src/platform` and add the platform service class. The class should implement the `IPlatformService` interface.
+
+```js
+interface IPlatformService {
+  platformName: string;
+  getMinterAddress(
+    contract: string,
+    tokenId: bigint
+  ): Promise<string | undefined>;
   getMintSignature(nftDetails: NFTExtraction): Promise<string | undefined>;
   getUIData(
     signature: string,
@@ -131,8 +163,15 @@ export interface IPlatformService {
     contractAddress: string,
     nftId: bigint,
     signature: string,
+    userAddress: string,
     unit?: bigint
   ): Promise<bigint | undefined>;
-  getArgs(tokenId: bigint, senderAddress: string, signature: string): any[];
+  getArgs(
+    contractAddress: string,
+    tokenId: bigint,
+    senderAddress: string,
+    signature: string,
+    price: bigint
+  ): Promise<any[]>;
 }
 ```
