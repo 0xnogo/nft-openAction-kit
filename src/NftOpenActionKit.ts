@@ -134,6 +134,8 @@ export class NftOpenActionKit implements INftOpenActionKit {
       },
     };
 
+    console.log(actionRequest);
+
     const url = `${BASE_URL}?arguments=${JSON.stringify(
       actionRequest,
       bigintSerializer
@@ -148,8 +150,10 @@ export class NftOpenActionKit implements INftOpenActionKit {
 
     const resp = JSON.parse(data, bigintDeserializer);
 
+    console.log(resp);
+
     if (resp.success === "false" || !resp.arbitraryData) {
-      throw new Error("No action response");
+      throw new Error("No action response", resp.error);
     }
 
     const encodedActionData = resp.arbitraryData.lensActionData;
