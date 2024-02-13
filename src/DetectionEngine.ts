@@ -242,6 +242,7 @@ export class DetectionEngine implements IDetectionEngine {
           return Promise.resolve(undefined);
         },
         platformService: OpenSeaService,
+        apiKey: this.openSeaApiKey,
       };
     }
   }

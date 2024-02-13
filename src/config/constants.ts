@@ -1,4 +1,4 @@
-import { base, mainnet, optimism, polygon, zora } from "viem/chains";
+import { arbitrum, base, mainnet, optimism, polygon, zora } from "viem/chains";
 import { ChainConfig } from "../types";
 
 export const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
@@ -30,4 +30,11 @@ export const CHAIN_CONFIG: ChainConfig =
         wMatic: "0x9c3C9283D3e44854697Cd22D3Faa240Cfb032889",
       };
 
-export const DESTINATION_CHAINS = [zora, optimism, base, mainnet, polygon];
+export const DESTINATION_CHAINS = [
+  zora,
+  optimism,
+  base,
+  mainnet,
+  polygon,
+  arbitrum,
+];

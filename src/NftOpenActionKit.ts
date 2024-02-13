@@ -107,7 +107,7 @@ export class NftOpenActionKit implements INftOpenActionKit {
       sender: senderAddress,
       srcChainId: parseInt(srcChainId),
       srcToken: CHAIN_CONFIG.wMatic,
-      dstChainId,
+      dstChainId: Number(dstChainId),
       dstToken: token,
       slippage: 3, // 1%
       actionType: "lens-open-action",
@@ -118,7 +118,7 @@ export class NftOpenActionKit implements INftOpenActionKit {
         contractAddress:
           (await plateformService.getMinterAddress(contract, tokenId)) ??
           contract,
-        chainId: dstChainId,
+        chainId: Number(dstChainId),
         cost: {
           isNative: true,
           amount: price,
@@ -148,13 +148,11 @@ export class NftOpenActionKit implements INftOpenActionKit {
 
     const resp = JSON.parse(data, bigintDeserializer);
 
-    // TODO: commented for now as Decent API is not returning actionResponse
-    // if (resp.success == "false" || !resp.actionResponse) {
-    //   throw new Error("No action response");
-    // }
+    if (resp.success === "false" || !resp.arbitraryData) {
+      throw new Error("No action response");
+    }
 
-    // TODO: check with Decent team why actionResponse is not present in the response
-    // const encodedActionData = resp.actionResponse!.arbitraryData.lensActionData;
+    const encodedActionData = resp.arbitraryData.lensActionData;
 
     const actArguments = {
       publicationActedProfileId: BigInt(post.args.postParams.profileId),
@@ -163,8 +161,7 @@ export class NftOpenActionKit implements INftOpenActionKit {
       referrerProfileIds: [],
       referrerPubIds: [],
       actionModuleAddress: CHAIN_CONFIG.decentOpenActionContractAddress,
-      // actionModuleData: encodedActionData as `0x${string}`,
-      actionModuleData: "0x123456789" as `0x${string}`,
+      actionModuleData: encodedActionData as `0x${string}`,
     };
 
     const uiData = await plateformService.getUIData(
