@@ -12,7 +12,6 @@ import ZoraCreator1155ImplABI from "../config/abis/Pods/ZoraCreator1155Impl";
 import ZoraCreatorFixedPriceSaleStrategyABI from "../config/abis/Zora/ZoraCreatorFixedPriceSaleStrategy.json";
 import { ARWEAVE_GATEWAY } from "../config/endpoints";
 import { IPlatformService } from "../interfaces/IPlatformService";
-import { NFT_PLATFORM_CONFIG } from "./nftPlatforms";
 import type { NFTExtraction, UIData } from "../types";
 
 // Although Pods does have a versioned metadata standard, for the purposes of
@@ -60,17 +59,28 @@ export const PODS_CHAIN_ID_MAPPING = {
 export type PodsSupportedChain =
   (typeof PODS_CHAIN_ID_MAPPING)[keyof typeof PODS_CHAIN_ID_MAPPING];
 
+type PodsServiceConfig = {
+  chain: PodsSupportedChain;
+  platformName: string;
+  platformLogoUrl: string;
+};
+
 export class PodsService implements IPlatformService {
+  readonly platformName: string;
+  readonly platformLogoUrl: string;
+
   private client: PublicClient<Transport, PodsSupportedChain>;
 
   private erc1155MintSignature =
     "function mintWithRewards(address minter, uint256 tokenId, uint256 quantity, bytes calldata minterArguments, address mintReferral)";
 
-  constructor(chain: PodsSupportedChain) {
+  constructor(config: PodsServiceConfig) {
     this.client = createPublicClient({
-      chain: chain,
+      chain: config.chain,
       transport: http(),
     });
+    this.platformName = config.platformName;
+    this.platformLogoUrl = config.platformLogoUrl;
   }
 
   getMinterAddress(
@@ -95,6 +105,7 @@ export class PodsService implements IPlatformService {
     contractAddress: string,
     nftId: bigint,
     signature: string,
+    userAddress: string,
     unit: bigint = 1n
   ): Promise<bigint | undefined> {
     const sale = await this.getERC1155SaleData(
@@ -129,13 +140,13 @@ export class PodsService implements IPlatformService {
       const metadataURI = (await podcastContract.read.uri([tokenId])).replace(
         // Ensure `ar://` scheme is replaced with an Arweave gateway instead.
         /^ar:\/\//,
-        `${ARWEAVE_GATEWAY}/`,
+        `${ARWEAVE_GATEWAY}/`
       );
       const response = await fetch(metadataURI);
 
       return {
-        platformName: NFT_PLATFORM_CONFIG["Pods"].platformName,
-        platformLogoUrl: NFT_PLATFORM_CONFIG["Pods"].platformLogoUrl,
+        platformName: this.platformName,
+        platformLogoUrl: this.platformLogoUrl,
         nftName: await podcastContract.read.name(),
         nftUri: ((await response.json()) as PodsMetadataStandard).image,
         nftCreatorAddress: await podcastContract.read.owner(),
@@ -151,11 +162,11 @@ export class PodsService implements IPlatformService {
     senderAddress: string,
     signature: string,
     price: bigint
-  ) {
+  ): Promise<any[]> {
     const minter =
       PODS_CHAIN_ID_MAPPING[this.client.chain.id].erc1155ZoraMinter;
     if (signature === this.erc1155MintSignature) {
-      return [
+      return Promise.resolve([
         minter,
         tokenId,
         1n,
@@ -164,7 +175,7 @@ export class PodsService implements IPlatformService {
           [senderAddress as `0x${string}`]
         ),
         "0x0000000000000000000000000000000000000000",
-      ];
+      ]);
     } else {
       throw new Error("Invalid function signature");
     }

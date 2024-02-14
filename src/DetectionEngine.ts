@@ -10,6 +10,12 @@ import { IPlatformService } from "./interfaces/IPlatformService";
 import { ArtBlocksService } from "./platform/ArtBlocksService";
 import { RaribleService } from "./platform/RaribleService";
 import {
+  PODS_CHAIN_ID_MAPPING,
+  PodsService,
+  type PodsSupportedChain,
+  type TokenInfoAPIResponse as PodsTokenInfoAPIResponse,
+} from "./platform/PodsService";
+import {
   SUPER_RARE_ADDRESS,
   SuperRareService,
 } from "./platform/SuperRareService";
@@ -49,7 +55,7 @@ export class DetectionEngine implements IDetectionEngine {
   }
 
   private initializePlatformConfig(): void {
-    // Zora, ArtBlocks, and SuperRare don't require an API key for this setup
+    // Zora, ArtBlocks, Pods, and SuperRare don't require an API key for this setup
     this.nftPlatformConfig.Zora = {
       platformName: "Zora",
       platformLogoUrl: "https://zora.co/favicon.ico",
@@ -141,6 +147,51 @@ export class DetectionEngine implements IDetectionEngine {
         return Promise.resolve(undefined);
       },
       platformService: SuperRareService,
+    };
+
+    this.nftPlatformConfig.Pods = {
+      platformName: "Pods",
+      platformLogoUrl: "https://pods.media/icon.svg",
+      urlPattern: /(https?:\/\/)?pods\.media(\/.+)/,
+      urlExtractor: async (url: string): Promise<NFTExtraction | undefined> => {
+        try {
+          // e.g. https://pods.media/the-rollup/ep-123-data-availability-in-the-modular-stack-explained
+          const [, , route] =
+            url.match(/(https?:\/\/)?pods\.media(\/.+)/) ?? [];
+          if (!route) return Promise.resolve(undefined);
+
+          // Given a Pods route, lookup the chain ID, contract address, and token ID.
+          // e.g. /the-rollup/ep-123-data-availability-in-the-modular-stack-explained
+          const response = await fetch(
+            `https://pods.media/api/tokenInfo?route=${encodeURIComponent(
+              route
+            )}`
+          );
+
+          const { chainId, contractAddress, tokenId } =
+            (await response.json()) as PodsTokenInfoAPIResponse;
+
+          if (chainId && contractAddress && tokenId) {
+            return Promise.resolve({
+              chain: PODS_CHAIN_ID_MAPPING[chainId],
+              contractAddress,
+              nftId: tokenId, // all are 1155s, this is the episode tokenId
+              service: new PodsService({
+                chain: PODS_CHAIN_ID_MAPPING[chainId],
+                platformName: this.nftPlatformConfig["Pods"].platformName,
+                platformLogoUrl: this.nftPlatformConfig["Pods"].platformLogoUrl,
+              }),
+            } satisfies NFTExtraction<PodsSupportedChain>);
+          }
+        } catch (err) {
+          throw new Error("Failed to parse Pods URL");
+        }
+      },
+      /*
+       * this type coercion is necessary because the constructor signature is not compatible with
+       * the IPlatformService interface, and we're referencing it in the initializer
+       */
+      platformService: PodsService as unknown as PlatformServiceConstructor,
     };
 
     // Rarible is conditionally added based on the presence of its API key
