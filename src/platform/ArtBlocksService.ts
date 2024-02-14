@@ -1,32 +1,28 @@
-import {
-  Chain,
-  PublicClient,
-  createPublicClient,
-  getContract,
-  http,
-} from "viem";
+import { PublicClient, createPublicClient, getContract, http } from "viem";
 import { IPlatformService } from "../interfaces/IPlatformService";
 
-import { NFTExtraction, UIData } from "../types";
+import { NFTExtraction, ServiceConfig, UIData } from "../types";
 
 import GenArt721CoreV3ABI from "../config/abis/ArtBlocks/GenArt721CoreV3.json";
 import MinterDAExpSettlementV3 from "../config/abis/ArtBlocks/MinterDAExpSettlementV3.json";
 import MinterFilterV2ABI from "../config/abis/ArtBlocks/MinterFilterV2.json";
-import { NFT_PLATFORM_CONFIG } from "./nftPlatforms";
 
 export class ArtBlocksService implements IPlatformService {
-  readonly platformName: string = "ArtBlocks";
+  readonly platformName: string;
+  readonly platformLogoUrl: string;
 
   private client: PublicClient;
 
   private mintSignature =
     "function purchase(uint256 projectId, address coreContract) external payable returns (uint256 tokenId)";
 
-  constructor(chain: Chain) {
+  constructor(config: ServiceConfig) {
     this.client = createPublicClient({
-      chain: chain,
+      chain: config.chain,
       transport: http(),
     });
+    this.platformName = config.platformName;
+    this.platformLogoUrl = config.platformLogoUrl;
   }
 
   async getMinterAddress(
@@ -74,6 +70,7 @@ export class ArtBlocksService implements IPlatformService {
     contractAddress: string,
     nftId: bigint,
     signature: string,
+    userAddress: string,
     unit: bigint = 1n
   ): Promise<bigint | undefined> {
     const minterContract = await this.getMinterContract(contractAddress, nftId);
@@ -132,8 +129,8 @@ export class ArtBlocksService implements IPlatformService {
     }
 
     return {
-      platformName: NFT_PLATFORM_CONFIG["ArtBlocks"].platformName,
-      platformLogoUrl: NFT_PLATFORM_CONFIG["ArtBlocks"].platformLogoUrl,
+      platformName: this.platformName,
+      platformLogoUrl: this.platformLogoUrl,
       nftName: tokenJson.collection_name,
       nftUri: tokenJson.preview_asset_url,
       nftCreatorAddress: tokenJson.payout_address,
@@ -146,8 +143,8 @@ export class ArtBlocksService implements IPlatformService {
     senderAddress: string,
     signature: string,
     price: bigint
-  ): any[] {
-    return [contract, tokenId, senderAddress];
+  ): Promise<any[]> {
+    return Promise.resolve([contract, tokenId, senderAddress]);
   }
 
   private async getTokenId(
