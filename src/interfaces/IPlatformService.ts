@@ -9,6 +9,7 @@ import { NFTExtraction, UIData } from "../types";
  * @param getArgs - returns the arguments for the mint function
  */
 export interface IPlatformService {
+  platformName: string;
   getMinterAddress(
     contract: string,
     tokenId: bigint
@@ -23,6 +24,7 @@ export interface IPlatformService {
     contractAddress: string,
     nftId: bigint,
     signature: string,
+    userAddress: string,
     unit?: bigint
   ): Promise<bigint | undefined>;
   getArgs(
@@ -31,5 +33,5 @@ export interface IPlatformService {
     senderAddress: string,
     signature: string,
     price: bigint
-  ): any[];
+  ): Promise<any[]>;
 }

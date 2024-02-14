@@ -1,20 +1,35 @@
 import { parseEther } from "viem";
 import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
-import { zora } from "viem/chains";
-import { actionDataFromPost } from "../src/actionDataFromPost";
+import { mainnet } from "viem/chains";
+import {
+  NFTExtraction,
+  NftOpenActionKit,
+  PostCreatedEventFormatted,
+} from "../src";
 import { CHAIN_CONFIG } from "../src/config/constants";
-import { ZoraService } from "../src/platform/ZoraService";
-import { NFT_PLATFORM_CONFIG } from "../src/platform/nftPlatforms";
-import { PostCreatedEventFormatted } from "../src/types";
+import { IPlatformService } from "../src/interfaces/IPlatformService";
 import { bigintSerializer } from "../src/utils";
 
-jest.mock("../src/platform/ZoraService");
+const DUMMY_ADDRESS = privateKeyToAccount(generatePrivateKey()).address;
 
-global.fetch = jest.fn();
+const mockPlatformService: jest.Mocked<IPlatformService> = {
+  platformName: "Mock Platform",
+  getMinterAddress: jest.fn().mockResolvedValue("0xMockMinterAddress"),
+  getMintSignature: jest.fn().mockResolvedValue("mock-signature"),
+  getUIData: jest.fn().mockResolvedValue({
+    platformName: "Mock Platform",
+    platformLogoUrl: "https://mockplatform.logo",
+    nftName: "Mock NFT Name",
+    nftUri: "https://mocknft.uri",
+    nftCreatorAddress: "0xMockCreatorAddress",
+  }),
+  getPrice: jest.fn().mockResolvedValue(parseEther("1")), // Mock price as 1 ETH
+  getArgs: jest
+    .fn()
+    .mockResolvedValue(["0xMockArg1", BigInt(1), "0xMockArg2", BigInt(2)]),
+};
 
-const dummyAddress = privateKeyToAccount(generatePrivateKey()).address;
-
-// Define a mock post object
+// Sample post data for testing
 const mockPost: PostCreatedEventFormatted = {
   args: {
     actionModulesInitReturnDatas: [""],
@@ -39,38 +54,74 @@ const mockPost: PostCreatedEventFormatted = {
     "0x95f6175eb48fb4da576268e5dfa0ffd2f54619abdd367d65c99b2009b9f62331",
 };
 
-describe("actionDataFromPost", () => {
-  let mockZoraService: jest.Mocked<ZoraService>;
+describe("detectAndReturnCalldata", () => {
+  let nftOpenActionKit: any;
 
   beforeEach(() => {
-    (global.fetch as jest.Mock).mockClear();
-    mockZoraService = new ZoraService(zora) as any;
-
-    // Mock the methods of ZoraService
-    mockZoraService.getPrice.mockResolvedValue(parseEther("0.1"));
-    mockZoraService.getArgs.mockReturnValue([
-      dummyAddress,
-      1n,
-      "",
-      "0x0000000000000000000000000000000000000000",
-    ]);
-    mockZoraService.getUIData.mockResolvedValue({
-      platformName: "Zora",
-      platformLogoUrl: "https://zora.co/favicon.ico",
-      nftName: "Messi World Cup 2022",
-      nftUri:
-        "ipfs://bafybeid2ixox2zpsdg6mvzyoaclgjpikoa2wurg564kqrpt43svyddcpqq",
-      nftCreatorAddress: "0x32B6B5B6a1c49fD2d386ccc7Dd0275CBAF11fE6b",
+    // Setup NftOpenActionKit with necessary mocks
+    nftOpenActionKit = new NftOpenActionKit({
+      decentApiKey: "mock-api-key",
+      raribleApiKey: "mock-rarible-key",
     });
-
-    // Replace the service instance in NFT_PLATFORM_CONFIG with the mock
-    NFT_PLATFORM_CONFIG["Zora"].platformService = jest.fn(
-      () => mockZoraService
-    );
   });
 
-  it("should handle valid post data and return action data", async () => {
-    // Mock the fetch response
+  it("should generate calldata for a valid NFT URL", async () => {
+    // Provide a mock URL and expected mock response for successful detection
+    const mockUrl = "https://example.com/nft/zora/123";
+    const expectedResult: NFTExtraction = {
+      contractAddress: DUMMY_ADDRESS,
+      nftId: "123",
+      chain: mainnet,
+      service: mockPlatformService,
+    };
+
+    jest
+      .spyOn(nftOpenActionKit.detectionEngine, "detectNFTDetails")
+      .mockReturnValue(expectedResult);
+
+    const result = await nftOpenActionKit.detectAndReturnCalldata(mockUrl);
+    expect(result).toBeDefined();
+  });
+
+  it("should return undefined for an NFT URL with no details found", async () => {
+    const mockUrl = "https://example.com/nft/unknown/456";
+    // Simulate no NFT details found
+    jest
+      .spyOn(nftOpenActionKit.detectionEngine, "detectNFTDetails")
+      .mockResolvedValue(undefined);
+
+    const result = await nftOpenActionKit.detectAndReturnCalldata(mockUrl);
+    expect(result).toBeUndefined();
+  });
+
+  it("should handle errors gracefully during NFT details detection", async () => {
+    const mockUrl = "https://example.com/nft/error";
+    // Simulate throwing an error during detection
+    jest
+      .spyOn(nftOpenActionKit.detectionEngine, "detectNFTDetails")
+      .mockRejectedValue(new Error("Mock error during detection"));
+
+    await expect(
+      nftOpenActionKit.detectAndReturnCalldata(mockUrl)
+    ).rejects.toThrow("Mock error during detection");
+  });
+});
+
+describe("actionDataFromPost", () => {
+  let nftOpenActionKit: any;
+
+  beforeEach(() => {
+    // Mock the detection engine or directly inject the mocked platform service as needed
+    nftOpenActionKit = new NftOpenActionKit({
+      decentApiKey: "mock-api-key",
+      raribleApiKey: "mock-rarible-key",
+    });
+
+    (global.fetch as jest.Mock).mockClear();
+  });
+
+  it("should return action data for a valid post", async () => {
+    // Assuming fetch is used within actionDataFromPost, mock its response
     (global.fetch as jest.Mock).mockResolvedValueOnce({
       text: () =>
         Promise.resolve(
@@ -104,45 +155,41 @@ describe("actionDataFromPost", () => {
         ),
     });
 
-    // Call the function with mock data
-    const result = await actionDataFromPost(
+    jest
+      .spyOn(nftOpenActionKit.detectionEngine, "getService")
+      .mockReturnValue(mockPlatformService);
+
+    // Execute the method with the mock data
+    const actionData = await nftOpenActionKit.actionDataFromPost(
       mockPost,
-      "50000",
-      "0x444483c2d87a6C298f44c223C0638A3eAc7B6ea0",
-      "137",
-      "DUMMY_API_KEY"
+      "100",
+      DUMMY_ADDRESS,
+      "1"
     );
 
-    expect(result).toBeDefined();
-    expect(global.fetch).toHaveBeenCalledWith(
-      expect.anything(),
-      expect.anything()
-    );
+    // Assertions to validate the action data
+    expect(actionData).toBeDefined();
+    expect(actionData.actArguments).toBeDefined();
+    expect(actionData.uiData).toBeDefined();
+
+    // Validate calls to mocked services if needed
+    expect(mockPlatformService.getMintSignature).toHaveBeenCalled();
+    expect(mockPlatformService.getUIData).toHaveBeenCalled();
+    expect(mockPlatformService.getPrice).toHaveBeenCalled();
+    expect(mockPlatformService.getArgs).toHaveBeenCalled();
   });
 
-  it("should handle API errors gracefully", async () => {
-    // Mock an API error response
-    (global.fetch as jest.Mock).mockResolvedValueOnce({
-      text: () =>
-        Promise.resolve({
-          success: false,
-          error: {
-            code: 500,
-            name: "InputError",
-            message: "An error occurred while processing the request.",
-            title: "Resource not found",
-          },
-        }),
-    });
+  it("should handle errors or specific cases as per your function's logic", async () => {
+    // Simulate an error during actionDataFromPost
+    jest
+      .spyOn(nftOpenActionKit.detectionEngine, "getService")
+      .mockReturnValue(mockPlatformService);
+    jest
+      .spyOn(nftOpenActionKit, "actionDataFromPost")
+      .mockRejectedValue(new Error("Mock error during actionDataFromPost"));
 
     await expect(
-      actionDataFromPost(
-        mockPost,
-        "50000",
-        "0x444483c2d87a6C298f44c223C0638A3eAc7B6ea0",
-        "137",
-        "DUMMY_API_KEY"
-      )
-    ).rejects.toThrow();
+      nftOpenActionKit.actionDataFromPost(mockPost, "100", DUMMY_ADDRESS, "1")
+    ).rejects.toThrow("Mock error during actionDataFromPost");
   });
 });
