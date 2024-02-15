@@ -13,6 +13,7 @@ export type NftPlatformConfig = { [key: string]: NFTPlatform };
 export type SdkConfig = {
   decentApiKey: string;
   raribleApiKey?: string;
+  openSeaApiKey?: string;
 };
 
 export type ChainConfig = {

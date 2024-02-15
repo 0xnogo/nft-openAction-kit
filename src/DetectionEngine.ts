@@ -1,4 +1,4 @@
-import { Chain, mainnet, polygon } from "viem/chains";
+import { Chain, arbitrum, mainnet, optimism, polygon, zora } from "viem/chains";
 import {
   NFTExtraction,
   NftPlatformConfig,
@@ -8,6 +8,7 @@ import {
 import { IDetectionEngine } from "./interfaces/IDetectionEngine";
 import { IPlatformService } from "./interfaces/IPlatformService";
 import { ArtBlocksService } from "./platform/ArtBlocksService";
+import { OpenSeaService } from "./platform/OpenSeaService";
 import { RaribleService } from "./platform/RaribleService";
 import {
   PODS_CHAIN_ID_MAPPING,
@@ -24,9 +25,11 @@ import { ZORA_CHAIN_ID_MAPPING, ZoraService } from "./platform/ZoraService";
 export class DetectionEngine implements IDetectionEngine {
   public nftPlatformConfig: NftPlatformConfig = {};
   private raribleApiKey: string | undefined;
+  private openSeaApiKey: string | undefined;
 
   constructor(config: SdkConfig) {
     this.raribleApiKey = config.raribleApiKey;
+    this.openSeaApiKey = config.openSeaApiKey;
 
     this.initializePlatformConfig();
   }
@@ -235,6 +238,62 @@ export class DetectionEngine implements IDetectionEngine {
         },
         platformService: RaribleService,
         apiKey: this.raribleApiKey,
+      };
+    }
+
+    // OpenSea is conditionally added based on the presence of its API key
+    if (this.openSeaApiKey) {
+      this.nftPlatformConfig.OpenSea = {
+        platformName: "OpenSea",
+        platformLogoUrl: "https://opensea.io/favicon.ico",
+        urlPattern:
+          /https:\/\/opensea\.io\/assets\/(ethereum|matic|optimism|arbitrum|zora)\/(0x[a-fA-F0-9]{40})\/(\d+)/,
+        urlExtractor: (url: string): Promise<NFTExtraction | undefined> => {
+          const match = url.match(this.nftPlatformConfig.OpenSea.urlPattern);
+          if (match) {
+            // Determine the chain based on the URL segment
+            let chain;
+            switch (match[1].toLowerCase()) {
+              case "ethereum":
+                chain = mainnet;
+                break;
+              case "matic":
+                chain = polygon;
+                break;
+              case "optimism":
+                chain = optimism; // Define `optimism` chain object similarly to `mainnet` and `polygon`
+                break;
+              case "arbitrum":
+                chain = arbitrum; // Define `arbitrum` chain object
+                break;
+              case "zora":
+                chain = zora; // Define `zora` chain object if available or use an appropriate chain object
+                break;
+              default:
+                return Promise.resolve(undefined); // Unsupported chain
+            }
+
+            const contractAddress = match[2];
+            const nftId = match[3];
+
+            return Promise.resolve({
+              platform: this.nftPlatformConfig["OpenSea"],
+              chain: chain,
+              contractAddress: contractAddress,
+              nftId: nftId,
+              service: new OpenSeaService({
+                chain,
+                platformName: this.nftPlatformConfig["OpenSea"].platformName,
+                platformLogoUrl:
+                  this.nftPlatformConfig["OpenSea"].platformLogoUrl,
+                apiKey: this.openSeaApiKey!,
+              }),
+            });
+          }
+          return Promise.resolve(undefined);
+        },
+        platformService: OpenSeaService,
+        apiKey: this.openSeaApiKey,
       };
     }
   }
