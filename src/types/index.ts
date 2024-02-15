@@ -46,24 +46,11 @@ export type ActionData = {
   uiData: UIData;
 };
 
-export type PostCreatedEventFormatted = {
-  args: {
-    postParams: {
-      profileId: string;
-      contentURI: string;
-      actionModules: string[];
-      actionModulesInitDatas: string[];
-      referenceModule: string;
-      referenceModuleInitData: string;
-    };
-    pubId: string;
-    actionModulesInitReturnDatas: string[];
-    referenceModuleInitReturnData: string;
-    transactionExecutor: string;
-    timestamp: string;
-  };
-  blockNumber: string;
-  transactionHash: string;
+export type PublicationInfo = {
+  profileId: string;
+  actionModules: string[];
+  actionModulesInitDatas: string[];
+  pubId: string;
 };
 
 export type PlatformServiceConstructor = new (
