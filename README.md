@@ -55,13 +55,13 @@ When a post appears in a Lens application feed with the NFT minting action attac
 ```js
 import { NFTOpenActionKit } from "nft-openaction-kit";
 
-const nftOpenActionKit = new NFTOpenActionKit({
+const nftOpenActionKit = new NftOpenActionKit({
   decentApiKey: process.env.DECENT_API_KEY,
   raribleApiKey: process.env.RARIBLE_API_KEY,
 });
 ```
 
-> Only the `decentApiKey` is required. The `raribleApiKey` is optional, which would make the Rareble detection available.
+> Only the `decentApiKey` is required. The `raribleApiKey` is optional, which would make the Rarible detection available.
 
 3. Use `detectAndReturnCalldata`
 
@@ -79,43 +79,27 @@ const fetchCalldata = async () => {
 4. Use `actionDataFromPost`
 
 ```js
-const post: PostCreatedEventFormatted = {
-  args: {
-    actionModulesInitReturnDatas: [""],
-    postParams: {
-      profileId: "48935",
-      contentURI:
-        "https://zora.co/collect/base:0x751362d366f66ecb70bf67e0d941daa7e34635f5/0",
-      actionModules: ["0x99Cd5A6e51C85CCc63BeC61A177003A551953628"],
-      actionModulesInitDatas: [calldata],
-      referenceModule: "0x0000000000000000000000000000000000000000",
-      referenceModuleInitData: "0x01",
-    },
-    pubId: "10",
-    referenceModuleInitReturnData: "0x",
-    timestamp: "1704816612",
-    transactionExecutor: "0x755bdaE53b234C6D1b7Be9cE7F316CF8f03F2533",
-  },
-  blockNumber: "52127727",
-  transactionHash:
-    "0x95f6175eb48fb4da576268e5dfa0ffd2f54619abdd367d65c99b2009b9f62331",
+const publication = {
+  profileId: "48935",
+  actionModules: ["0x99Cd5A6e51C85CCc63BeC61A177003A551953628"],
+  actionModulesInitDatas: [calldata],
+  pubId: "10",
 };
 
 try {
   // Call the async function and pass the link
-  const result: ResultData = await nftOpenActionKit.actionDataFromPost(
+  const result: ActionData = await nftOpenActionKit.actionDataFromPost(
     post,
     profileId,
     senderAddress,
-    srcChainId,
-    apiKey
+    srcChainId
   );
 } catch (error) {
   console.log(error);
 }
 ```
 
-> The `actionDataFromPost` function is accepting as input a PostCreatedEventFormatted object (as defined in <https://github.com/wkantaros/lens-openAction>). Another interface could be defined if needed (as long as it has the required fields).
+> The `actionDataFromPost` function is accepting a subset of fields from Publication events (example event defined in <https://github.com/wkantaros/lens-openAction>).
 
 ## Add a new NFT platform
 
@@ -123,8 +107,8 @@ try {
 
 ```js
 type SdkConfig = {
-  decentApiKey: string;
-  raribleApiKey?: string;
+  decentApiKey: string,
+  raribleApiKey?: string,
 };
 ```
 
@@ -132,11 +116,11 @@ type SdkConfig = {
 
 ```js
 type NFTPlatform = {
-  platformName: string;
-  platformLogoUrl: string;
-  urlPattern: RegExp;
-  urlExtractor: (url: string) => Promise<NFTExtraction | undefined>;
-  platformService: PlatformServiceConstructor;
+  platformName: string,
+  platformLogoUrl: string,
+  urlPattern: RegExp,
+  urlExtractor: (url: string) => Promise<NFTExtraction | undefined>,
+  platformService: PlatformServiceConstructor,
 };
 ```
 
@@ -144,18 +128,17 @@ type NFTPlatform = {
 
 ```js
 export type NFTPlatform = {
-  platformName: string;
-  platformLogoUrl: string;
-  urlPattern: RegExp;
-  urlExtractor: (url: string) => Promise<NFTExtraction | undefined>;
-  urlExtractor: (url: string) => Promise<NFTExtraction | undefined>;
-  platformService: PlatformServiceConstructor;
-  apiKey?: string;
+  platformName: string,
+  platformLogoUrl: string,
+  urlPattern: RegExp,
+  urlExtractor: (url: string) => Promise<NFTExtraction | undefined>,
+  urlExtractor: (url: string) => Promise<NFTExtraction | undefined>,
+  platformService: PlatformServiceConstructor,
+  apiKey?: string,
 };
 ```
 
 > If an api key is required, make sure to add it in the `DetectionEngine` class and handle it in the `initializePlatformConfig` function. The Rareble detection is an example of how to handle an api key.
-
 
 4. Create a new file in `src/platform` and add the platform service class. The class should implement the `IPlatformService` interface.
 
