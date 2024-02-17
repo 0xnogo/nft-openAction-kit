@@ -78,8 +78,8 @@ export type NFTPlatform = {
   apiKey?: string;
 };
 
-export type NFTExtraction = {
-  chain: Chain;
+export type NFTExtraction<TChain extends Chain = Chain> = {
+  chain: TChain;
   contractAddress: string;
   nftId: string;
   service: IPlatformService;
