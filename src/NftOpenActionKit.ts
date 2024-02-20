@@ -11,7 +11,7 @@ import { BASE_URL } from "./config/endpoints";
 import { IDetectionEngine } from "./interfaces/IDetectionEngine";
 import { INftOpenActionKit } from "./interfaces/INftOpenActionKit";
 import { IPlatformService } from "./interfaces/IPlatformService";
-import { ActionData, PostCreatedEventFormatted, SdkConfig } from "./types";
+import { ActionData, PublicationInfo, SdkConfig } from "./types";
 import { bigintDeserializer, bigintSerializer, idToChain } from "./utils";
 
 /**
@@ -76,7 +76,7 @@ export class NftOpenActionKit implements INftOpenActionKit {
    * @returns action data
    */
   public async actionDataFromPost(
-    post: PostCreatedEventFormatted,
+    post: PublicationInfo,
     profileId: string,
     senderAddress: string,
     srcChainId: string
@@ -113,8 +113,8 @@ export class NftOpenActionKit implements INftOpenActionKit {
       actionType: "lens-open-action",
       actionConfig: {
         functionCall: "processPublicationAction",
-        pubId: post.args.pubId,
-        profileId: post.args.postParams.profileId,
+        pubId: post.pubId,
+        profileId: post.profileId,
         contractAddress:
           (await plateformService.getMinterAddress(contract, tokenId)) ??
           contract,
@@ -159,8 +159,8 @@ export class NftOpenActionKit implements INftOpenActionKit {
     const encodedActionData = resp.arbitraryData.lensActionData;
 
     const actArguments = {
-      publicationActedProfileId: BigInt(post.args.postParams.profileId),
-      publicationActedId: BigInt(post.args.pubId),
+      publicationActedProfileId: BigInt(post.profileId),
+      publicationActedId: BigInt(post.pubId),
       actorProfileId: BigInt(profileId!),
       referrerProfileIds: [],
       referrerPubIds: [],
@@ -220,7 +220,7 @@ export class NftOpenActionKit implements INftOpenActionKit {
   }
 
   private fetchParams = (
-    post: PostCreatedEventFormatted
+    post: PublicationInfo
   ):
     | readonly [
         `0x${string}`,
@@ -232,14 +232,12 @@ export class NftOpenActionKit implements INftOpenActionKit {
         string
       ]
     | undefined => {
-    const actionModules = post.args.postParams.actionModules;
+    const actionModules = post.actionModules;
     const index = actionModules.indexOf(
       CHAIN_CONFIG.decentOpenActionContractAddress
     );
     if (index < 0) return;
-    const actionModuleInitData = post.args.postParams.actionModulesInitDatas[
-      index
-    ] as Address;
+    const actionModuleInitData = post.actionModulesInitDatas[index] as Address;
 
     return decodeAbiParameters(
       [

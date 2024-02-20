@@ -15,7 +15,7 @@ export const CHAIN_CONFIG: ChainConfig =
         simpleCollectModuleContractAddress:
           "0x060f5448ae8aCF0Bc06D040400c6A89F45b488bb",
         decentOpenActionContractAddress:
-          "0x99Cd5A6e51C85CCc63BeC61A177003A551953628",
+          "0x14860D0495CAF16914Db10117D4111AC4Da2F0a5",
         wMatic: "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270",
       }
     : {
@@ -26,7 +26,7 @@ export const CHAIN_CONFIG: ChainConfig =
         simpleCollectModuleContractAddress:
           "0x345Cc3A3F9127DE2C69819C2E07bB748dE6E45ee",
         decentOpenActionContractAddress:
-          "0x48Cc077E082365F1be696cAad2ccF91cEb08D9f9",
+          "0xe310b5Ed0B3c19B1F0852Ce985a4C38BAE738FDb",
         wMatic: "0x9c3C9283D3e44854697Cd22D3Faa240Cfb032889",
       };
 

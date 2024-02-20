@@ -1,10 +1,10 @@
-import { ActionData, PostCreatedEventFormatted } from "..";
+import { ActionData, PublicationInfo } from "..";
 
 export interface INftOpenActionKit {
   detectAndReturnCalldata(contentURI: string): Promise<string | undefined>;
 
   actionDataFromPost(
-    post: PostCreatedEventFormatted,
+    post: PublicationInfo,
     profileId: string,
     senderAddress: string,
     srcChainId: string
