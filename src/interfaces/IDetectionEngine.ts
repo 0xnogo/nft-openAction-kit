@@ -6,5 +6,5 @@ export interface IDetectionEngine {
   nftPlatformConfig: NftPlatformConfig;
 
   detectNFTDetails(url: string): Promise<NFTExtraction | undefined>;
-  getService(name: string, dstChain: Chain): IPlatformService {
+  getService(name: string, dstChain: Chain): IPlatformService;
 }

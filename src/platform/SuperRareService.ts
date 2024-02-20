@@ -157,9 +157,9 @@ export class SuperRareService implements IPlatformService {
     }
 
     return {
-      price: BigInt(salePrice[0]),
-      token: salePrice[1],
-      seller: salePrice[2],
+      price: BigInt(salePrice[2]),
+      token: salePrice[2],
+      seller: salePrice[0],
     };
   }
 
