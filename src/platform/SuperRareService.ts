@@ -132,6 +132,7 @@ export class SuperRareService implements IPlatformService {
     senderAddress: string,
     signature: string,
     price: bigint,
+    quantity: bigint,
     profileOwnerAddress: string
   ): Promise<any[]> {
     return Promise.resolve([contractAddress, tokenId, ZERO_ADDRESS, price]);

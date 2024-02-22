@@ -187,6 +187,7 @@ export class ZoraService implements IPlatformService {
     senderAddress: string,
     signature: string,
     price: bigint,
+    quantity: bigint,
     profileOwnerAddress: string
   ): Promise<any[]> {
     const minter =
@@ -198,7 +199,7 @@ export class ZoraService implements IPlatformService {
       return Promise.resolve([
         minter,
         tokenId,
-        1n,
+        quantity,
         encodeAbiParameters(
           [{ type: "address" }],
           [senderAddress as `0x${string}`]

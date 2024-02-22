@@ -143,6 +143,7 @@ export class ArtBlocksService implements IPlatformService {
     senderAddress: string,
     signature: string,
     price: bigint,
+    quantity: bigint,
     profileOwnerAddress: string
   ): Promise<any[]> {
     return Promise.resolve([contract, tokenId, senderAddress]);

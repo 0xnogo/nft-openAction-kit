@@ -162,6 +162,7 @@ export class PodsService implements IPlatformService {
     senderAddress: string,
     signature: string,
     price: bigint,
+    quantity: bigint,
     profileOwnerAddress: string
   ): Promise<any[]> {
     const minter =
@@ -170,7 +171,7 @@ export class PodsService implements IPlatformService {
       return Promise.resolve([
         minter,
         tokenId,
-        1n,
+        quantity,
         encodeAbiParameters(
           [{ type: "address" }],
           [senderAddress as `0x${string}`]
