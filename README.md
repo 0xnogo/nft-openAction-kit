@@ -92,7 +92,8 @@ try {
     post,
     profileId,
     senderAddress,
-    srcChainId
+    srcChainId,
+    quantity
   );
 } catch (error) {
   console.log(error);
