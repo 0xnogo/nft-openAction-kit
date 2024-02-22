@@ -32,6 +32,8 @@ export interface IPlatformService {
     tokenId: bigint,
     senderAddress: string,
     signature: string,
-    price: bigint
+    price: bigint,
+    quantity: bigint,
+    profileOwnerAddress: string
   ): Promise<any[]>;
 }

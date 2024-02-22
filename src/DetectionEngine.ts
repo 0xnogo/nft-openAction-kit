@@ -46,10 +46,10 @@ export class DetectionEngine implements IDetectionEngine {
   }
 
   public getService(name: string, dstChain: Chain): IPlatformService {
-    const PlateformService: PlatformServiceConstructor =
+    const PlatformService: PlatformServiceConstructor =
       this.nftPlatformConfig[name].platformService;
 
-    return new PlateformService({
+    return new PlatformService({
       chain: dstChain,
       platformName: this.nftPlatformConfig[name].platformName,
       platformLogoUrl: this.nftPlatformConfig[name].platformLogoUrl,

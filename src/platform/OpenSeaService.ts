@@ -109,7 +109,9 @@ export class OpenSeaService implements IPlatformService {
     tokenId: bigint,
     senderAddress: string,
     signature: string,
-    price: bigint
+    price: bigint,
+    quantity: bigint,
+    profileOwnerAddress: string
   ): Promise<any[]> {
     const chainName = this.getChainName();
 
