@@ -186,18 +186,14 @@ export class ZoraService implements IPlatformService {
     tokenId: bigint,
     senderAddress: string,
     signature: string,
-    price: bigint
+    price: bigint,
+    profileOwnerAddress: string
   ): Promise<any[]> {
     const minter =
       ZORA_CHAIN_ID_MAPPING[CHAIN_ID_TO_KEY[Number(this.client.chain!.id)]]
         .erc1155ZoraMinter;
     if (signature === this.erc721DropMintSignature) {
-      return Promise.resolve([
-        senderAddress,
-        1n,
-        "",
-        "0x0000000000000000000000000000000000000000",
-      ]);
+      return Promise.resolve([senderAddress, 1n, "", profileOwnerAddress]);
     } else {
       return Promise.resolve([
         minter,
@@ -207,7 +203,7 @@ export class ZoraService implements IPlatformService {
           [{ type: "address" }],
           [senderAddress as `0x${string}`]
         ),
-        "0x0000000000000000000000000000000000000000",
+        profileOwnerAddress,
       ]);
     }
   }

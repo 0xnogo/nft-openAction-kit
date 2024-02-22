@@ -71,6 +71,7 @@ export class NftOpenActionKit implements INftOpenActionKit {
    * Fetches action data from post
    * @param post Post object
    * @param profileId Profile ID of the user
+   * @param profileOwnerAddress Address owning profileID
    * @param senderAddress Address of the user
    * @param srcChainId Chain ID of the source chain
    * @returns action data
@@ -78,6 +79,7 @@ export class NftOpenActionKit implements INftOpenActionKit {
   public async actionDataFromPost(
     post: PublicationInfo,
     profileId: string,
+    profileOwnerAddress: string,
     senderAddress: string,
     srcChainId: string
   ): Promise<ActionData> {
@@ -126,7 +128,8 @@ export class NftOpenActionKit implements INftOpenActionKit {
           tokenId,
           senderAddress,
           signature,
-          price
+          price,
+          profileOwnerAddress
         ),
       },
     };

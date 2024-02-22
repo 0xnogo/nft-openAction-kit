@@ -167,7 +167,8 @@ interface IPlatformService {
     tokenId: bigint,
     senderAddress: string,
     signature: string,
-    price: bigint
+    price: bigint,
+    profileOwnerAddress: string
   ): Promise<any[]>;
 }
 ```

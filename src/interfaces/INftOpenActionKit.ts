@@ -6,6 +6,7 @@ export interface INftOpenActionKit {
   actionDataFromPost(
     post: PublicationInfo,
     profileId: string,
+    profileOwnerAddress: string,
     senderAddress: string,
     srcChainId: string
   ): Promise<ActionData>;

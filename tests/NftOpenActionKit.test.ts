@@ -145,6 +145,7 @@ describe("actionDataFromPost", () => {
       mockPost,
       "100",
       DUMMY_ADDRESS,
+      DUMMY_ADDRESS,
       "1"
     );
 

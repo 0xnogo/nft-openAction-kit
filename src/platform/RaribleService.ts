@@ -149,7 +149,8 @@ export class RaribleService implements IPlatformService {
     tokenId: bigint,
     senderAddress: string,
     signature: string,
-    price: bigint
+    price: bigint,
+    profileOwnerAddress: string
   ): Promise<any[]> {
     const sellOrders = await this.fetchSellOrdersByItem(
       contractAddress,

@@ -161,7 +161,8 @@ export class PodsService implements IPlatformService {
     tokenId: bigint,
     senderAddress: string,
     signature: string,
-    price: bigint
+    price: bigint,
+    profileOwnerAddress: string
   ): Promise<any[]> {
     const minter =
       PODS_CHAIN_ID_MAPPING[this.client.chain.id].erc1155ZoraMinter;
@@ -174,7 +175,7 @@ export class PodsService implements IPlatformService {
           [{ type: "address" }],
           [senderAddress as `0x${string}`]
         ),
-        "0x0000000000000000000000000000000000000000",
+        profileOwnerAddress,
       ]);
     } else {
       throw new Error("Invalid function signature");
