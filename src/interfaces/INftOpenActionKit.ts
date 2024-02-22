@@ -8,6 +8,7 @@ export interface INftOpenActionKit {
     profileId: string,
     profileOwnerAddress: string,
     senderAddress: string,
-    srcChainId: string
+    srcChainId: string,
+    quantity: bigint
   ): Promise<ActionData>;
 }

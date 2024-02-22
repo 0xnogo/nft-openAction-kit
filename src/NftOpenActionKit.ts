@@ -74,6 +74,7 @@ export class NftOpenActionKit implements INftOpenActionKit {
    * @param profileOwnerAddress Address owning profileID
    * @param senderAddress Address of the user
    * @param srcChainId Chain ID of the source chain
+   * @param quantity Quantity of 1155 NFT mints
    * @returns action data
    */
   public async actionDataFromPost(
@@ -81,7 +82,8 @@ export class NftOpenActionKit implements INftOpenActionKit {
     profileId: string,
     profileOwnerAddress: string,
     senderAddress: string,
-    srcChainId: string
+    srcChainId: string,
+    quantity: bigint
   ): Promise<ActionData> {
     const [contract, tokenId, token, dstChainId, _, signature, platform] =
       this.fetchParams(post)!;
@@ -129,6 +131,7 @@ export class NftOpenActionKit implements INftOpenActionKit {
           senderAddress,
           signature,
           price,
+          quantity,
           profileOwnerAddress
         ),
       },
