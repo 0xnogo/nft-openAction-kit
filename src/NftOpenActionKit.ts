@@ -86,13 +86,10 @@ export class NftOpenActionKit implements INftOpenActionKit {
 
     // from id to the viem chain object
     const dstChain = idToChain(Number(dstChainId));
-    const plateformService = this.detectionEngine.getService(
-      platform,
-      dstChain
-    );
+    const platformService = this.detectionEngine.getService(platform, dstChain);
 
     // logic to fetch the price + fee from the platform
-    const price = await plateformService.getPrice(
+    const price = await platformService.getPrice(
       contract,
       tokenId,
       signature,
@@ -116,7 +113,7 @@ export class NftOpenActionKit implements INftOpenActionKit {
         pubId: post.pubId,
         profileId: post.profileId,
         contractAddress:
-          (await plateformService.getMinterAddress(contract, tokenId)) ??
+          (await platformService.getMinterAddress(contract, tokenId)) ??
           contract,
         chainId: Number(dstChainId),
         cost: {
@@ -124,7 +121,7 @@ export class NftOpenActionKit implements INftOpenActionKit {
           amount: price,
         },
         signature,
-        args: await plateformService.getArgs(
+        args: await platformService.getArgs(
           contract,
           tokenId,
           senderAddress,
@@ -133,8 +130,6 @@ export class NftOpenActionKit implements INftOpenActionKit {
         ),
       },
     };
-
-    console.log(actionRequest);
 
     const url = `${BASE_URL}?arguments=${JSON.stringify(
       actionRequest,
@@ -149,8 +144,6 @@ export class NftOpenActionKit implements INftOpenActionKit {
     const data = await response.text();
 
     const resp = JSON.parse(data, bigintDeserializer);
-
-    console.log(resp);
 
     if (resp.success === "false" || !resp.arbitraryData) {
       throw new Error("No action response", resp.error);
@@ -168,7 +161,7 @@ export class NftOpenActionKit implements INftOpenActionKit {
       actionModuleData: encodedActionData as `0x${string}`,
     };
 
-    const uiData = await plateformService.getUIData(
+    const uiData = await platformService.getUIData(
       signature,
       contract,
       tokenId
