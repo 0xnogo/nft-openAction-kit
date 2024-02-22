@@ -25,6 +25,12 @@ export type ChainConfig = {
   wMatic: string;
 };
 
+type Token = {
+  address: string;
+  amount: bigint;
+  chainId: string;
+};
+
 export type UIData = {
   platformName: string;
   platformLogoUrl: string;
@@ -44,6 +50,11 @@ export type ActionData = {
     actionModuleData: `0x${string}`;
   };
   uiData: UIData;
+  actArgumentsFormatted: {
+    paymentToken: Token;
+    bridgeFee: Token;
+    amountOut: Token;
+  };
 };
 
 export type PublicationInfo = {
