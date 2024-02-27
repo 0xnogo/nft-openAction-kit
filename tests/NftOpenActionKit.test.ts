@@ -153,6 +153,7 @@ describe("actionDataFromPost", () => {
     expect(actionData).toBeDefined();
     expect(actionData.actArguments).toBeDefined();
     expect(actionData.uiData).toBeDefined();
+    expect(actionData.actArgumentsFormatted).toBeDefined();
 
     // Validate calls to mocked services if needed
     expect(mockPlatformService.getMintSignature).toHaveBeenCalled();
