@@ -31,6 +31,7 @@ export type UIData = {
   nftName: string;
   nftUri: string;
   nftCreatorAddress?: string;
+  tokenStandard: string;
 };
 
 export type ActionData = {

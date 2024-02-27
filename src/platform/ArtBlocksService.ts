@@ -134,6 +134,7 @@ export class ArtBlocksService implements IPlatformService {
       nftName: tokenJson.collection_name,
       nftUri: tokenJson.preview_asset_url,
       nftCreatorAddress: tokenJson.payout_address,
+      tokenStandard: "erc721",
     };
   }
 
