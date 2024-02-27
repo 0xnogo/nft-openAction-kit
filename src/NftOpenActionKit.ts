@@ -83,7 +83,8 @@ export class NftOpenActionKit implements INftOpenActionKit {
     profileOwnerAddress: string,
     senderAddress: string,
     srcChainId: string,
-    quantity: bigint
+    quantity: bigint,
+    paymentToken: string
   ): Promise<ActionData> {
     const [contract, tokenId, token, dstChainId, _, signature, platform] =
       this.fetchParams(post)!;
@@ -107,7 +108,7 @@ export class NftOpenActionKit implements INftOpenActionKit {
     const actionRequest = {
       sender: senderAddress,
       srcChainId: parseInt(srcChainId),
-      srcToken: CHAIN_CONFIG.wMatic,
+      srcToken: paymentToken,
       dstChainId: Number(dstChainId),
       dstToken: token,
       slippage: 3, // 1%
