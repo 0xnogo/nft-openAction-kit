@@ -9,6 +9,7 @@ const chainToOpenSeaChain = {
   10: "optimism",
   1: "ethereum",
   7777777: "zora",
+  8453: "base",
 };
 
 export class OpenSeaService implements IPlatformService {
