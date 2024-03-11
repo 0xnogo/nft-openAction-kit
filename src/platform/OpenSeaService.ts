@@ -4,11 +4,12 @@ import { IPlatformService } from "../interfaces/IPlatformService";
 import { NFTExtraction, ServiceConfig, UIData } from "../types";
 
 const chainToOpenSeaChain = {
-  137: "polygon",
+  137: "matic",
   42161: "arbitrum",
   10: "optimism",
   1: "ethereum",
   7777777: "zora",
+  8453: "base",
 };
 
 export class OpenSeaService implements IPlatformService {

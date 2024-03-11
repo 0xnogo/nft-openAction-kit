@@ -63,11 +63,11 @@ export class DetectionEngine implements IDetectionEngine {
       platformName: "Zora",
       platformLogoUrl: "https://zora.co/favicon.ico",
       urlPattern:
-        /https:\/\/zora\.co\/collect\/([a-z]+):(0x[a-fA-F0-9]{40})(?:\/(\d+))?/,
+        /https:\/\/zora\.co\/collect\/([a-z]+):(0x[a-fA-F0-9]{40})\/(?:premint-)?(\d+)/,
 
       urlExtractor: (url: string): Promise<NFTExtraction | undefined> => {
         const match = url.match(
-          /https:\/\/zora\.co\/collect\/([a-z]+):(0x[a-fA-F0-9]{40})(?:\/(\d+))?/
+          /https:\/\/zora\.co\/collect\/([a-z]+):(0x[a-fA-F0-9]{40})\/(?:premint-)?(\d+)/
         );
         if (match && ZORA_CHAIN_ID_MAPPING[match[1]]) {
           return Promise.resolve({
