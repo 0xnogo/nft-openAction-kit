@@ -48,12 +48,13 @@ When a post appears in a Lens application feed with the NFT minting action attac
    ```sh
    DECENT_API_KEY=api-key
    RARIBLE_API_KEY=api-key
+   OPENSEA_API_KEY=api-key
    ```
 
 2. Instantiate the `NFTOpenActionKit` class and use the `detectAndReturnCalldata` and `actionDataFromPost` methods.
 
 ```js
-import { NFTOpenActionKit } from "nft-openaction-kit";
+import { NftOpenActionKit } from "nft-openaction-kit";
 
 const nftOpenActionKit = new NftOpenActionKit({
   decentApiKey: process.env.DECENT_API_KEY,
@@ -89,7 +90,7 @@ const publication = {
 try {
   // Call the async function and pass the link
   const result: ActionData = await nftOpenActionKit.actionDataFromPost(
-    post,
+    publication,
     profileId,
     senderAddress,
     srcChainId,
