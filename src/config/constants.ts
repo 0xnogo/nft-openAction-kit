@@ -8,7 +8,7 @@ export const network: string = "polygon"; // options: 'polygon', 'mumbai'
 export const CHAIN_CONFIG: ChainConfig =
   network === "polygon"
     ? {
-        openActionContractAddress: "0x7c4fAeef5ba47a437DFBaB57C016c1E706F56fcf",
+        openActionContractAddress: "0xa04e00b99dd47835acfeaf4df7f3d5afcb1f77c3",
         lensHubProxyAddress: "0xDb46d1Dc155634FbC732f92E853b10B288AD5a1d",
         collectActionContractAddress:
           "0x0D90C58cBe787CD70B5Effe94Ce58185D72143fB",
