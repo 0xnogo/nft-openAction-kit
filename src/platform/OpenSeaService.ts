@@ -4,11 +4,12 @@ import { IPlatformService } from "../interfaces/IPlatformService";
 import { NFTExtraction, ServiceConfig, UIData } from "../types";
 
 const chainToOpenSeaChain = {
-  137: "polygon",
+  137: "matic",
   42161: "arbitrum",
   10: "optimism",
   1: "ethereum",
   7777777: "zora",
+  8453: "base",
 };
 
 export class OpenSeaService implements IPlatformService {
@@ -70,6 +71,7 @@ export class OpenSeaService implements IPlatformService {
       nftName: nftDetail.name,
       nftUri: nftDetail.imageUrl,
       nftCreatorAddress: nftDetail.creator,
+      tokenStandard: nftDetail.tokenStandard,
     });
   }
 
@@ -157,7 +159,13 @@ export class OpenSeaService implements IPlatformService {
     contractAddress: string,
     tokenId: string
   ): Promise<
-    | { slug: string; name: string; imageUrl: string; creator: string }
+    | {
+        slug: string;
+        name: string;
+        imageUrl: string;
+        creator: string;
+        tokenStandard: string;
+      }
     | undefined
   > {
     const url = `https://api.opensea.io/api/v2/chain/${chain}/contract/${contractAddress}/nfts/${tokenId}`;
@@ -175,6 +183,7 @@ export class OpenSeaService implements IPlatformService {
         name: response.data.nft.name,
         imageUrl: response.data.nft.image_url,
         creator: response.data.nft.creator,
+        tokenStandard: response.data.token_standard,
       };
     } catch (error) {
       console.error("Error making GET request:", error);

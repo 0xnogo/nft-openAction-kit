@@ -83,7 +83,8 @@ export class NftOpenActionKit implements INftOpenActionKit {
     profileOwnerAddress: string,
     senderAddress: string,
     srcChainId: string,
-    quantity: bigint
+    quantity: bigint,
+    paymentToken: string
   ): Promise<ActionData> {
     const [contract, tokenId, token, dstChainId, _, signature, platform] =
       this.fetchParams(post)!;
@@ -107,7 +108,7 @@ export class NftOpenActionKit implements INftOpenActionKit {
     const actionRequest = {
       sender: senderAddress,
       srcChainId: parseInt(srcChainId),
-      srcToken: CHAIN_CONFIG.wMatic,
+      srcToken: paymentToken,
       dstChainId: Number(dstChainId),
       dstToken: token,
       slippage: 3, // 1%
@@ -177,7 +178,27 @@ export class NftOpenActionKit implements INftOpenActionKit {
       throw new Error("No UI data");
     }
 
-    return { actArguments, uiData };
+    return {
+      actArguments,
+      uiData,
+      actArgumentsFormatted: {
+        paymentToken: {
+          address: resp.tokenPayment.tokenAddress,
+          amount: resp.tokenPayment.amount,
+          chainId: srcChainId,
+        },
+        amountOut: {
+          address: resp.amountOut.tokenAddress,
+          amount: resp.amountOut.amount,
+          chainId: dstChainId.toString(),
+        },
+        bridgeFee: {
+          address: resp.bridgeFee.tokenAddress,
+          amount: resp.bridgeFee.amount,
+          chainId: srcChainId,
+        },
+      },
+    };
   }
 
   private calldataGenerator(

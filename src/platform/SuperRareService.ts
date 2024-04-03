@@ -106,6 +106,7 @@ export class SuperRareService implements IPlatformService {
       platformLogoUrl: this.platformLogoUrl,
       nftName: tokenJson.name,
       nftUri: tokenJson.image,
+      tokenStandard: "erc721",
       ...(owner ? { nftCreatorAddress: owner } : {}),
     };
   }

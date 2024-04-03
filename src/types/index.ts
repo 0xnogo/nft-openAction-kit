@@ -17,12 +17,14 @@ export type SdkConfig = {
 };
 
 export type ChainConfig = {
-  openActionContractAddress: string;
   lensHubProxyAddress: string;
-  collectActionContractAddress: string;
-  simpleCollectModuleContractAddress: string;
   decentOpenActionContractAddress: string;
-  wMatic: string;
+};
+
+type Token = {
+  address: string;
+  amount: bigint;
+  chainId: string;
 };
 
 export type UIData = {
@@ -31,6 +33,7 @@ export type UIData = {
   nftName: string;
   nftUri: string;
   nftCreatorAddress?: string;
+  tokenStandard: string;
 };
 
 export type ActionData = {
@@ -44,6 +47,11 @@ export type ActionData = {
     actionModuleData: `0x${string}`;
   };
   uiData: UIData;
+  actArgumentsFormatted: {
+    paymentToken: Token;
+    bridgeFee: Token;
+    amountOut: Token;
+  };
 };
 
 export type PublicationInfo = {

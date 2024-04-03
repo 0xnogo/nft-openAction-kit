@@ -116,6 +116,7 @@ export class RaribleService implements IPlatformService {
       platformLogoUrl: this.platformLogoUrl,
       nftName: nftInfo.meta.name,
       nftUri: nftInfo.meta.content[0].url,
+      tokenStandard: "erc721",
       ...(nftCreatorAddress ? { nftCreatorAddress } : {}),
     };
   }

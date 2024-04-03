@@ -178,6 +178,7 @@ export class ZoraService implements IPlatformService {
       nftName,
       nftUri,
       nftCreatorAddress,
+      tokenStandard: this.isERC1155(signature) ? "erc1155" : "erc721",
     };
   }
 
