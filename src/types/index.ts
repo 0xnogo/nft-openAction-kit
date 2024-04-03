@@ -17,12 +17,8 @@ export type SdkConfig = {
 };
 
 export type ChainConfig = {
-  openActionContractAddress: string;
   lensHubProxyAddress: string;
-  collectActionContractAddress: string;
-  simpleCollectModuleContractAddress: string;
   decentOpenActionContractAddress: string;
-  wMatic: string;
 };
 
 type Token = {
