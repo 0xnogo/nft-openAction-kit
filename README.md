@@ -90,7 +90,7 @@ const publication = {
 try {
   // Call the async function and pass the link
   const result: ActionData = await nftOpenActionKit.actionDataFromPost(
-    post,
+    publication,
     profileId,
     senderAddress,
     srcChainId,
