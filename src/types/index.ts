@@ -49,8 +49,6 @@ export type ActionData = {
   uiData: UIData;
   actArgumentsFormatted: {
     paymentToken: Token;
-    bridgeFee: Token;
-    amountOut: Token;
   };
 };
 
