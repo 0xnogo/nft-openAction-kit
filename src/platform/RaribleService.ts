@@ -404,8 +404,8 @@ export class RaribleService implements IPlatformService {
     // Replace with the appropriate address for MATIC/USD or other feeds as needed
     const priceFeedAddress =
       asset === "ETHEREUM"
-        ? "0x5f4eC3df9cbd43714fe2740f5e3616155c5b8419"
-        : "0xab594600376ec9fd91f8e885dadf0ce036862de0";
+        ? "0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419"
+        : "0xAB594600376Ec9fD91F8e885dADF0CE036862dE0";
 
     // ABI for Chainlink's Price Feed
     // This is the minimal ABI to get the latest price
