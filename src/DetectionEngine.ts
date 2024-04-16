@@ -1,4 +1,12 @@
-import { Chain, arbitrum, mainnet, optimism, polygon, zora } from "viem/chains";
+import {
+  Chain,
+  arbitrum,
+  mainnet,
+  optimism,
+  polygon,
+  zora,
+  base,
+} from "viem/chains";
 import {
   NFTExtraction,
   NftPlatformConfig,
@@ -247,7 +255,7 @@ export class DetectionEngine implements IDetectionEngine {
         platformName: "OpenSea",
         platformLogoUrl: "https://opensea.io/favicon.ico",
         urlPattern:
-          /https:\/\/opensea\.io\/assets\/(ethereum|matic|optimism|arbitrum|zora)\/(0x[a-fA-F0-9]{40})\/(\d+)/,
+          /https:\/\/opensea\.io\/assets\/(ethereum|matic|optimism|arbitrum|zora|base)\/(0x[a-fA-F0-9]{40})\/(\d+)/,
         urlExtractor: (url: string): Promise<NFTExtraction | undefined> => {
           const match = url.match(this.nftPlatformConfig.OpenSea.urlPattern);
           if (match) {
@@ -261,13 +269,15 @@ export class DetectionEngine implements IDetectionEngine {
                 chain = polygon;
                 break;
               case "optimism":
-                chain = optimism; // Define `optimism` chain object similarly to `mainnet` and `polygon`
+                chain = optimism;
                 break;
               case "arbitrum":
-                chain = arbitrum; // Define `arbitrum` chain object
+                chain = arbitrum;
                 break;
               case "zora":
-                chain = zora; // Define `zora` chain object if available or use an appropriate chain object
+                chain = zora;
+              case "base":
+                chain = base;
                 break;
               default:
                 return Promise.resolve(undefined); // Unsupported chain
