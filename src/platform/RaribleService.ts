@@ -188,7 +188,7 @@ export class RaribleService implements IPlatformService {
 
     const sellOrderData = this.buildOrderData(
       sellOrders[0].data,
-      sellOrders[0].data.isMakeFill
+      !!sellOrders[0].data.isMakeFill
     );
     const buyOrderData = this.buildOrderData(sellOrders[0].data, false);
 
