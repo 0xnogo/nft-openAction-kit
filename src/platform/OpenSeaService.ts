@@ -230,7 +230,6 @@ export class OpenSeaService implements IPlatformService {
       offer: {
         hash: orderHash,
         chain: chain,
-        protocol_address: protocolAddress,
       },
       fulfiller: {
         address: fullfiller,
