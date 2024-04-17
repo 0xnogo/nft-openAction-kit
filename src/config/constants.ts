@@ -8,15 +8,15 @@ export const network: string = "polygon"; // options: 'polygon', 'mumbai'
 export const CHAIN_CONFIG: ChainConfig =
   network === "polygon"
     ? {
-      lensHubProxyAddress: "0xDb46d1Dc155634FbC732f92E853b10B288AD5a1d",
-      decentOpenActionContractAddress:
-        "0x1692a68825C6F240984d208f95E5CcEDcc6C17a0",
-    }
+        lensHubProxyAddress: "0xDb46d1Dc155634FbC732f92E853b10B288AD5a1d",
+        decentOpenActionContractAddress:
+          "0xA117BEc22a9a2f96725D986941899f90B705c67D",
+      }
     : {
-      lensHubProxyAddress: "0x4fbffF20302F3326B20052ab9C217C44F6480900",
-      decentOpenActionContractAddress:
-        "0xe310b5Ed0B3c19B1F0852Ce985a4C38BAE738FDb",
-    };
+        lensHubProxyAddress: "0x4fbffF20302F3326B20052ab9C217C44F6480900",
+        decentOpenActionContractAddress:
+          "0xe310b5Ed0B3c19B1F0852Ce985a4C38BAE738FDb",
+      };
 
 export const DESTINATION_CHAINS = [
   zora,
