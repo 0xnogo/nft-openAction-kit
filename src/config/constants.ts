@@ -26,3 +26,25 @@ export const DESTINATION_CHAINS = [
   polygon,
   arbitrum,
 ];
+
+export const InitData = [
+  {
+    name: "data",
+    type: "tuple",
+    internalType: "struct InitializedAction",
+    components: [
+      { name: "targetContract", type: "address", internalType: "address" },
+      { name: "tokenId", type: "uint256", internalType: "uint256" },
+      { name: "paymentToken", type: "address", internalType: "address" },
+      { name: "chainId", type: "uint256", internalType: "uint256" },
+      { name: "cost", type: "uint256", internalType: "uint256" },
+      {
+        name: "publishingClientProfileId",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      { name: "signature", type: "bytes", internalType: "bytes" },
+      { name: "platformName", type: "bytes", internalType: "bytes" },
+    ],
+  },
+] as const;

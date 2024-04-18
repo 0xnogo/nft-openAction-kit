@@ -3,13 +3,18 @@ import {
   decodeAbiParameters,
   encodeAbiParameters,
   encodePacked,
+  hexToString,
   parseUnits,
 } from "viem";
 import { DetectionEngine } from "./DetectionEngine";
-import { CHAIN_CONFIG, ZERO_ADDRESS } from "./config/constants";
+import { CHAIN_CONFIG, InitData, ZERO_ADDRESS } from "./config/constants";
 import { BASE_URL } from "./config/endpoints";
 import { IDetectionEngine } from "./interfaces/IDetectionEngine";
-import { INftOpenActionKit } from "./interfaces/INftOpenActionKit";
+import {
+  ActionDataFromPostParams,
+  DetectAndReturnCalldataParams,
+  INftOpenActionKit,
+} from "./interfaces/INftOpenActionKit";
 import { IPlatformService } from "./interfaces/IPlatformService";
 import { ActionData, PublicationInfo, SdkConfig } from "./types";
 import { bigintDeserializer, bigintSerializer, idToChain } from "./utils";
@@ -36,12 +41,14 @@ export class NftOpenActionKit implements INftOpenActionKit {
 
   /**
    * Detects NFT details from URL and returns calldata for minting
-   * @param contentURI URL of the NFT
+   * @param contentURI URI of the publication
+   * @param publishingClientProfileId profileId of application where publication is created
    * @returns calldata for minting
    */
-  public async detectAndReturnCalldata(
-    contentURI: string
-  ): Promise<string | undefined> {
+  public async detectAndReturnCalldata({
+    contentURI,
+    publishingClientProfileId,
+  }: DetectAndReturnCalldataParams): Promise<string | undefined> {
     const nftDetails = await this.detectionEngine.detectNFTDetails(contentURI);
     if (nftDetails) {
       const service: IPlatformService = nftDetails.service;
@@ -61,6 +68,7 @@ export class NftOpenActionKit implements INftOpenActionKit {
         paymentToken,
         BigInt(dstChainId),
         cost,
+        BigInt(publishingClientProfileId),
         mintSignature,
         nftDetails.service.platformName
       );
@@ -77,26 +85,33 @@ export class NftOpenActionKit implements INftOpenActionKit {
    * @param quantity Quantity of 1155 NFT mints
    * @returns action data
    */
-  public async actionDataFromPost(
-    post: PublicationInfo,
-    profileId: string,
-    profileOwnerAddress: string,
-    senderAddress: string,
-    srcChainId: string,
-    quantity: bigint,
-    paymentToken: string
-  ): Promise<ActionData> {
-    const [contract, tokenId, token, dstChainId, _, signature, platform] =
-      this.fetchParams(post)!;
+  public async actionDataFromPost({
+    post,
+    profileId,
+    profileOwnerAddress,
+    senderAddress,
+    srcChainId,
+    quantity,
+    paymentToken,
+    executingClientProfileId,
+    mirrorerProfileId,
+    mirrorPubId,
+  }: ActionDataFromPostParams): Promise<ActionData> {
+    const initData = this.fetchParams(post)!;
 
     // from id to the viem chain object
-    const dstChain = idToChain(Number(dstChainId));
-    const platformService = this.detectionEngine.getService(platform, dstChain);
+    const dstChain = idToChain(Number(initData[0].chainId));
+    const platformName = hexToString(initData[0].platformName);
+    const signature = hexToString(initData[0].signature);
+    const platformService = this.detectionEngine.getService(
+      platformName,
+      dstChain
+    );
 
     // logic to fetch the price + fee from the platform
     const price = await platformService.getPrice(
-      contract,
-      tokenId,
+      initData[0].targetContract,
+      initData[0].tokenId,
       signature,
       senderAddress
     );
@@ -109,8 +124,8 @@ export class NftOpenActionKit implements INftOpenActionKit {
       sender: senderAddress,
       srcChainId: parseInt(srcChainId),
       srcToken: paymentToken,
-      dstChainId: Number(dstChainId),
-      dstToken: token,
+      dstChainId: Number(initData[0].chainId),
+      dstToken: initData[0].paymentToken,
       slippage: 3, // 1%
       actionType: "lens-open-action",
       actionConfig: {
@@ -118,21 +133,23 @@ export class NftOpenActionKit implements INftOpenActionKit {
         pubId: post.pubId,
         profileId: post.profileId,
         contractAddress:
-          (await platformService.getMinterAddress(contract, tokenId)) ??
-          contract,
-        chainId: Number(dstChainId),
+          (await platformService.getMinterAddress(
+            initData[0].targetContract,
+            initData[0].tokenId
+          )) ?? initData[0].targetContract,
+        chainId: Number(initData[0].chainId),
         cost: {
           isNative: true,
           amount: price,
         },
         signature,
         args: await platformService.getArgs(
-          contract,
-          tokenId,
+          initData[0].targetContract,
+          initData[0].tokenId,
           senderAddress,
           signature,
           price,
-          quantity,
+          BigInt(quantity),
           profileOwnerAddress
         ),
       },
@@ -158,20 +175,34 @@ export class NftOpenActionKit implements INftOpenActionKit {
 
     const encodedActionData = resp.arbitraryData.lensActionData;
 
+    let referrerProfileIds = [];
+    let referrerPubIds = [];
+
+    if (!!mirrorerProfileId && !!mirrorPubId) {
+      referrerProfileIds = [
+        BigInt(mirrorerProfileId),
+        BigInt(executingClientProfileId),
+      ];
+      referrerPubIds = [BigInt(mirrorPubId), BigInt(0)];
+    } else {
+      referrerProfileIds = [BigInt(executingClientProfileId)];
+      referrerPubIds = [BigInt(0)];
+    }
+
     const actArguments = {
       publicationActedProfileId: BigInt(post.profileId),
       publicationActedId: BigInt(post.pubId),
       actorProfileId: BigInt(profileId!),
-      referrerProfileIds: [],
-      referrerPubIds: [],
+      referrerProfileIds,
+      referrerPubIds,
       actionModuleAddress: CHAIN_CONFIG.decentOpenActionContractAddress,
       actionModuleData: encodedActionData as `0x${string}`,
     };
 
     const uiData = await platformService.getUIData(
       signature,
-      contract,
-      tokenId
+      initData[0].targetContract,
+      initData[0].tokenId
     );
 
     if (!uiData) {
@@ -208,49 +239,38 @@ export class NftOpenActionKit implements INftOpenActionKit {
     paymentToken: string,
     dstChainId: bigint,
     cost: bigint,
+    publishingClientProfileId: bigint,
     mintSignatureMethod: string,
     platformName: string
   ): string {
-    return encodeAbiParameters(
-      [
-        // contract address of call
-        { type: "address" },
-        // tokenId of the nft
-        { type: "uint256" },
-        // the payment token for the action (i.e.mint) zeroAddress if cost is native or free
-        { type: "address" },
-        // chainId of that contract
-        { type: "uint256" },
-        // cost of the function call
-        { type: "uint256" },
-        // signature of the mint function
-        { type: "bytes" },
-        // platform name
-        { type: "bytes" },
-      ],
-      [
-        contractAddress as `0x${string}`,
-        nftId,
-        paymentToken as `0x${string}`,
-        dstChainId,
+    return encodeAbiParameters(InitData, [
+      {
+        targetContract: contractAddress as `0x${string}`,
+        tokenId: nftId,
+        paymentToken: paymentToken as `0x${string}`,
+        chainId: dstChainId,
         cost,
-        encodePacked(["string"], [mintSignatureMethod]),
-        encodePacked(["string"], [platformName]),
-      ]
-    );
+        publishingClientProfileId,
+        signature: encodePacked(["string"], [mintSignatureMethod]),
+        platformName: encodePacked(["string"], [platformName]),
+      },
+    ]);
   }
 
   private fetchParams = (
     post: PublicationInfo
   ):
     | readonly [
-        `0x${string}`,
-        bigint,
-        `0x${string}`,
-        bigint,
-        bigint,
-        string,
-        string
+        {
+          targetContract: `0x${string}`;
+          tokenId: bigint;
+          paymentToken: `0x${string}`;
+          chainId: bigint;
+          cost: bigint;
+          publishingClientProfileId: bigint;
+          signature: `0x${string}`;
+          platformName: `0x${string}`;
+        }
       ]
     | undefined => {
     const actionModules = post.actionModules;
@@ -259,18 +279,6 @@ export class NftOpenActionKit implements INftOpenActionKit {
     );
     if (index < 0) return;
     const actionModuleInitData = post.actionModulesInitDatas[index] as Address;
-
-    return decodeAbiParameters(
-      [
-        { type: "address" },
-        { type: "uint256" },
-        { type: "address" },
-        { type: "uint256" },
-        { type: "uint256" },
-        { type: "string" },
-        { type: "string" },
-      ],
-      actionModuleInitData
-    );
+    return decodeAbiParameters(InitData, actionModuleInitData);
   };
 }

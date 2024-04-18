@@ -30,7 +30,7 @@ const mockPost: PublicationInfo = {
   profileId: "48935",
   actionModules: [CHAIN_CONFIG.decentOpenActionContractAddress],
   actionModulesInitDatas: [
-    "0x000000000000000000000000751362d366f66ecb70bf67e0d941daa7e34635f5000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002105000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000e00000000000000000000000000000000000000000000000000000000000000180000000000000000000000000000000000000000000000000000000000000006c66756e6374696f6e206d696e745769746852657761726473286164647265737320726563697069656e742c2075696e74323536207175616e746974792c20737472696e672063616c6c6461746120636f6d6d656e742c2061646472657373206d696e74526566657272616c29000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000045a6f726100000000000000000000000000000000000000000000000000000000",
+    "0x0000000000000000000000000000000000000000000000000000000000000020000000000000000000000000f7d3ddffae7ec2576c9a6d95fe7d0f79c480c721000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000089000000000000000000000000000000000000000000000000016345785d8a0000000000000000000000000000000000000000000000000000000000000000bf2700000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000160000000000000000000000000000000000000000000000000000000000000003166756e6374696f6e206d696e74286164647265737320746f2c2075696e74323536206e756d6265724f66546f6b656e7329000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000b4578616d706c655265706f000000000000000000000000000000000000000000",
   ],
   pubId: "10",
 };
@@ -43,6 +43,7 @@ describe("detectAndReturnCalldata", () => {
     nftOpenActionKit = new NftOpenActionKit({
       decentApiKey: "mock-api-key",
       raribleApiKey: "mock-rarible-key",
+      openSeaApiKey: "mock-opensea-key",
     });
   });
 
@@ -60,7 +61,10 @@ describe("detectAndReturnCalldata", () => {
       .spyOn(nftOpenActionKit.detectionEngine, "detectNFTDetails")
       .mockReturnValue(expectedResult);
 
-    const result = await nftOpenActionKit.detectAndReturnCalldata(mockUrl);
+    const result = await nftOpenActionKit.detectAndReturnCalldata({
+      contentUri: mockUrl,
+      publishingClientProfileId: "10",
+    });
     expect(result).toBeDefined();
   });
 
@@ -71,7 +75,10 @@ describe("detectAndReturnCalldata", () => {
       .spyOn(nftOpenActionKit.detectionEngine, "detectNFTDetails")
       .mockResolvedValue(undefined);
 
-    const result = await nftOpenActionKit.detectAndReturnCalldata(mockUrl);
+    const result = await nftOpenActionKit.detectAndReturnCalldata({
+      contentUri: mockUrl,
+      publishingClientProfileId: "10",
+    });
     expect(result).toBeUndefined();
   });
 
@@ -83,7 +90,10 @@ describe("detectAndReturnCalldata", () => {
       .mockRejectedValue(new Error("Mock error during detection"));
 
     await expect(
-      nftOpenActionKit.detectAndReturnCalldata(mockUrl)
+      nftOpenActionKit.detectAndReturnCalldata({
+        contentUri: mockUrl,
+        publishingClientProfileId: "10",
+      })
     ).rejects.toThrow("Mock error during detection");
   });
 });
@@ -141,13 +151,18 @@ describe("actionDataFromPost", () => {
       .mockReturnValue(mockPlatformService);
 
     // Execute the method with the mock data
-    const actionData = await nftOpenActionKit.actionDataFromPost(
-      mockPost,
-      "100",
-      DUMMY_ADDRESS,
-      DUMMY_ADDRESS,
-      "1"
-    );
+    const actionData = await nftOpenActionKit.actionDataFromPost({
+      post: mockPost,
+      profileId: "100",
+      profileOwnerAddress: DUMMY_ADDRESS,
+      senderAddress: DUMMY_ADDRESS,
+      srcChainId: "1",
+      quantity: 1,
+      paymentToken: DUMMY_ADDRESS,
+      executingClientProfileId: "1",
+      mirrorerProfileId: "1",
+      mirrorPubId: "1",
+    });
 
     // Assertions to validate the action data
     expect(actionData).toBeDefined();
