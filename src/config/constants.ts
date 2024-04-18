@@ -10,7 +10,7 @@ export const CHAIN_CONFIG: ChainConfig =
     ? {
         lensHubProxyAddress: "0xDb46d1Dc155634FbC732f92E853b10B288AD5a1d",
         decentOpenActionContractAddress:
-          "0xA117BEc22a9a2f96725D986941899f90B705c67D",
+          "0x2357a69BAF2584cf25A3B9bAA2c7eE6063cb8B40",
       }
     : {
         lensHubProxyAddress: "0x4fbffF20302F3326B20052ab9C217C44F6480900",
