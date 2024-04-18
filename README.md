@@ -59,17 +59,21 @@ import { NftOpenActionKit } from "nft-openaction-kit";
 const nftOpenActionKit = new NftOpenActionKit({
   decentApiKey: process.env.DECENT_API_KEY,
   raribleApiKey: process.env.RARIBLE_API_KEY,
+  openSeaApiKey: process.env.OPENSEA_API_KEY,
 });
 ```
 
-> Only the `decentApiKey` is required. The `raribleApiKey` is optional, which would make the Rarible detection available.
+> Only the `decentApiKey` is required. The `raribleApiKey` and `openSeaApiKey` are optional, which would make the detection available for these platforms.
 
 3. Use `detectAndReturnCalldata`
 
 ```js
 const fetchCalldata = async () => {
   try {
-    const result = await nftOpenActionKit.detectAndReturnCalldata(url);
+    const result = await nftOpenActionKit.detectAndReturnCalldata({
+      contentURI: url,
+      publishingClientProfileId: "10",
+    });
     console.log(result || "No calldata found");
   } catch (err) {
     console.log(err);
@@ -89,13 +93,18 @@ const publication = {
 
 try {
   // Call the async function and pass the link
-  const result: ActionData = await nftOpenActionKit.actionDataFromPost(
-    publication,
+  const result: ActionData = await nftOpenActionKit.actionDataFromPost({
+    post: publication,
     profileId,
+    profileOwnerAddress,
     senderAddress,
     srcChainId,
-    quantity
-  );
+    quantity,
+    paymentToken,
+    executingClientProfileId,
+    mirrorerProfileId,
+    mirrorPubId,
+  });
 } catch (error) {
   console.log(error);
 }
@@ -111,6 +120,7 @@ try {
 type SdkConfig = {
   decentApiKey: string,
   raribleApiKey?: string,
+  openSeaApiKey?: string,
 };
 ```
 
