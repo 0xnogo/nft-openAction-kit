@@ -3,6 +3,7 @@ import {
   decodeAbiParameters,
   encodeAbiParameters,
   encodePacked,
+  hexToString,
   parseUnits,
 } from "viem";
 import { DetectionEngine } from "./DetectionEngine";
@@ -100,8 +101,10 @@ export class NftOpenActionKit implements INftOpenActionKit {
 
     // from id to the viem chain object
     const dstChain = idToChain(Number(initData[0].chainId));
+    const platformName = hexToString(initData[0].platformName);
+    const signature = hexToString(initData[0].signature);
     const platformService = this.detectionEngine.getService(
-      initData[0].platformName,
+      platformName,
       dstChain
     );
 
@@ -109,7 +112,7 @@ export class NftOpenActionKit implements INftOpenActionKit {
     const price = await platformService.getPrice(
       initData[0].targetContract,
       initData[0].tokenId,
-      initData[0].signature,
+      signature,
       senderAddress
     );
 
@@ -139,12 +142,12 @@ export class NftOpenActionKit implements INftOpenActionKit {
           isNative: true,
           amount: price,
         },
-        signature: initData[0].signature,
+        signature,
         args: await platformService.getArgs(
           initData[0].targetContract,
           initData[0].tokenId,
           senderAddress,
-          initData[0].signature,
+          signature,
           price,
           BigInt(quantity),
           profileOwnerAddress
@@ -197,7 +200,7 @@ export class NftOpenActionKit implements INftOpenActionKit {
     };
 
     const uiData = await platformService.getUIData(
-      initData[0].signature,
+      signature,
       initData[0].targetContract,
       initData[0].tokenId
     );
@@ -265,8 +268,8 @@ export class NftOpenActionKit implements INftOpenActionKit {
           chainId: bigint;
           cost: bigint;
           publishingClientProfileId: bigint;
-          signature: string;
-          platformName: string;
+          signature: `0x${string}`;
+          platformName: `0x${string}`;
         }
       ]
     | undefined => {
