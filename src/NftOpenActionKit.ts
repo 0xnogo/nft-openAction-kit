@@ -265,8 +265,8 @@ export class NftOpenActionKit implements INftOpenActionKit {
           chainId: bigint;
           cost: bigint;
           publishingClientProfileId: bigint;
-          signature: `0x${string}`;
-          platformName: `0x${string}`;
+          signature: string;
+          platformName: string;
         }
       ]
     | undefined => {
