@@ -209,16 +209,11 @@ export class NftOpenActionKit implements INftOpenActionKit {
       throw new Error("No UI data");
     }
 
-    /*         amountOut: {
-          address: resp.amountOut.tokenAddress,
-          amount: resp.amountOut.amount,
-          chainId: dstChainId.toString(),
-        },
-        bridgeFee: {
-          address: resp.bridgeFee.tokenAddress,
-          amount: resp.bridgeFee.amount,
-          chainId: srcChainId,
-        }, */
+    const bridgeFeeNative =
+      Number(
+        BigInt(resp.tx.bridgeFee.amount) + BigInt(resp.tx.applicationFee.amount)
+      ) /
+      10 ** 18;
 
     return {
       actArguments,
@@ -229,6 +224,7 @@ export class NftOpenActionKit implements INftOpenActionKit {
           amount: resp.tokenPayment.amount,
           chainId: srcChainId,
         },
+        bridgeFeeNative,
       },
     };
   }
