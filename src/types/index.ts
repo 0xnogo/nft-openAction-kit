@@ -49,6 +49,7 @@ export type ActionData = {
   uiData: UIData;
   actArgumentsFormatted: {
     paymentToken: Token;
+    bridgeFeeNative: number;
   };
 };
 
