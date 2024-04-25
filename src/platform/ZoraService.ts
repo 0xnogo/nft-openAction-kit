@@ -125,7 +125,8 @@ export class ZoraService implements IPlatformService {
   async getUIData(
     signature: string,
     contract: string,
-    tokenId: bigint
+    tokenId: bigint,
+    dstChainId: bigint
   ): Promise<UIData | undefined> {
     let nftName: string = "";
     let nftUri: string = "";
@@ -179,6 +180,7 @@ export class ZoraService implements IPlatformService {
       nftUri,
       nftCreatorAddress,
       tokenStandard: this.isERC1155(signature) ? "erc1155" : "erc721",
+      dstChainId: Number(dstChainId),
     };
   }
 

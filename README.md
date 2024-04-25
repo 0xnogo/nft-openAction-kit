@@ -165,7 +165,8 @@ interface IPlatformService {
   getUIData(
     signature: string,
     contract: string,
-    tokenId: bigint
+    tokenId: bigint,
+    dstChainId: bigint
   ): Promise<UIData | undefined>;
   getPrice(
     contractAddress: string,

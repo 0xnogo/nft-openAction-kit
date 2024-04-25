@@ -16,7 +16,7 @@ import {
   INftOpenActionKit,
 } from "./interfaces/INftOpenActionKit";
 import { IPlatformService } from "./interfaces/IPlatformService";
-import { ActionData, PublicationInfo, SdkConfig } from "./types";
+import { ActionData, PublicationInfo, SdkConfig, UIData } from "./types";
 import { bigintDeserializer, bigintSerializer, idToChain } from "./utils";
 
 /**
@@ -202,7 +202,8 @@ export class NftOpenActionKit implements INftOpenActionKit {
     const uiData = await platformService.getUIData(
       signature,
       initData[0].targetContract,
-      initData[0].tokenId
+      initData[0].tokenId,
+      initData[0].chainId
     );
 
     if (!uiData) {
@@ -228,6 +229,46 @@ export class NftOpenActionKit implements INftOpenActionKit {
         dstChainId: Number(initData[0].chainId),
       },
     };
+  }
+
+  public async generateUiData({
+    contentURI,
+  }: {
+    contentURI: string;
+  }): Promise<UIData> {
+    const nftDetails = await this.detectionEngine.detectNFTDetails(contentURI);
+    if (!nftDetails) {
+      throw new Error("NFT details not found");
+    }
+    const service: IPlatformService = nftDetails.service;
+    const mintSignature = await service.getMintSignature(nftDetails);
+
+    if (!mintSignature) {
+      throw new Error("Mint signature not found");
+    }
+
+    const nftAddress = nftDetails.contractAddress;
+    const nftId = nftDetails.nftId != null ? BigInt(nftDetails.nftId) : 0n;
+
+    const dstChainId = nftDetails.chain.id;
+
+    const platformService = this.detectionEngine.getService(
+      nftDetails.service.platformName,
+      idToChain(Number(dstChainId))
+    );
+
+    const uiData = await platformService.getUIData(
+      mintSignature,
+      nftAddress,
+      nftId,
+      BigInt(dstChainId)
+    );
+
+    if (!uiData) {
+      throw new Error("No UI data");
+    }
+
+    return uiData;
   }
 
   private calldataGenerator(

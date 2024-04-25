@@ -54,7 +54,8 @@ export class SuperRareService implements IPlatformService {
   async getUIData(
     signature: string,
     contract: string,
-    tokenId: bigint
+    tokenId: bigint,
+    dstChainId: bigint
   ): Promise<UIData | undefined> {
     const nftContract = getContract({
       address: contract as `0x${string}`,
@@ -108,6 +109,7 @@ export class SuperRareService implements IPlatformService {
       nftUri: tokenJson.image,
       tokenStandard: "erc721",
       ...(owner ? { nftCreatorAddress: owner } : {}),
+      dstChainId: Number(dstChainId),
     };
   }
 
