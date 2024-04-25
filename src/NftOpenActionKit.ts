@@ -225,6 +225,7 @@ export class NftOpenActionKit implements INftOpenActionKit {
           chainId: srcChainId,
         },
         bridgeFeeNative,
+        dstChainId: Number(initData[0].chainId),
       },
     };
   }

@@ -50,6 +50,7 @@ export type ActionData = {
   actArgumentsFormatted: {
     paymentToken: Token;
     bridgeFeeNative: number;
+    dstChainId: number;
   };
 };
 
