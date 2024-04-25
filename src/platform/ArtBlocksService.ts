@@ -94,7 +94,8 @@ export class ArtBlocksService implements IPlatformService {
   async getUIData(
     signature: string,
     contract: string,
-    tokenId: bigint
+    tokenId: bigint,
+    dstChainId: bigint
   ): Promise<UIData | undefined> {
     const genArtContract = getContract({
       address: contract as `0x${string}`,
@@ -135,6 +136,7 @@ export class ArtBlocksService implements IPlatformService {
       nftUri: tokenJson.preview_asset_url,
       nftCreatorAddress: tokenJson.payout_address,
       tokenStandard: "erc721",
+      dstChainId: Number(dstChainId),
     };
   }
 

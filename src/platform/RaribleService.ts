@@ -92,7 +92,8 @@ export class RaribleService implements IPlatformService {
   async getUIData(
     signature: string,
     contract: string,
-    tokenId: bigint
+    tokenId: bigint,
+    dstChainId: bigint
   ): Promise<UIData | undefined> {
     const nftInfo = await this.fetchNFTData(
       contract,
@@ -118,6 +119,7 @@ export class RaribleService implements IPlatformService {
       nftUri: nftInfo.meta.content[0].url,
       tokenStandard: "erc721",
       ...(nftCreatorAddress ? { nftCreatorAddress } : {}),
+      dstChainId: Number(dstChainId),
     };
   }
 

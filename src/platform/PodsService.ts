@@ -127,7 +127,8 @@ export class PodsService implements IPlatformService {
   async getUIData(
     signature: string,
     contract: string,
-    tokenId: bigint
+    tokenId: bigint,
+    dstChainId: bigint
   ): Promise<UIData | undefined> {
     try {
       const podcastContract = getContract({
@@ -151,6 +152,7 @@ export class PodsService implements IPlatformService {
         nftUri: ((await response.json()) as PodsMetadataStandard).image,
         nftCreatorAddress: await podcastContract.read.owner(),
         tokenStandard: "erc1155",
+        dstChainId: Number(dstChainId),
       };
     } catch (err) {
       console.error(err);

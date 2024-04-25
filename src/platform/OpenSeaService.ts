@@ -53,7 +53,8 @@ export class OpenSeaService implements IPlatformService {
   async getUIData(
     signature: string,
     contract: string,
-    tokenId: bigint
+    tokenId: bigint,
+    dstChainId: bigint
   ): Promise<UIData | undefined> {
     const chainName = this.getChainName();
 
@@ -72,6 +73,7 @@ export class OpenSeaService implements IPlatformService {
       nftUri: nftDetail.imageUrl,
       nftCreatorAddress: nftDetail.creator,
       tokenStandard: nftDetail.tokenStandard,
+      dstChainId: Number(dstChainId),
     });
   }
 

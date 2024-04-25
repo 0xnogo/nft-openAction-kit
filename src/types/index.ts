@@ -34,6 +34,7 @@ export type UIData = {
   nftUri: string;
   nftCreatorAddress?: string;
   tokenStandard: string;
+  dstChainId: number;
 };
 
 export type ActionData = {
@@ -50,7 +51,6 @@ export type ActionData = {
   actArgumentsFormatted: {
     paymentToken: Token;
     bridgeFeeNative: number;
-    dstChainId: number;
   };
 };
 

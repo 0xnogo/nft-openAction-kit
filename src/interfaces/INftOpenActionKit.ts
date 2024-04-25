@@ -1,4 +1,4 @@
-import { ActionData, PublicationInfo } from "..";
+import { ActionData, PublicationInfo, UIData } from "..";
 
 export interface DetectAndReturnCalldataParams {
   contentURI: string;
@@ -36,4 +36,6 @@ export interface INftOpenActionKit {
     mirrorPubId,
     executingClientProfileId,
   }: ActionDataFromPostParams): Promise<ActionData>;
+
+  generateUiData({ contentURI }: { contentURI: string }): Promise<UIData>;
 }
