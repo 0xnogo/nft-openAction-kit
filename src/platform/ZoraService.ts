@@ -9,7 +9,7 @@ import {
 } from "viem";
 import { IPlatformService } from "../interfaces/IPlatformService";
 
-import { base, mainnet, optimism, zora } from "viem/chains";
+import { arbitrum, base, mainnet, optimism, zora } from "viem/chains";
 import ERC721DropAbi from "../config/abis/Zora/ERC721Drop.json";
 import MetadataRendererABI from "../config/abis/Zora/MetadataRenderer.json";
 import ZoraCreator1155ImplABI from "../config/abis/Zora/ZoraCreator1155Impl.json";
@@ -29,6 +29,7 @@ const CHAIN_ID_TO_KEY: { [id: number]: string } = {
   [zora.id]: "zora",
   [base.id]: "base",
   [optimism.id]: "oeth",
+  [arbitrum.id]: "arb",
 };
 
 export const ZORA_CHAIN_ID_MAPPING: { [key: string]: ZoraExtendedChain } = {
@@ -47,6 +48,10 @@ export const ZORA_CHAIN_ID_MAPPING: { [key: string]: ZoraExtendedChain } = {
   oeth: {
     ...optimism,
     erc1155ZoraMinter: "0x3678862f04290E565cCA2EF163BAeb92Bb76790C",
+  },
+  arb: {
+    ...arbitrum,
+    erc1155ZoraMinter: "0x1Cd1C1f3b8B779B50Db23155F2Cb244FCcA06B21",
   },
 };
 
@@ -266,8 +271,6 @@ export class ZoraService implements IPlatformService {
           signature: this.erc721DropMintSignature,
         };
       } catch (error) {
-        // do nothing
-        console.log("unrecognized contract");
         throw new Error("Unrecognized contract");
       }
     }
