@@ -29,6 +29,7 @@ const CHAIN_ID_TO_KEY: { [id: number]: string } = {
   [zora.id]: "zora",
   [base.id]: "base",
   [optimism.id]: "oeth",
+  [arbitrum.id]: "arb",
 };
 
 export const ZORA_CHAIN_ID_MAPPING: { [key: string]: ZoraExtendedChain } = {
@@ -270,8 +271,6 @@ export class ZoraService implements IPlatformService {
           signature: this.erc721DropMintSignature,
         };
       } catch (error) {
-        // do nothing
-        console.log("unrecognized contract");
         throw new Error("Unrecognized contract");
       }
     }
