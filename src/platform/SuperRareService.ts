@@ -8,13 +8,12 @@ import { ZERO_ADDRESS } from "../config/constants";
 import { IPlatformService } from "../interfaces/IPlatformService";
 
 export const SUPER_RARE_ADDRESS = "0xb932a70a57673d89f4acffbe830e8ed7f75fb9e0";
+export const SUPER_RARE_MINTER_ADDRESS =
+  "0x6D7c44773C52D396F43c2D511B81aa168E9a7a42";
 
 export class SuperRareService implements IPlatformService {
   readonly platformName: string;
   readonly platformLogoUrl: string;
-
-  readonly superRareServiceAddress =
-    "0x6D7c44773C52D396F43c2D511B81aa168E9a7a42";
 
   private client: PublicClient;
 
@@ -35,7 +34,7 @@ export class SuperRareService implements IPlatformService {
     contract: string,
     tokenId: bigint
   ): Promise<string | undefined> {
-    return Promise.resolve(this.superRareServiceAddress);
+    return Promise.resolve(SUPER_RARE_MINTER_ADDRESS);
   }
 
   async getMintSignature(
@@ -146,7 +145,7 @@ export class SuperRareService implements IPlatformService {
     nftId: bigint
   ): Promise<{ price: bigint; token: string; seller: string } | undefined> {
     const superRareServiceContract = getContract({
-      address: this.superRareServiceAddress as `0x${string}`,
+      address: "0x6D7c44773C52D396F43c2D511B81aa168E9a7a42" as `0x${string}`,
       abi: SuperRareMarketplaceABI,
       client: this.client,
     });

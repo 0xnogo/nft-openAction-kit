@@ -12,13 +12,15 @@ const chainToOpenSeaChain = {
   8453: "base",
 };
 
+export const OPENSEA_MINTER_ADDRESS =
+  "0x00000000000000ADc04C56Bf30aC9d3c0aAF14dC";
+
 export class OpenSeaService implements IPlatformService {
   public readonly platformName: string;
   public readonly platformLogoUrl: string;
   private apiKey: string;
   private client: Client;
 
-  private minterAddress = "0x00000000000000ADc04C56Bf30aC9d3c0aAF14dC";
   private mintSignature = `function fulfillBasicOrder((address considerationToken, uint256 considerationIdentifier, uint256 considerationAmount, address offerer, address zone, address offerToken, uint256 offerIdentifier, uint256 offerAmount, uint8 basicOrderType, uint256 startTime, uint256 endTime, bytes32 zoneHash, uint256 salt, bytes32 offererConduitKey, bytes32 fulfillerConduitKey, uint256 totalOriginalAdditionalRecipients, (uint256 amount, address recipient)[] additionalRecipients, bytes signature)) external payable returns (bool fulfilled)`;
 
   constructor(config: ServiceConfig) {
@@ -40,7 +42,7 @@ export class OpenSeaService implements IPlatformService {
     contract: string,
     tokenId: bigint
   ): Promise<string | undefined> {
-    return Promise.resolve(this.minterAddress);
+    return Promise.resolve(OPENSEA_MINTER_ADDRESS);
   }
 
   getMintSignature(nftDetails: NFTExtraction): Promise<string | undefined> {
@@ -141,7 +143,7 @@ export class OpenSeaService implements IPlatformService {
     const fulfillmentData = await this.fulfillmentData(
       bestListing.orderHash,
       chainName,
-      this.minterAddress,
+      OPENSEA_MINTER_ADDRESS,
       senderAddress,
       contractAddress,
       tokenId.toString()

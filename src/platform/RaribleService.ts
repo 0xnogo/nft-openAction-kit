@@ -32,14 +32,14 @@ interface SellOrder {
   signature: string;
 }
 
+export const RARIBLE_MINTER_ADDRESS = {
+  ETHEREUM: "0x9757F2d2b135150BBeb65308D4a91804107cd8D6",
+  POLYGON: "0x12b3897a36fDB436ddE2788C06Eff0ffD997066e",
+};
+
 export class RaribleService implements IPlatformService {
   readonly platformName: string;
   readonly platformLogoUrl: string;
-
-  readonly minterAddress = {
-    ETHEREUM: "0x9757F2d2b135150BBeb65308D4a91804107cd8D6",
-    POLYGON: "0x12b3897a36fDB436ddE2788C06Eff0ffD997066e",
-  };
 
   readonly stakingContractAddress =
     "0x096bd9a7a2e703670088c05035e23c7a9f428496";
@@ -68,7 +68,7 @@ export class RaribleService implements IPlatformService {
     contract: string,
     tokenId: bigint
   ): Promise<string | undefined> {
-    return this.minterAddress[
+    return RARIBLE_MINTER_ADDRESS[
       this.client.chain!.name.toUpperCase() as "ETHEREUM" | "POLYGON"
     ];
   }

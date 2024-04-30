@@ -57,10 +57,12 @@ export class NftOpenActionKit implements INftOpenActionKit {
         return;
       }
 
-      const nftAddress = nftDetails.contractAddress;
+      const nftAddress = nftDetails.minterAddress
+        ? nftDetails.minterAddress
+        : nftDetails.contractAddress;
       const nftId = nftDetails.nftId != null ? BigInt(nftDetails.nftId) : 0n;
       const paymentToken = ZERO_ADDRESS;
-      const cost = parseUnits("0", 18); // workaround - price fetched in actionDataFromPost
+      const cost = parseUnits("0", 18); // un-used - price fetched in actionDataFromPost
       const dstChainId = nftDetails.chain.id;
       return this.calldataGenerator(
         nftAddress,
@@ -108,9 +110,24 @@ export class NftOpenActionKit implements INftOpenActionKit {
       dstChain
     );
 
+    // on platforms where minter address is
+    let targetContract: string = initData[0].targetContract;
+    if (
+      platformName === "Rarible" ||
+      platformName === "SuperRare" ||
+      platformName === "OpenSea"
+    ) {
+      const nftDetails = await this.detectionEngine.detectNFTDetails(
+        post.contentURI
+      );
+      if (nftDetails) {
+        targetContract = nftDetails?.contractAddress;
+      }
+    }
+
     // logic to fetch the price + fee from the platform
     const price = await platformService.getPrice(
-      initData[0].targetContract,
+      targetContract,
       initData[0].tokenId,
       signature,
       senderAddress

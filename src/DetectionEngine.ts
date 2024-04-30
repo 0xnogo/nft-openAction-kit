@@ -16,8 +16,14 @@ import {
 import { IDetectionEngine } from "./interfaces/IDetectionEngine";
 import { IPlatformService } from "./interfaces/IPlatformService";
 import { ArtBlocksService } from "./platform/ArtBlocksService";
-import { OpenSeaService } from "./platform/OpenSeaService";
-import { RaribleService } from "./platform/RaribleService";
+import {
+  OPENSEA_MINTER_ADDRESS,
+  OpenSeaService,
+} from "./platform/OpenSeaService";
+import {
+  RARIBLE_MINTER_ADDRESS,
+  RaribleService,
+} from "./platform/RaribleService";
 import {
   PODS_CHAIN_ID_MAPPING,
   PodsService,
@@ -26,6 +32,7 @@ import {
 } from "./platform/PodsService";
 import {
   SUPER_RARE_ADDRESS,
+  SUPER_RARE_MINTER_ADDRESS,
   SuperRareService,
 } from "./platform/SuperRareService";
 import { ZORA_CHAIN_ID_MAPPING, ZoraService } from "./platform/ZoraService";
@@ -146,6 +153,7 @@ export class DetectionEngine implements IDetectionEngine {
             platform: this.nftPlatformConfig["SuperRare"],
             chain: mainnet,
             contractAddress,
+            minterAddress: SUPER_RARE_MINTER_ADDRESS,
             nftId,
             service: new SuperRareService({
               chain: mainnet,
@@ -221,6 +229,9 @@ export class DetectionEngine implements IDetectionEngine {
             const isPolygon = url.includes("/token/polygon/");
             const chain = isPolygon ? polygon : mainnet;
             const contractAddress = match[1];
+            const minterAddress = isPolygon
+              ? RARIBLE_MINTER_ADDRESS["POLYGON"]
+              : RARIBLE_MINTER_ADDRESS["ETHEREUM"];
             const nftId = match[2];
 
             // Return undefined for unsupported chains (Rari Chain, ZkSync Era, Immutable X)
@@ -232,6 +243,7 @@ export class DetectionEngine implements IDetectionEngine {
               platform: this.nftPlatformConfig["Rarible"],
               chain: chain,
               contractAddress,
+              minterAddress,
               nftId,
               service: new RaribleService({
                 chain,
@@ -290,6 +302,7 @@ export class DetectionEngine implements IDetectionEngine {
               platform: this.nftPlatformConfig["OpenSea"],
               chain: chain,
               contractAddress: contractAddress,
+              minterAddress: OPENSEA_MINTER_ADDRESS,
               nftId: nftId,
               service: new OpenSeaService({
                 chain,
