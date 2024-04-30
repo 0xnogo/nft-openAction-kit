@@ -104,6 +104,7 @@ try {
     executingClientProfileId,
     mirrorerProfileId,
     mirrorPubId,
+    sourceUrl,
   });
 } catch (error) {
   console.log(error);
@@ -166,14 +167,16 @@ interface IPlatformService {
     signature: string,
     contract: string,
     tokenId: bigint,
-    dstChainId: bigint
+    dstChainId: bigint,
+    sourceUrl?: string
   ): Promise<UIData | undefined>;
   getPrice(
     contractAddress: string,
     nftId: bigint,
     signature: string,
     userAddress: string,
-    unit?: bigint
+    unit?: bigint,
+    sourceUrl?: string
   ): Promise<bigint | undefined>;
   getArgs(
     contractAddress: string,
@@ -182,7 +185,8 @@ interface IPlatformService {
     signature: string,
     price: bigint,
     quantity: bigint,
-    profileOwnerAddress: string
+    profileOwnerAddress: string,
+    sourceUrl?: string
   ): Promise<any[]>;
 }
 ```

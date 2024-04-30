@@ -57,7 +57,9 @@ export class NftOpenActionKit implements INftOpenActionKit {
         return;
       }
 
-      const nftAddress = nftDetails.contractAddress;
+      const nftAddress = nftDetails.minterAddress
+        ? nftDetails.minterAddress
+        : nftDetails.contractAddress;
       const nftId = nftDetails.nftId != null ? BigInt(nftDetails.nftId) : 0n;
       const paymentToken = ZERO_ADDRESS;
       const cost = parseUnits("0", 18); // workaround - price fetched in actionDataFromPost
@@ -96,6 +98,7 @@ export class NftOpenActionKit implements INftOpenActionKit {
     executingClientProfileId,
     mirrorerProfileId,
     mirrorPubId,
+    sourceUrl,
   }: ActionDataFromPostParams): Promise<ActionData> {
     const initData = this.fetchParams(post)!;
 
@@ -113,7 +116,9 @@ export class NftOpenActionKit implements INftOpenActionKit {
       initData[0].targetContract,
       initData[0].tokenId,
       signature,
-      senderAddress
+      senderAddress,
+      undefined,
+      sourceUrl
     );
 
     if (!price) {
@@ -150,7 +155,8 @@ export class NftOpenActionKit implements INftOpenActionKit {
           signature,
           price,
           BigInt(quantity),
-          profileOwnerAddress
+          profileOwnerAddress,
+          sourceUrl
         ),
       },
     };
@@ -203,18 +209,25 @@ export class NftOpenActionKit implements INftOpenActionKit {
       signature,
       initData[0].targetContract,
       initData[0].tokenId,
-      initData[0].chainId
+      initData[0].chainId,
+      sourceUrl
     );
 
     if (!uiData) {
       throw new Error("No UI data");
     }
 
-    const bridgeFeeNative =
-      Number(
-        BigInt(resp.tx.bridgeFee.amount) + BigInt(resp.tx.applicationFee.amount)
-      ) /
-      10 ** 18;
+    let bridgeFeeNative = 0;
+    if (resp.tx.bridgeFee) {
+      bridgeFeeNative =
+        Number(
+          BigInt(resp.tx.bridgeFee.amount) +
+            BigInt(resp.tx.applicationFee.amount)
+        ) /
+        10 ** 18;
+    } else {
+      bridgeFeeNative = Number(BigInt(resp.applicationFee.amount)) / 10 ** 18;
+    }
 
     return {
       actArguments,

@@ -16,6 +16,7 @@ export interface ActionDataFromPostParams {
   executingClientProfileId: string;
   mirrorerProfileId?: string;
   mirrorPubId?: string;
+  sourceUrl?: string;
 }
 
 export interface INftOpenActionKit {
@@ -35,6 +36,7 @@ export interface INftOpenActionKit {
     mirrorerProfileId,
     mirrorPubId,
     executingClientProfileId,
+    sourceUrl,
   }: ActionDataFromPostParams): Promise<ActionData>;
 
   generateUiData({ contentURI }: { contentURI: string }): Promise<UIData>;
