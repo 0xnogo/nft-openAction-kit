@@ -9,6 +9,7 @@ import {
   parseAbiParameters,
   parseEther,
   toHex,
+  getAddress,
 } from "viem";
 import { mainnet } from "viem/chains";
 import { NFTExtraction, ServiceConfig, UIData } from "..";
@@ -32,14 +33,14 @@ interface SellOrder {
   signature: string;
 }
 
+export const RARIBLE_MINTER_ADDRESS = {
+  ETHEREUM: "0x9757F2d2b135150BBeb65308D4a91804107cd8D6",
+  POLYGON: "0x12b3897a36fDB436ddE2788C06Eff0ffD997066e",
+};
+
 export class RaribleService implements IPlatformService {
   readonly platformName: string;
   readonly platformLogoUrl: string;
-
-  readonly minterAddress = {
-    ETHEREUM: "0x9757F2d2b135150BBeb65308D4a91804107cd8D6",
-    POLYGON: "0x12b3897a36fDB436ddE2788C06Eff0ffD997066e",
-  };
 
   readonly stakingContractAddress =
     "0x096bd9a7a2e703670088c05035e23c7a9f428496";
@@ -68,7 +69,7 @@ export class RaribleService implements IPlatformService {
     contract: string,
     tokenId: bigint
   ): Promise<string | undefined> {
-    return this.minterAddress[
+    return RARIBLE_MINTER_ADDRESS[
       this.client.chain!.name.toUpperCase() as "ETHEREUM" | "POLYGON"
     ];
   }
@@ -93,10 +94,19 @@ export class RaribleService implements IPlatformService {
     signature: string,
     contract: string,
     tokenId: bigint,
-    dstChainId: bigint
+    dstChainId: bigint,
+    sourceUrl?: string
   ): Promise<UIData | undefined> {
+    let sellAddress = contract;
+    const addressIndex =
+      this.client.chain!.name.toUpperCase() === "ETHEREUM" ? 4 : 5;
+    if (sourceUrl) {
+      sellAddress = getAddress(
+        sourceUrl.split("/")[addressIndex].split(":")[0]
+      );
+    }
     const nftInfo = await this.fetchNFTData(
-      contract,
+      sellAddress,
       tokenId,
       this.client.chain!.name.toUpperCase() as "ETHEREUM" | "POLYGON"
     );
@@ -128,10 +138,19 @@ export class RaribleService implements IPlatformService {
     nftId: bigint,
     signature: string,
     userAddress: string,
-    unit = 1n
+    unit = 1n,
+    sourceUrl?: string
   ): Promise<bigint | undefined> {
+    let sellAddress = contractAddress;
+    const addressIndex =
+      this.client.chain!.name.toUpperCase() === "ETHEREUM" ? 4 : 5;
+    if (sourceUrl) {
+      sellAddress = getAddress(
+        sourceUrl.split("/")[addressIndex].split(":")[0]
+      );
+    }
     const sellOrders = await this.fetchSellOrdersByItem(
-      contractAddress,
+      sellAddress,
       nftId.toString(),
       this.client.chain!.name.toUpperCase() as "ETHEREUM" | "POLYGON"
     );
@@ -154,10 +173,19 @@ export class RaribleService implements IPlatformService {
     signature: string,
     price: bigint,
     quantity: bigint,
-    profileOwnerAddress: string
+    profileOwnerAddress: string,
+    sourceUrl?: string
   ): Promise<any[]> {
+    let sellAddress = contractAddress;
+    const addressIndex =
+      this.client.chain!.name.toUpperCase() === "ETHEREUM" ? 4 : 5;
+    if (sourceUrl) {
+      sellAddress = getAddress(
+        sourceUrl.split("/")[addressIndex].split(":")[0]
+      );
+    }
     const sellOrders = await this.fetchSellOrdersByItem(
-      contractAddress,
+      sellAddress,
       tokenId.toString(),
       this.client.chain!.name.toUpperCase() as "ETHEREUM" | "POLYGON"
     );
@@ -179,7 +207,7 @@ export class RaribleService implements IPlatformService {
     ).slice(0, 10);
     const nftData = encodeAbiParameters(
       parseAbiParameters("address token, uint256 id"),
-      [contractAddress as `0x{string}`, tokenId]
+      [sellAddress as `0x{string}`, tokenId]
     );
     const sellOrderPaymentAmount = parseEther(sellOrders[0].take.value);
     const paymentToken = ZERO_ADDRESS;
