@@ -69,6 +69,8 @@ export class ZoraService implements IPlatformService {
     "function mintWithRewards(address minter, uint256 tokenId, uint256 quantity, bytes calldata minterArguments, address mintReferral)";
   private erc721DropMintSignature =
     "function mintWithRewards(address recipient, uint256 quantity, string calldata comment, address mintReferral)";
+  private erc115PremintSignature =
+    "function premintV2(bytes calldata contractConfig, bytes calldata premintConfig, bytes calldata signature, uint256 quantityToMint, bytes calldata mintArguments)";
 
   constructor(config: ServiceConfig) {
     this.client = createPublicClient({
