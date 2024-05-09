@@ -8,13 +8,12 @@ import { ZERO_ADDRESS } from "../config/constants";
 import { IPlatformService } from "../interfaces/IPlatformService";
 
 export const SUPER_RARE_ADDRESS = "0xb932a70a57673d89f4acffbe830e8ed7f75fb9e0";
+export const SUPER_RARE_MINTER_ADDRESS =
+  "0x6D7c44773C52D396F43c2D511B81aa168E9a7a42";
 
 export class SuperRareService implements IPlatformService {
   readonly platformName: string;
   readonly platformLogoUrl: string;
-
-  readonly superRareServiceAddress =
-    "0x6D7c44773C52D396F43c2D511B81aa168E9a7a42";
 
   private client: PublicClient;
 
@@ -35,7 +34,7 @@ export class SuperRareService implements IPlatformService {
     contract: string,
     tokenId: bigint
   ): Promise<string | undefined> {
-    return Promise.resolve(this.superRareServiceAddress);
+    return Promise.resolve(SUPER_RARE_MINTER_ADDRESS);
   }
 
   async getMintSignature(
@@ -55,18 +54,28 @@ export class SuperRareService implements IPlatformService {
     signature: string,
     contract: string,
     tokenId: bigint,
-    dstChainId: bigint
+    dstChainId: bigint,
+    sourceUrl: string
   ): Promise<UIData | undefined> {
+    let sellAddress = SUPER_RARE_ADDRESS;
+    if (sourceUrl) {
+      const contractMatch = sourceUrl.match(
+        /https:\/\/superrare\.com\/(0x[a-fA-F0-9]{40})/
+      );
+      if (contractMatch) {
+        sellAddress = contractMatch[1];
+      }
+    }
     const nftContract = getContract({
-      address: contract as `0x${string}`,
+      address: sellAddress as `0x${string}`,
       abi: ERC721ABI,
       client: this.client,
     });
 
     let owner: any | undefined;
-    if (contract.toLowerCase() === SUPER_RARE_ADDRESS.toLowerCase()) {
+    if (sellAddress.toLowerCase() === SUPER_RARE_ADDRESS.toLowerCase()) {
       const superRareContract = getContract({
-        address: contract as `0x${string}`,
+        address: sellAddress as `0x${string}`,
         abi: SuperRareV2ABI,
         client: this.client,
       });
@@ -75,7 +84,7 @@ export class SuperRareService implements IPlatformService {
     } else {
       try {
         owner = await this.client.readContract({
-          address: contract as `0x${string}`,
+          address: sellAddress as `0x${string}`,
           abi: OwnableABI,
           functionName: "owner",
         });
@@ -118,9 +127,20 @@ export class SuperRareService implements IPlatformService {
     nftId: bigint,
     signature: string,
     userAddress: string,
-    unit: bigint = 1n
+    unit: bigint = 1n,
+    sourceUrl?: string
   ): Promise<bigint | undefined> {
-    const salePrice = await this.getSalePrices(contractAddress, nftId);
+    let sellAddress = SUPER_RARE_ADDRESS;
+    if (sourceUrl) {
+      const contractMatch = sourceUrl.match(
+        /https:\/\/superrare\.com\/(0x[a-fA-F0-9]{40})/
+      );
+      if (contractMatch) {
+        sellAddress = contractMatch[1];
+      }
+    }
+
+    const salePrice = await this.getSalePrices(sellAddress, nftId);
 
     if (!this.isSaleValid(salePrice)) return;
 
@@ -136,9 +156,19 @@ export class SuperRareService implements IPlatformService {
     signature: string,
     price: bigint,
     quantity: bigint,
-    profileOwnerAddress: string
+    profileOwnerAddress: string,
+    sourceUrl: string
   ): Promise<any[]> {
-    return Promise.resolve([contractAddress, tokenId, ZERO_ADDRESS, price]);
+    let sellAddress = SUPER_RARE_ADDRESS;
+    if (sourceUrl) {
+      const contractMatch = sourceUrl.match(
+        /https:\/\/superrare\.com\/(0x[a-fA-F0-9]{40})/
+      );
+      if (contractMatch) {
+        sellAddress = contractMatch[1];
+      }
+    }
+    return Promise.resolve([sellAddress, tokenId, ZERO_ADDRESS, price]);
   }
 
   private async getSalePrices(
@@ -146,7 +176,7 @@ export class SuperRareService implements IPlatformService {
     nftId: bigint
   ): Promise<{ price: bigint; token: string; seller: string } | undefined> {
     const superRareServiceContract = getContract({
-      address: this.superRareServiceAddress as `0x${string}`,
+      address: SUPER_RARE_MINTER_ADDRESS as `0x${string}`,
       abi: SuperRareMarketplaceABI,
       client: this.client,
     });
