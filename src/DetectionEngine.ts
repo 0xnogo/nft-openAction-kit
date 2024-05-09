@@ -1,11 +1,6 @@
 import {
   Chain,
-  arbitrum,
   mainnet,
-  optimism,
-  polygon,
-  zora,
-  base,
 } from "viem/chains";
 import {
   NFTExtraction,
@@ -15,15 +10,6 @@ import {
 } from ".";
 import { IDetectionEngine } from "./interfaces/IDetectionEngine";
 import { IPlatformService } from "./interfaces/IPlatformService";
-import { ArtBlocksService } from "./platform/ArtBlocksService";
-import {
-  OPENSEA_MINTER_ADDRESS,
-  OpenSeaService,
-} from "./platform/OpenSeaService";
-import {
-  RARIBLE_MINTER_ADDRESS,
-  RaribleService,
-} from "./platform/RaribleService";
 import {
   PODS_CHAIN_ID_MAPPING,
   PodsService,
@@ -102,7 +88,7 @@ export class DetectionEngine implements IDetectionEngine {
       platformService: ZoraService,
     };
 
-    this.nftPlatformConfig.ArtBlocks = {
+    /* this.nftPlatformConfig.ArtBlocks = {
       platformName: "ArtBlocks",
       platformLogoUrl: "https://www.artblocks.io/favicon.ico",
       urlPattern:
@@ -128,7 +114,7 @@ export class DetectionEngine implements IDetectionEngine {
         return Promise.resolve(undefined);
       },
       platformService: ArtBlocksService,
-    };
+    }; */
 
     this.nftPlatformConfig.SuperRare = {
       platformName: "SuperRare",
@@ -214,7 +200,7 @@ export class DetectionEngine implements IDetectionEngine {
     };
 
     // Rarible is conditionally added based on the presence of its API key
-    if (this.raribleApiKey) {
+    /* if (this.raribleApiKey) {
       this.nftPlatformConfig.Rarible = {
         platformName: "Rarible",
         platformLogoUrl: "https://rarible.com/favicon.ico",
@@ -259,10 +245,10 @@ export class DetectionEngine implements IDetectionEngine {
         platformService: RaribleService,
         apiKey: this.raribleApiKey,
       };
-    }
+    } */
 
     // OpenSea is conditionally added based on the presence of its API key
-    if (this.openSeaApiKey) {
+    /* if (this.openSeaApiKey) {
       this.nftPlatformConfig.OpenSea = {
         platformName: "OpenSea",
         platformLogoUrl: "https://opensea.io/favicon.ico",
@@ -319,6 +305,6 @@ export class DetectionEngine implements IDetectionEngine {
         platformService: OpenSeaService,
         apiKey: this.openSeaApiKey,
       };
-    }
+    } */
   }
 }
