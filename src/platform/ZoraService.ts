@@ -15,6 +15,7 @@ import MetadataRendererABI from "../config/abis/Zora/MetadataRenderer.json";
 import ZoraCreator1155ImplABI from "../config/abis/Zora/ZoraCreator1155Impl.json";
 import ZoraCreatorFixedPriceSaleStrategyABI from "../config/abis/Zora/ZoraCreatorFixedPriceSaleStrategy.json";
 import { NFTExtraction, ServiceConfig, UIData } from "../types";
+import { fetchIPFSMetadataImageWithFallback } from "../utils";
 
 type Sale = {
   saleStart: number;
@@ -150,11 +151,7 @@ export class ZoraService implements IPlatformService {
 
       const uri = (await erc1155Contract.read.uri([tokenId])) as string;
       const cid = uri.split("/").pop();
-      const response = await fetch(
-        `https://ipfs.decentralized-content.com/ipfs/${cid}`
-      );
-      const metadata: any = await response.json();
-      nftUri = metadata.image;
+      nftUri = await fetchIPFSMetadataImageWithFallback(cid);
     } else {
       const erc721DropContract = getContract({
         address: contract as `0x${string}`,
