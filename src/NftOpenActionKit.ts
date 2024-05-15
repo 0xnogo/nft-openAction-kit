@@ -254,7 +254,7 @@ export class NftOpenActionKit implements INftOpenActionKit {
       throw new Error("NFT details not found");
     }
     const service: IPlatformService = nftDetails.service;
-    const mintSignature = await service.getMintSignature(nftDetails);
+    const mintSignature = await service.getMintSignature(nftDetails, true);
 
     if (!mintSignature) {
       throw new Error("Mint signature not found");
