@@ -38,14 +38,17 @@ export class SuperRareService implements IPlatformService {
   }
 
   async getMintSignature(
-    nftDetails: NFTExtraction
+    nftDetails: NFTExtraction,
+    ignoreValidSale?: boolean
   ): Promise<string | undefined> {
-    const salePrice = await this.getSalePrices(
-      nftDetails.contractAddress,
-      BigInt(nftDetails.nftId)
-    );
+    if (!ignoreValidSale) {
+      const salePrice = await this.getSalePrices(
+        nftDetails.contractAddress,
+        BigInt(nftDetails.nftId)
+      );
 
-    if (!this.isSaleValid(salePrice)) return;
+      if (!this.isSaleValid(salePrice)) return;
+    }
 
     return Promise.resolve(this.mintSignature);
   }

@@ -45,8 +45,14 @@ export class OpenSeaService implements IPlatformService {
     return Promise.resolve(OPENSEA_MINTER_ADDRESS);
   }
 
-  getMintSignature(nftDetails: NFTExtraction): Promise<string | undefined> {
-    if (!this.isSaleValid(nftDetails.contractAddress, nftDetails.nftId)) {
+  getMintSignature(
+    nftDetails: NFTExtraction,
+    ignoreValidSale?: boolean
+  ): Promise<string | undefined> {
+    if (
+      !ignoreValidSale &&
+      !this.isSaleValid(nftDetails.contractAddress, nftDetails.nftId)
+    ) {
       return Promise.resolve(undefined);
     }
     return Promise.resolve(this.mintSignature);

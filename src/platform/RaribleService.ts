@@ -75,16 +75,19 @@ export class RaribleService implements IPlatformService {
   }
 
   async getMintSignature(
-    nftDetails: NFTExtraction
+    nftDetails: NFTExtraction,
+    ignoreValidSale?: boolean
   ): Promise<string | undefined> {
-    const sellOrders = await this.fetchSellOrdersByItem(
-      nftDetails.contractAddress,
-      nftDetails.nftId.toString(),
-      this.client.chain!.name.toUpperCase() as "ETHEREUM" | "POLYGON"
-    );
+    if (!ignoreValidSale) {
+      const sellOrders = await this.fetchSellOrdersByItem(
+        nftDetails.contractAddress,
+        nftDetails.nftId.toString(),
+        this.client.chain!.name.toUpperCase() as "ETHEREUM" | "POLYGON"
+      );
 
-    if (!this.isSaleValid(sellOrders)) {
-      return;
+      if (!this.isSaleValid(sellOrders)) {
+        return;
+      }
     }
 
     return this.mintSignature;

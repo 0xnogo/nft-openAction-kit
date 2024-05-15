@@ -90,9 +90,13 @@ export class ZoraService implements IPlatformService {
   }
 
   async getMintSignature(
-    nftDetails: NFTExtraction
+    nftDetails: NFTExtraction,
+    ignoreValidSale?: boolean
   ): Promise<string | undefined> {
-    const contractTypeResult = await this.getContractType(nftDetails);
+    const contractTypeResult = await this.getContractType(
+      nftDetails,
+      ignoreValidSale
+    );
     if (!contractTypeResult) {
       return;
     }
@@ -221,7 +225,8 @@ export class ZoraService implements IPlatformService {
   }
 
   private async getContractType(
-    nftDetails: NFTExtraction
+    nftDetails: NFTExtraction,
+    ignoreValidSale?: boolean
   ): Promise<{ type: string; signature: string } | undefined> {
     try {
       const sale = await this.getERC1155SaleData(
@@ -237,7 +242,8 @@ export class ZoraService implements IPlatformService {
           sale.saleEnd,
           sale.totalMinted,
           sale.maxSupply
-        )
+        ) &&
+        !ignoreValidSale
       ) {
         throw new Error("Not an ERC1155");
       }
@@ -260,7 +266,8 @@ export class ZoraService implements IPlatformService {
             sale.saleEnd,
             sale.totalMinted,
             sale.maxSupply
-          )
+          ) &&
+          !ignoreValidSale
         ) {
           throw new Error("Not a valid ERC721Drop");
         }
