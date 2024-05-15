@@ -91,9 +91,13 @@ export class PodsService implements IPlatformService {
   }
 
   async getMintSignature(
-    nftDetails: NFTExtraction<PodsSupportedChain>
+    nftDetails: NFTExtraction<PodsSupportedChain>,
+    ignoreValidSale?: boolean
   ): Promise<string | undefined> {
-    const contractTypeResult = await this.getContractType(nftDetails);
+    const contractTypeResult = await this.getContractType(
+      nftDetails,
+      ignoreValidSale
+    );
     if (!contractTypeResult) {
       return;
     }
@@ -187,7 +191,8 @@ export class PodsService implements IPlatformService {
   }
 
   private async getContractType(
-    nftDetails: NFTExtraction<PodsSupportedChain>
+    nftDetails: NFTExtraction<PodsSupportedChain>,
+    ignoreValidSale?: boolean
   ): Promise<{ type: string; signature: string } | undefined> {
     if (!(nftDetails.chain.id in PODS_CHAIN_ID_MAPPING)) {
       return;
@@ -209,7 +214,8 @@ export class PodsService implements IPlatformService {
           sale.saleEnd,
           sale.totalMinted,
           sale.maxSupply
-        )
+        ) &&
+        !ignoreValidSale
       ) {
         throw new Error("Not an ERC1155");
       }

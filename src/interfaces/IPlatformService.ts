@@ -14,7 +14,10 @@ export interface IPlatformService {
     contract: string,
     tokenId: bigint
   ): Promise<string | undefined>;
-  getMintSignature(nftDetails: NFTExtraction): Promise<string | undefined>;
+  getMintSignature(
+    nftDetails: NFTExtraction,
+    ignoreValidSale?: boolean
+  ): Promise<string | undefined>;
   getUIData(
     signature: string,
     contract: string,

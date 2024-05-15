@@ -35,7 +35,8 @@ export class ArtBlocksService implements IPlatformService {
   }
 
   async getMintSignature(
-    nftDetails: NFTExtraction
+    nftDetails: NFTExtraction,
+    ignoreValidSale?: boolean
   ): Promise<string | undefined> {
     const genArtContract = getContract({
       address: nftDetails.contractAddress as `0x${string}`,
@@ -59,7 +60,7 @@ export class ArtBlocksService implements IPlatformService {
 
     const isValid = this.isSaleValid(stateData[0], stateData[1], sale[0]);
 
-    if (!isValid) {
+    if (!ignoreValidSale && !isValid) {
       throw new Error("Sale not valid");
     }
 
