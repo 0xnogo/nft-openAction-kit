@@ -120,7 +120,7 @@ export class ZoraService implements IPlatformService {
       sale = await this.getERC721DropSaleData(contractAddress);
     }
 
-    if (!sale) {
+    if (!sale || Number(sale.saleEnd) <= Date.now()) {
       return;
     }
 
