@@ -1,6 +1,6 @@
 {
   "name": "nft-openaction-kit",
-  "version": "1.0.27",
+  "version": "1.0.28",
   "description": "Seamless integration of NFT platforms into the Lens protocol by enabling automatic detection and handling of NFT links within Lens publications.",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
