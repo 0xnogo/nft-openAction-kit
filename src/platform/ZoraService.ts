@@ -37,27 +37,33 @@ export const ZORA_CHAIN_ID_MAPPING: { [key: string]: ZoraExtendedChain } = {
   zora: {
     ...zora,
     erc1155ZoraMinter: "0x04E2516A2c207E84a1839755675dfd8eF6302F0a",
+    ethMinter: "0x777777E8850d8D6d98De2B5f64fae401F96eFF31",
   },
   eth: {
     ...mainnet,
     erc1155ZoraMinter: "0x04E2516A2c207E84a1839755675dfd8eF6302F0a",
+    ethMinter: "0x777777E8850d8D6d98De2B5f64fae401F96eFF31",
   },
   base: {
     ...base,
     erc1155ZoraMinter: "0x04E2516A2c207E84a1839755675dfd8eF6302F0a",
+    ethMinter: "0x777777E8850d8D6d98De2B5f64fae401F96eFF31",
   },
   oeth: {
     ...optimism,
     erc1155ZoraMinter: "0x3678862f04290E565cCA2EF163BAeb92Bb76790C",
+    ethMinter: "0x777777E8850d8D6d98De2B5f64fae401F96eFF31",
   },
   arb: {
     ...arbitrum,
     erc1155ZoraMinter: "0x1Cd1C1f3b8B779B50Db23155F2Cb244FCcA06B21",
+    ethMinter: "0x777777E8850d8D6d98De2B5f64fae401F96eFF31",
   },
 };
 
 export interface ZoraExtendedChain extends Chain {
   erc1155ZoraMinter: string;
+  ethMinter: string;
 }
 
 export class ZoraService implements IPlatformService {
@@ -70,7 +76,7 @@ export class ZoraService implements IPlatformService {
     "function mintWithRewards(address minter, uint256 tokenId, uint256 quantity, bytes calldata minterArguments, address mintReferral)";
   private erc721DropMintSignature =
     "function mintWithRewards(address recipient, uint256 quantity, string calldata comment, address mintReferral)";
-  private erc115PremintSignature =
+  private erc1155PremintSignature =
     "function premintV2(bytes calldata contractConfig, bytes calldata premintConfig, bytes calldata signature, uint256 quantityToMint, bytes calldata mintArguments)";
 
   constructor(config: ServiceConfig) {
@@ -357,8 +363,7 @@ export class ZoraService implements IPlatformService {
   ): boolean {
     // check the saleEnd + mint liquidity available
     const now = Math.floor(Date.now() / 1000);
-    const saleOpen =
-      saleStart <= now && (Number(saleEnd) === 0 || saleEnd >= now);
+    const saleOpen = saleStart <= now && saleEnd >= now;
     const quantityAvailable = maxSupply > totalMinted;
     return saleOpen && quantityAvailable;
   }
