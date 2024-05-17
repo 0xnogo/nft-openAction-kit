@@ -124,7 +124,15 @@ export class ZoraService implements IPlatformService {
       sale = await this.getERC721DropSaleData(contractAddress);
     }
 
-    if (!sale || Number(sale.saleEnd) <= Date.now()) {
+    if (
+      !sale ||
+      !this.isSaleValid(
+        sale.saleStart,
+        sale.saleEnd,
+        sale.totalMinted,
+        sale.maxSupply
+      )
+    ) {
       return;
     }
 
@@ -349,7 +357,8 @@ export class ZoraService implements IPlatformService {
   ): boolean {
     // check the saleEnd + mint liquidity available
     const now = Math.floor(Date.now() / 1000);
-    const saleOpen = saleStart <= now && saleEnd >= now;
+    const saleOpen =
+      saleStart <= now && (Number(saleEnd) === 0 || saleEnd >= now);
     const quantityAvailable = maxSupply > totalMinted;
     return saleOpen && quantityAvailable;
   }
