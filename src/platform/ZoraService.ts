@@ -14,8 +14,10 @@ import ERC721DropAbi from "../config/abis/Zora/ERC721Drop.json";
 import MetadataRendererABI from "../config/abis/Zora/MetadataRenderer.json";
 import ZoraCreator1155ImplABI from "../config/abis/Zora/ZoraCreator1155Impl.json";
 import ZoraCreatorFixedPriceSaleStrategyABI from "../config/abis/Zora/ZoraCreatorFixedPriceSaleStrategy.json";
-import { NFTExtraction, ServiceConfig, UIData } from "../types";
+import ZoraERC20MinterABI from "../config/abis/Zora/ZoraERC20Minter.json";
+import { MintSignature, NFTExtraction, ServiceConfig, UIData } from "../types";
 import { fetchIPFSMetadataImageWithFallback } from "../utils";
+import { ZERO_ADDRESS } from "../config/constants";
 
 type Sale = {
   saleStart: number;
@@ -23,6 +25,7 @@ type Sale = {
   totalMinted: bigint;
   maxSupply: bigint;
   price: bigint;
+  paymentToken?: string;
 };
 
 const CHAIN_ID_TO_KEY: { [id: number]: string } = {
@@ -37,33 +40,33 @@ export const ZORA_CHAIN_ID_MAPPING: { [key: string]: ZoraExtendedChain } = {
   zora: {
     ...zora,
     erc1155ZoraMinter: "0x04E2516A2c207E84a1839755675dfd8eF6302F0a",
-    ethMinter: "0x777777E8850d8D6d98De2B5f64fae401F96eFF31",
+    erc20Minter: "0x777777E8850d8D6d98De2B5f64fae401F96eFF31",
   },
   eth: {
     ...mainnet,
     erc1155ZoraMinter: "0x04E2516A2c207E84a1839755675dfd8eF6302F0a",
-    ethMinter: "0x777777E8850d8D6d98De2B5f64fae401F96eFF31",
+    erc20Minter: "0x777777E8850d8D6d98De2B5f64fae401F96eFF31",
   },
   base: {
     ...base,
     erc1155ZoraMinter: "0x04E2516A2c207E84a1839755675dfd8eF6302F0a",
-    ethMinter: "0x777777E8850d8D6d98De2B5f64fae401F96eFF31",
+    erc20Minter: "0x777777E8850d8D6d98De2B5f64fae401F96eFF31",
   },
   oeth: {
     ...optimism,
     erc1155ZoraMinter: "0x3678862f04290E565cCA2EF163BAeb92Bb76790C",
-    ethMinter: "0x777777E8850d8D6d98De2B5f64fae401F96eFF31",
+    erc20Minter: "0x777777E8850d8D6d98De2B5f64fae401F96eFF31",
   },
   arb: {
     ...arbitrum,
     erc1155ZoraMinter: "0x1Cd1C1f3b8B779B50Db23155F2Cb244FCcA06B21",
-    ethMinter: "0x777777E8850d8D6d98De2B5f64fae401F96eFF31",
+    erc20Minter: "0x777777E8850d8D6d98De2B5f64fae401F96eFF31",
   },
 };
 
 export interface ZoraExtendedChain extends Chain {
   erc1155ZoraMinter: string;
-  ethMinter: string;
+  erc20Minter: string;
 }
 
 export class ZoraService implements IPlatformService {
@@ -78,6 +81,8 @@ export class ZoraService implements IPlatformService {
     "function mintWithRewards(address recipient, uint256 quantity, string calldata comment, address mintReferral)";
   private erc1155PremintSignature =
     "function premintV2(bytes calldata contractConfig, bytes calldata premintConfig, bytes calldata signature, uint256 quantityToMint, bytes calldata mintArguments)";
+  private erc1155ERC20MintSignature =
+    "function mint(address mintTo, uint256 quantity, address tokenAddress, uint256 tokenId, uint256 totalValue, address currency, address mintReferral, string comment)";
 
   constructor(config: ServiceConfig) {
     this.client = createPublicClient({
@@ -98,16 +103,19 @@ export class ZoraService implements IPlatformService {
   async getMintSignature(
     nftDetails: NFTExtraction,
     ignoreValidSale?: boolean
-  ): Promise<string | undefined> {
+  ): Promise<MintSignature> {
     const contractTypeResult = await this.getContractType(
       nftDetails,
       ignoreValidSale
     );
     if (!contractTypeResult) {
-      return;
+      return {};
     }
 
-    return contractTypeResult.signature;
+    return {
+      mintSignature: contractTypeResult.signature,
+      paymentToken: contractTypeResult.paymentToken,
+    };
   }
 
   async getPrice(
@@ -115,7 +123,8 @@ export class ZoraService implements IPlatformService {
     nftId: bigint,
     signature: string,
     userAddress: string,
-    unit: bigint = 1n
+    unit: bigint = 1n,
+    paymentToken?: string
   ): Promise<bigint | undefined> {
     const chain = this.client.chain!;
 
@@ -145,7 +154,11 @@ export class ZoraService implements IPlatformService {
     const price = sale.price;
     const fee = this.getFees();
 
-    return (price + fee) * unit;
+    if (paymentToken && paymentToken !== ZERO_ADDRESS) {
+      return price * unit;
+    } else {
+      return (price + fee) * unit;
+    }
   }
 
   async getUIData(
@@ -213,14 +226,16 @@ export class ZoraService implements IPlatformService {
     signature: string,
     price: bigint,
     quantity: bigint,
-    profileOwnerAddress: string
+    profileOwnerAddress: string,
+    sourceUrl: string,
+    paymentToken: string
   ): Promise<any[]> {
     const minter =
       ZORA_CHAIN_ID_MAPPING[CHAIN_ID_TO_KEY[Number(this.client.chain!.id)]]
         .erc1155ZoraMinter;
     if (signature === this.erc721DropMintSignature) {
       return Promise.resolve([senderAddress, 1n, "", profileOwnerAddress]);
-    } else {
+    } else if (signature === this.erc1155MintSignature) {
       return Promise.resolve([
         minter,
         tokenId,
@@ -230,6 +245,16 @@ export class ZoraService implements IPlatformService {
           [senderAddress as `0x${string}`]
         ),
         profileOwnerAddress,
+      ]);
+    } else {
+      return Promise.resolve([
+        minter,
+        quantity,
+        tokenId,
+        price,
+        paymentToken,
+        profileOwnerAddress,
+        "", // comment field, can be left blank
       ]);
     }
   }
@@ -241,7 +266,9 @@ export class ZoraService implements IPlatformService {
   private async getContractType(
     nftDetails: NFTExtraction,
     ignoreValidSale?: boolean
-  ): Promise<{ type: string; signature: string } | undefined> {
+  ): Promise<
+    { type: string; signature: string; paymentToken?: string } | undefined
+  > {
     try {
       const sale = await this.getERC1155SaleData(
         ZORA_CHAIN_ID_MAPPING[CHAIN_ID_TO_KEY[nftDetails.chain.id]],
@@ -259,7 +286,31 @@ export class ZoraService implements IPlatformService {
         ) &&
         !ignoreValidSale
       ) {
-        throw new Error("Not an ERC1155");
+        // If 1155 sale exists but is not valid, check for ERC20 Minter
+        const erc20Sale = await this.getERC1155SaleData(
+          ZORA_CHAIN_ID_MAPPING[CHAIN_ID_TO_KEY[nftDetails.chain.id]],
+          nftDetails.contractAddress,
+          nftDetails.nftId,
+          true
+        );
+
+        if (
+          erc20Sale &&
+          this.isSaleValid(
+            erc20Sale.saleStart,
+            erc20Sale.saleEnd,
+            erc20Sale.totalMinted,
+            erc20Sale.maxSupply
+          )
+        ) {
+          return {
+            type: "ZoraCreator1155Impl",
+            signature: this.erc1155ERC20MintSignature,
+            paymentToken: erc20Sale.paymentToken,
+          };
+        } else {
+          throw new Error("Invalid ERC1155 sale");
+        }
       }
 
       return {
@@ -299,37 +350,72 @@ export class ZoraService implements IPlatformService {
   private async getERC1155SaleData(
     chain: ZoraExtendedChain,
     contractAddress: string,
-    nftId: string
+    nftId: string,
+    erc20Minter?: boolean
   ): Promise<Sale | undefined> {
-    const fixedPriceSaleStrategyContract = getContract({
-      address: chain.erc1155ZoraMinter as `0x${string}`,
-      abi: ZoraCreatorFixedPriceSaleStrategyABI,
-      client: this.client,
-    });
+    if (erc20Minter) {
+      const erc20MinterContract = getContract({
+        address: chain.erc20Minter as `0x${string}`,
+        abi: ZoraERC20MinterABI,
+        client: this.client,
+      });
 
-    const result: any = await fixedPriceSaleStrategyContract.read.sale([
-      contractAddress as `0x${string}`,
-      nftId,
-    ]);
-    const erc1155Contract = getContract({
-      address: contractAddress as `0x${string}`,
-      abi: ZoraCreator1155ImplABI,
-      client: this.client,
-    });
+      const result: any = await erc20MinterContract.read.sale([
+        contractAddress as `0x${string}`,
+        nftId,
+      ]);
+      const erc1155Contract = getContract({
+        address: contractAddress as `0x${string}`,
+        abi: ZoraCreator1155ImplABI,
+        client: this.client,
+      });
 
-    const tokenInfo: any = await erc1155Contract.read.getTokenInfo([nftId]);
+      const tokenInfo: any = await erc1155Contract.read.getTokenInfo([nftId]);
 
-    if (!result || !tokenInfo) {
-      return;
+      if (!result || !tokenInfo) {
+        return;
+      }
+
+      return {
+        saleStart: result.saleStart,
+        saleEnd: result.saleEnd,
+        totalMinted: tokenInfo.totalMinted,
+        maxSupply: tokenInfo.maxSupply,
+        price: result.pricePerToken,
+        paymentToken: result.currency,
+      };
+    } else {
+      const fixedPriceSaleStrategyContract = getContract({
+        address: chain.erc1155ZoraMinter as `0x${string}`,
+        abi: ZoraCreatorFixedPriceSaleStrategyABI,
+        client: this.client,
+      });
+
+      const result: any = await fixedPriceSaleStrategyContract.read.sale([
+        contractAddress as `0x${string}`,
+        nftId,
+      ]);
+
+      const erc1155Contract = getContract({
+        address: contractAddress as `0x${string}`,
+        abi: ZoraCreator1155ImplABI,
+        client: this.client,
+      });
+
+      const tokenInfo: any = await erc1155Contract.read.getTokenInfo([nftId]);
+
+      if (!result || !tokenInfo) {
+        return;
+      }
+
+      return {
+        saleStart: result.saleStart,
+        saleEnd: result.saleEnd,
+        totalMinted: tokenInfo.totalMinted,
+        maxSupply: tokenInfo.maxSupply,
+        price: result.pricePerToken,
+      };
     }
-
-    return {
-      saleStart: result.saleStart,
-      saleEnd: result.saleEnd,
-      totalMinted: tokenInfo.totalMinted,
-      maxSupply: tokenInfo.maxSupply,
-      price: result.pricePerToken,
-    };
   }
 
   private async getERC721DropSaleData(
