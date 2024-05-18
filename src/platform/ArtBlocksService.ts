@@ -1,7 +1,7 @@
 import { PublicClient, createPublicClient, getContract, http } from "viem";
 import { IPlatformService } from "../interfaces/IPlatformService";
 
-import { NFTExtraction, ServiceConfig, UIData } from "../types";
+import { MintSignature, NFTExtraction, ServiceConfig, UIData } from "../types";
 
 import GenArt721CoreV3ABI from "../config/abis/ArtBlocks/GenArt721CoreV3.json";
 import MinterDAExpSettlementV3 from "../config/abis/ArtBlocks/MinterDAExpSettlementV3.json";
@@ -37,7 +37,7 @@ export class ArtBlocksService implements IPlatformService {
   async getMintSignature(
     nftDetails: NFTExtraction,
     ignoreValidSale?: boolean
-  ): Promise<string | undefined> {
+  ): Promise<MintSignature> {
     const genArtContract = getContract({
       address: nftDetails.contractAddress as `0x${string}`,
       abi: GenArt721CoreV3ABI,
@@ -64,7 +64,7 @@ export class ArtBlocksService implements IPlatformService {
       throw new Error("Sale not valid");
     }
 
-    return this.mintSignature;
+    return { mintSignature: this.mintSignature };
   }
 
   async getPrice(

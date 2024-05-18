@@ -12,7 +12,7 @@ import {
   getAddress,
 } from "viem";
 import { mainnet } from "viem/chains";
-import { NFTExtraction, ServiceConfig, UIData } from "..";
+import { MintSignature, NFTExtraction, ServiceConfig, UIData } from "..";
 import { ZERO_ADDRESS } from "../config/constants";
 import { IPlatformService } from "../interfaces/IPlatformService";
 
@@ -77,7 +77,7 @@ export class RaribleService implements IPlatformService {
   async getMintSignature(
     nftDetails: NFTExtraction,
     ignoreValidSale?: boolean
-  ): Promise<string | undefined> {
+  ): Promise<MintSignature> {
     if (!ignoreValidSale) {
       const sellOrders = await this.fetchSellOrdersByItem(
         nftDetails.contractAddress,
@@ -86,11 +86,11 @@ export class RaribleService implements IPlatformService {
       );
 
       if (!this.isSaleValid(sellOrders)) {
-        return;
+        return {};
       }
     }
 
-    return this.mintSignature;
+    return { mintSignature: this.mintSignature };
   }
 
   async getUIData(
