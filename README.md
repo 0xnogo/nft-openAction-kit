@@ -8,6 +8,24 @@ When a user posts a link to an NFT in a Lens Publication, this package will pars
 
 When a post appears in a Lens application feed with the NFT minting action attached, the app can use this package to populate metadata to appear on a UI and generate calldata to perform the transaction.
 
+## Supported Collections
+
+### Zora
+
+- Any NFT that is actively minting and is priced in ETH
+  - NFTs that are priced in other ERC20 tokens are not currently supported
+  - If an NFT page is listed as "secondary" this means it is no longer a primary mint and is not supported
+
+### Pods Media
+
+- Any NFT that is actively minting
+
+### Under Construction:
+
+- SuperRare
+- Rarible
+- OpenSea
+
 ## Features
 
 - Function 1: `detectAndReturnCalldata`. Detects the NFT platform and returns the calldata to be used in the post action.
