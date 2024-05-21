@@ -357,8 +357,7 @@ export class ZoraService implements IPlatformService {
   ): boolean {
     // check the saleEnd + mint liquidity available
     const now = Math.floor(Date.now() / 1000);
-    const saleOpen =
-      saleStart <= now && (Number(saleEnd) === 0 || saleEnd >= now);
+    const saleOpen = saleStart <= now && saleEnd >= now;
     const quantityAvailable = maxSupply > totalMinted;
     return saleOpen && quantityAvailable;
   }
