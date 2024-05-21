@@ -1,7 +1,4 @@
-import {
-  Chain,
-  mainnet,
-} from "viem/chains";
+import { Chain, mainnet } from "viem/chains";
 import {
   NFTExtraction,
   NftPlatformConfig,
@@ -116,7 +113,7 @@ export class DetectionEngine implements IDetectionEngine {
       platformService: ArtBlocksService,
     }; */
 
-    this.nftPlatformConfig.SuperRare = {
+    /*     this.nftPlatformConfig.SuperRare = {
       platformName: "SuperRare",
       platformLogoUrl: "https://superrare.com/favicon.ico",
       urlPattern:
@@ -152,7 +149,7 @@ export class DetectionEngine implements IDetectionEngine {
         return Promise.resolve(undefined);
       },
       platformService: SuperRareService,
-    };
+    }; */
 
     this.nftPlatformConfig.Pods = {
       platformName: "Pods",
