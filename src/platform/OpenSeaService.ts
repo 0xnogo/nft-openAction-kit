@@ -1,7 +1,7 @@
 import axios from "axios";
 import { Client, createPublicClient, http } from "viem";
 import { IPlatformService } from "../interfaces/IPlatformService";
-import { NFTExtraction, ServiceConfig, UIData } from "../types";
+import { MintSignature, NFTExtraction, ServiceConfig, UIData } from "../types";
 
 const chainToOpenSeaChain = {
   137: "matic",
@@ -48,14 +48,14 @@ export class OpenSeaService implements IPlatformService {
   getMintSignature(
     nftDetails: NFTExtraction,
     ignoreValidSale?: boolean
-  ): Promise<string | undefined> {
+  ): Promise<MintSignature> {
     if (
       !ignoreValidSale &&
       !this.isSaleValid(nftDetails.contractAddress, nftDetails.nftId)
     ) {
-      return Promise.resolve(undefined);
+      return Promise.resolve({});
     }
-    return Promise.resolve(this.mintSignature);
+    return Promise.resolve({ mintSignature: this.mintSignature });
   }
 
   async getUIData(

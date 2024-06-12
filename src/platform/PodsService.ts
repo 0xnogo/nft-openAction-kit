@@ -12,7 +12,7 @@ import ZoraCreator1155ImplABI from "../config/abis/Pods/ZoraCreator1155Impl";
 import ZoraCreatorFixedPriceSaleStrategyABI from "../config/abis/Zora/ZoraCreatorFixedPriceSaleStrategy.json";
 import { ARWEAVE_GATEWAY } from "../config/endpoints";
 import { IPlatformService } from "../interfaces/IPlatformService";
-import type { NFTExtraction, UIData } from "../types";
+import type { MintSignature, NFTExtraction, UIData } from "../types";
 
 // Although Pods does have a versioned metadata standard, for the purposes of
 // these platform configuration bindings, this is all we need to care about for
@@ -93,16 +93,16 @@ export class PodsService implements IPlatformService {
   async getMintSignature(
     nftDetails: NFTExtraction<PodsSupportedChain>,
     ignoreValidSale?: boolean
-  ): Promise<string | undefined> {
+  ): Promise<MintSignature> {
     const contractTypeResult = await this.getContractType(
       nftDetails,
       ignoreValidSale
     );
     if (!contractTypeResult) {
-      return;
+      return {};
     }
 
-    return contractTypeResult.signature;
+    return { mintSignature: contractTypeResult.signature };
   }
 
   async getPrice(

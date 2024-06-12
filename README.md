@@ -162,7 +162,7 @@ interface IPlatformService {
     contract: string,
     tokenId: bigint
   ): Promise<string | undefined>;
-  getMintSignature(nftDetails: NFTExtraction): Promise<string | undefined>;
+  getMintSignature(nftDetails: NFTExtraction): Promise<MintSignature>;
   getUIData(
     signature: string,
     contract: string,
@@ -176,7 +176,8 @@ interface IPlatformService {
     signature: string,
     userAddress: string,
     unit?: bigint,
-    sourceUrl?: string
+    sourceUrl?: string,
+    paymentToken?: string
   ): Promise<bigint | undefined>;
   getArgs(
     contractAddress: string,
@@ -186,7 +187,8 @@ interface IPlatformService {
     price: bigint,
     quantity: bigint,
     profileOwnerAddress: string,
-    sourceUrl?: string
+    sourceUrl?: string,
+    paymentToken?: string
   ): Promise<any[]>;
 }
 ```

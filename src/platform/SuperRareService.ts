@@ -1,5 +1,5 @@
 import { PublicClient, createPublicClient, getContract, http } from "viem";
-import { NFTExtraction, ServiceConfig, UIData } from "..";
+import { MintSignature, NFTExtraction, ServiceConfig, UIData } from "..";
 import ERC721ABI from "../config/abis/ERC721.json";
 import OwnableABI from "../config/abis/Ownable.json";
 import SuperRareMarketplaceABI from "../config/abis/SuperRare/SuperRareMarketplace.json";
@@ -40,17 +40,17 @@ export class SuperRareService implements IPlatformService {
   async getMintSignature(
     nftDetails: NFTExtraction,
     ignoreValidSale?: boolean
-  ): Promise<string | undefined> {
+  ): Promise<MintSignature> {
     if (!ignoreValidSale) {
       const salePrice = await this.getSalePrices(
         nftDetails.contractAddress,
         BigInt(nftDetails.nftId)
       );
 
-      if (!this.isSaleValid(salePrice)) return;
+      if (!this.isSaleValid(salePrice)) return {};
     }
 
-    return Promise.resolve(this.mintSignature);
+    return Promise.resolve({ mintSignature: this.mintSignature });
   }
 
   async getUIData(

@@ -52,7 +52,10 @@ export class NftOpenActionKit implements INftOpenActionKit {
     const nftDetails = await this.detectionEngine.detectNFTDetails(contentURI);
     if (nftDetails) {
       const service: IPlatformService = nftDetails.service;
-      const mintSignature = await service.getMintSignature(nftDetails);
+      const { mintSignature, paymentToken } = await service.getMintSignature(
+        nftDetails
+      );
+
       if (!mintSignature) {
         return;
       }
@@ -61,13 +64,13 @@ export class NftOpenActionKit implements INftOpenActionKit {
         ? nftDetails.minterAddress
         : nftDetails.contractAddress;
       const nftId = nftDetails.nftId != null ? BigInt(nftDetails.nftId) : 0n;
-      const paymentToken = ZERO_ADDRESS;
+      const paymentTokenParam = paymentToken ?? ZERO_ADDRESS;
       const cost = parseUnits("0", 18); // workaround - price fetched in actionDataFromPost
       const dstChainId = nftDetails.chain.id;
       return this.calldataGenerator(
         nftAddress,
         nftId,
-        paymentToken,
+        paymentTokenParam,
         BigInt(dstChainId),
         cost,
         BigInt(publishingClientProfileId),
@@ -118,7 +121,8 @@ export class NftOpenActionKit implements INftOpenActionKit {
       signature,
       senderAddress,
       undefined,
-      sourceUrl
+      sourceUrl,
+      initData[0].paymentToken
     );
 
     if (!price) {
@@ -156,7 +160,8 @@ export class NftOpenActionKit implements INftOpenActionKit {
           price,
           BigInt(quantity),
           profileOwnerAddress,
-          sourceUrl
+          sourceUrl,
+          initData[0].paymentToken
         ),
       },
     };
@@ -254,7 +259,7 @@ export class NftOpenActionKit implements INftOpenActionKit {
       throw new Error("NFT details not found");
     }
     const service: IPlatformService = nftDetails.service;
-    const mintSignature = await service.getMintSignature(nftDetails, true);
+    const { mintSignature } = await service.getMintSignature(nftDetails, true);
 
     if (!mintSignature) {
       throw new Error("Mint signature not found");
