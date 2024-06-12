@@ -133,7 +133,8 @@ export class ZoraService implements IPlatformService {
       sale = await this.getERC1155SaleData(
         ZORA_CHAIN_ID_MAPPING[CHAIN_ID_TO_KEY[chain.id]],
         contractAddress,
-        nftId.toString()
+        nftId.toString(),
+        signature === this.erc1155ERC20MintSignature ? true : false
       );
     } else {
       sale = await this.getERC721DropSaleData(contractAddress);
@@ -260,7 +261,10 @@ export class ZoraService implements IPlatformService {
   }
 
   private isERC1155(signature: string): boolean {
-    return signature === this.erc1155MintSignature;
+    return (
+      signature === this.erc1155MintSignature ||
+      signature === this.erc1155ERC20MintSignature
+    );
   }
 
   private async getContractType(
