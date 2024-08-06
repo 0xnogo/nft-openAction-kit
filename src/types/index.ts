@@ -27,6 +27,12 @@ type Token = {
   chainId: string;
 };
 
+export type ZoraAdditional = {
+  animation_url?: string;
+};
+
+export type PodsAdditional = {};
+
 export type UIData = {
   platformName: string;
   platformLogoUrl: string;
@@ -35,6 +41,8 @@ export type UIData = {
   nftCreatorAddress?: string;
   tokenStandard: string;
   dstChainId: number;
+  zoraAdditional?: ZoraAdditional;
+  podsAdditional?: PodsAdditional;
 };
 
 export type ActionData = {

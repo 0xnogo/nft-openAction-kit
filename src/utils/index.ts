@@ -4,6 +4,7 @@ import {
   DESTINATION_CHAINS,
   IPFS_GATEWAY,
 } from "../config/constants";
+import { ZoraAdditional } from "../types";
 
 export const bigintSerializer = (key: string, value: unknown): unknown => {
   if (typeof value === "bigint") {
@@ -26,6 +27,21 @@ export const idToChain = (id: number): Chain => {
     chains: DESTINATION_CHAINS,
     id: id as any,
   });
+};
+
+export const fetchZoraMetadata = async (uri: string) => {
+  const url = sanitizeDStorageUrl(uri);
+  try {
+    const response = await fetchWithTimeout(url, 3000);
+    if (response.ok) {
+      const metadata: any = await response.json();
+      return { animation_url: metadata.animation_url, image: metadata.image };
+    }
+  } catch (error) {
+    console.warn(`Error fetching from ${url}: ${error}`);
+  }
+
+  return { image: "" };
 };
 
 export const fetchIPFSMetadataImageWithFallback = async (
