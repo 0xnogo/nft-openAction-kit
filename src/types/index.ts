@@ -31,7 +31,7 @@ export type ZoraAdditional = {
   animation_url?: string;
 };
 
-export type PodsAdditional = {};
+export type PodsAdditional = ZoraAdditional & {};
 
 export type UIData = {
   platformName: string;

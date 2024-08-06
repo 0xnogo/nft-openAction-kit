@@ -145,7 +145,6 @@ export class ZoraService implements IPlatformService {
     let nftName: string = "";
     let nftUri: string = "";
     let nftCreatorAddress: string = "";
-    let zoraAdditional: ZoraAdditional = {};
 
     if (this.isERC1155(signature)) {
       const erc1155Contract = getContract({

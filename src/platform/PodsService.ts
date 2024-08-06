@@ -13,6 +13,7 @@ import ZoraCreatorFixedPriceSaleStrategyABI from "../config/abis/Zora/ZoraCreato
 import { ARWEAVE_GATEWAY } from "../config/endpoints";
 import { IPlatformService } from "../interfaces/IPlatformService";
 import type { NFTExtraction, UIData } from "../types";
+import { fetchZoraMetadata } from "../utils";
 
 // Although Pods does have a versioned metadata standard, for the purposes of
 // these platform configuration bindings, this is all we need to care about for
@@ -142,21 +143,18 @@ export class PodsService implements IPlatformService {
         client: this.client,
       });
 
-      const metadataURI = (await podcastContract.read.uri([tokenId])).replace(
-        // Ensure `ar://` scheme is replaced with an Arweave gateway instead.
-        /^ar:\/\//,
-        `${ARWEAVE_GATEWAY}/`
-      );
-      const response = await fetch(metadataURI);
+      const metadataURI = await podcastContract.read.uri([tokenId]);
+      const response = await fetchZoraMetadata(metadataURI);
 
       return {
         platformName: this.platformName,
         platformLogoUrl: this.platformLogoUrl,
         nftName: await podcastContract.read.name(),
-        nftUri: ((await response.json()) as PodsMetadataStandard).image,
+        nftUri: response.image,
         nftCreatorAddress: await podcastContract.read.owner(),
         tokenStandard: "erc1155",
         dstChainId: Number(dstChainId),
+        podsAdditional: response.animation_url,
       };
     } catch (err) {
       console.error(err);
