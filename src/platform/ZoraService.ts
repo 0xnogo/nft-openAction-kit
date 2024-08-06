@@ -10,7 +10,6 @@ import {
 import { IPlatformService } from "../interfaces/IPlatformService";
 
 import { arbitrum, base, mainnet, optimism, zora } from "viem/chains";
-import ERC721DropAbi from "../config/abis/Zora/ERC721Drop.json";
 import ZoraCreator1155ImplABI from "../config/abis/Zora/ZoraCreator1155Impl.json";
 import ZoraCreatorFixedPriceSaleStrategyABI from "../config/abis/Zora/ZoraCreatorFixedPriceSaleStrategy.json";
 import { NFTExtraction, ServiceConfig, UIData, ZoraAdditional } from "../types";
@@ -67,10 +66,6 @@ export class ZoraService implements IPlatformService {
 
   private erc1155MintSignature =
     "function mintWithRewards(address minter, uint256 tokenId, uint256 quantity, bytes calldata minterArguments, address mintReferral)";
-  private erc721DropMintSignature =
-    "function mintWithRewards(address recipient, uint256 quantity, string calldata comment, address mintReferral)";
-  private erc115PremintSignature =
-    "function premintV2(bytes calldata contractConfig, bytes calldata premintConfig, bytes calldata signature, uint256 quantityToMint, bytes calldata mintArguments)";
 
   constructor(config: ServiceConfig) {
     this.client = createPublicClient({
@@ -120,7 +115,7 @@ export class ZoraService implements IPlatformService {
         nftId.toString()
       );
     } else {
-      sale = await this.getERC721DropSaleData(contractAddress);
+      throw new Error("Unsupported Zora NFT type");
     }
 
     if (
@@ -191,20 +186,17 @@ export class ZoraService implements IPlatformService {
     const minter =
       ZORA_CHAIN_ID_MAPPING[CHAIN_ID_TO_KEY[Number(this.client.chain!.id)]]
         .erc1155ZoraMinter;
-    if (signature === this.erc721DropMintSignature) {
-      return Promise.resolve([senderAddress, 1n, "", profileOwnerAddress]);
-    } else {
-      return Promise.resolve([
-        minter,
-        tokenId,
-        quantity,
-        encodeAbiParameters(
-          [{ type: "address" }],
-          [senderAddress as `0x${string}`]
-        ),
-        profileOwnerAddress,
-      ]);
-    }
+
+    return Promise.resolve([
+      minter,
+      tokenId,
+      quantity,
+      encodeAbiParameters(
+        [{ type: "address" }],
+        [senderAddress as `0x${string}`]
+      ),
+      profileOwnerAddress,
+    ]);
   }
 
   private isERC1155(signature: string): boolean {
@@ -241,31 +233,7 @@ export class ZoraService implements IPlatformService {
       };
     } catch (error) {
       // If the above call fail, it might be an ERC721Drop
-      try {
-        const sale = await this.getERC721DropSaleData(
-          nftDetails.contractAddress
-        );
-
-        if (
-          sale &&
-          !this.isSaleValid(
-            sale.saleStart,
-            sale.saleEnd,
-            sale.totalMinted,
-            sale.maxSupply
-          ) &&
-          !ignoreValidSale
-        ) {
-          throw new Error("Not a valid ERC721Drop");
-        }
-
-        return {
-          type: "ERC721Drop",
-          signature: this.erc721DropMintSignature,
-        };
-      } catch (error) {
-        throw new Error("Unrecognized contract");
-      }
+      throw new Error(`Unrecognized Zora contract type: ${error}`);
     }
   }
 
@@ -302,29 +270,6 @@ export class ZoraService implements IPlatformService {
       totalMinted: tokenInfo.totalMinted,
       maxSupply: tokenInfo.maxSupply,
       price: result.pricePerToken,
-    };
-  }
-
-  private async getERC721DropSaleData(
-    contractAddress: string
-  ): Promise<Sale | undefined> {
-    const erc721DropContract = getContract({
-      address: contractAddress as `0x${string}`,
-      abi: ERC721DropAbi,
-      client: this.client,
-    });
-
-    const salesDetails: any = await erc721DropContract.read.saleDetails();
-
-    if (!salesDetails) {
-      return;
-    }
-    return {
-      saleStart: salesDetails.publicSaleStart,
-      saleEnd: salesDetails.publicSaleEnd,
-      totalMinted: salesDetails.totalMinted,
-      maxSupply: salesDetails.maxSupply,
-      price: salesDetails.publicSalePrice,
     };
   }
 
