@@ -1,12 +1,19 @@
 import {
   createPublicClient,
   encodeAbiParameters,
+  fallback,
   getContract,
   http,
   parseEther,
 } from "viem";
 import { base, mainnet, optimism, zora } from "viem/chains";
-import type { Address, PublicClient, Transport } from "viem";
+import type {
+  Address,
+  FallbackTransport,
+  HttpTransport,
+  PublicClient,
+  Transport,
+} from "viem";
 
 import ZoraCreator1155ImplABI from "../config/abis/Pods/ZoraCreator1155Impl";
 import ZoraCreatorFixedPriceSaleStrategyABI from "../config/abis/Zora/ZoraCreatorFixedPriceSaleStrategy.json";
@@ -75,9 +82,18 @@ export class PodsService implements IPlatformService {
     "function mintWithRewards(address minter, uint256 tokenId, uint256 quantity, bytes calldata minterArguments, address mintReferral)";
 
   constructor(config: PodsServiceConfig) {
+    /*   
+
+    TODO: allow integrator to pass RPC url mapping as NftOpenActionKit contructor and pass as fallback array
+  if (config.chain.id === zora.id) {
+      transportConfig = fallback([http(""), http("")]);
+    } else if (config.chain.id === base.id) {
+      transportConfig = fallback([http(""), http("")]);
+    } */
+    let transportConfig: HttpTransport | FallbackTransport = http();
     this.client = createPublicClient({
       chain: config.chain,
-      transport: http(),
+      transport: transportConfig,
     });
     this.platformName = config.platformName;
     this.platformLogoUrl = config.platformLogoUrl;

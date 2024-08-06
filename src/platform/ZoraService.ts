@@ -1,5 +1,7 @@
 import {
   Chain,
+  FallbackTransport,
+  HttpTransport,
   PublicClient,
   createPublicClient,
   encodeAbiParameters,
@@ -74,9 +76,17 @@ export class ZoraService implements IPlatformService {
     "function premintV2(bytes calldata contractConfig, bytes calldata premintConfig, bytes calldata signature, uint256 quantityToMint, bytes calldata mintArguments)";
 
   constructor(config: ServiceConfig) {
+    /*   
+    TODO: allow integrator to pass RPC url mapping as NftOpenActionKit contructor and pass as fallback array
+  if (config.chain.id === zora.id) {
+      transportConfig = fallback([http(""), http("")]);
+    } else if (config.chain.id === base.id) {
+      transportConfig = fallback([http(""), http("")]);
+    } */
+    let transportConfig: HttpTransport | FallbackTransport = http();
     this.client = createPublicClient({
       chain: config.chain,
-      transport: http(),
+      transport: transportConfig,
     });
     this.platformName = config.platformName;
     this.platformLogoUrl = config.platformLogoUrl;
