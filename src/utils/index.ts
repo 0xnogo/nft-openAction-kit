@@ -1,5 +1,9 @@
 import { Chain, extractChain } from "viem";
-import { DESTINATION_CHAINS } from "../config/constants";
+import {
+  ARWEAVE_GATEWAY,
+  DESTINATION_CHAINS,
+  IPFS_GATEWAY,
+} from "../config/constants";
 
 export const bigintSerializer = (key: string, value: unknown): unknown => {
   if (typeof value === "bigint") {
@@ -63,4 +67,21 @@ export const fetchWithTimeout = (
         reject(err);
       });
   });
+};
+
+export const sanitizeDStorageUrl = (hash?: string): string => {
+  if (!hash) {
+    return "";
+  }
+
+  const ipfsGateway = `${IPFS_GATEWAY}/`;
+  const arweaveGateway = `${ARWEAVE_GATEWAY}/`;
+
+  let link = hash.replace(/^Qm[1-9A-Za-z]{44}/gm, `${IPFS_GATEWAY}/${hash}`);
+  link = link.replace("https://ipfs.io/ipfs/", ipfsGateway);
+  link = link.replace("ipfs://ipfs/", ipfsGateway);
+  link = link.replace("ipfs://", ipfsGateway);
+  link = link.replace("ar://", arweaveGateway);
+
+  return link;
 };

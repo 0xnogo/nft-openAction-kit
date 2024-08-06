@@ -38,3 +38,6 @@ export const InitData = [
     ],
   },
 ] as const;
+
+export const IPFS_GATEWAY = "https://gw.ipfs-lens.dev/ipfs/";
+export const ARWEAVE_GATEWAY = "https://gateway.irys.xyz";
