@@ -154,7 +154,7 @@ export class PodsService implements IPlatformService {
         nftCreatorAddress: await podcastContract.read.owner(),
         tokenStandard: "erc1155",
         dstChainId: Number(dstChainId),
-        podsAdditional: response.animation_url,
+        podsAdditional: response,
       };
     } catch (err) {
       console.error(err);

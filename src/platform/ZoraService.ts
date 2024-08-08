@@ -12,7 +12,7 @@ import { IPlatformService } from "../interfaces/IPlatformService";
 import { arbitrum, base, mainnet, optimism, zora } from "viem/chains";
 import ZoraCreator1155ImplABI from "../config/abis/Zora/ZoraCreator1155Impl.json";
 import ZoraCreatorFixedPriceSaleStrategyABI from "../config/abis/Zora/ZoraCreatorFixedPriceSaleStrategy.json";
-import { NFTExtraction, ServiceConfig, UIData, ZoraAdditional } from "../types";
+import { NFTExtraction, ServiceConfig, UIData } from "../types";
 import { fetchZoraMetadata } from "../utils";
 
 type Sale = {
@@ -166,7 +166,7 @@ export class ZoraService implements IPlatformService {
         nftCreatorAddress,
         tokenStandard: this.isERC1155(signature) ? "erc1155" : "erc721",
         dstChainId: Number(dstChainId),
-        zoraAdditional: response.animation_url,
+        zoraAdditional: response,
       };
     } else {
       throw new Error("Unsupported Zora NFT type");

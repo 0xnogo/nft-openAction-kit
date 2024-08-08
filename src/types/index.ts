@@ -27,11 +27,53 @@ type Token = {
   chainId: string;
 };
 
-export type ZoraAdditional = {
+type ZoraAdditional = {
+  name?: string;
+  description?: string;
+  image?: string;
   animation_url?: string;
+  content?: {
+    mime?: string;
+    uri?: string;
+  };
 };
 
-export type PodsAdditional = ZoraAdditional & {};
+export type PodsAdditional = {
+  animation_url?: string;
+  artwork?: {
+    kind?: string;
+    type?: string;
+    uri?: string;
+  };
+  collection?: string;
+  credits?: {
+    name?: string;
+    role?: string;
+  }[];
+  description?: string;
+  episodeNumber?: number;
+  episodeTitle?: string;
+  external_url?: string;
+  image?: string;
+  name?: string;
+  podcast?: string;
+  primaryMedia?: {
+    kind?: string;
+    type?: string;
+    uri?: string;
+    duration?: number;
+  };
+  properties?: {
+    Collection?: string;
+    Podcast?: string;
+    guest_1?: Record<string, unknown>;
+    host_1?: Record<string, unknown>;
+    host_2?: Record<string, unknown>;
+    [key: string]: unknown;
+  };
+  publishedAt?: string;
+  version?: string;
+};
 
 export type UIData = {
   platformName: string;

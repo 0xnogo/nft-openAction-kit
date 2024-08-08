@@ -3,8 +3,8 @@ import {
   ARWEAVE_GATEWAY,
   DESTINATION_CHAINS,
   IPFS_GATEWAY,
+  IPFS_GATEWAY_FALLBACK,
 } from "../config/constants";
-import { ZoraAdditional } from "../types";
 
 export const bigintSerializer = (key: string, value: unknown): unknown => {
   if (typeof value === "bigint") {
@@ -30,15 +30,22 @@ export const idToChain = (id: number): Chain => {
 };
 
 export const fetchZoraMetadata = async (uri: string) => {
-  const url = sanitizeDStorageUrl(uri);
   try {
+    const url = sanitizeDStorageUrl(uri);
     const response = await fetchWithTimeout(url, 3000);
     if (response.ok) {
       const metadata: any = await response.json();
-      return { animation_url: metadata.animation_url, image: metadata.image };
+      return metadata;
     }
   } catch (error) {
-    console.warn(`Error fetching from ${url}: ${error}`);
+    const url = sanitizeDStorageUrl(uri, true);
+    const response = await fetchWithTimeout(url, 3000);
+    if (response.ok) {
+      const metadata: any = await response.json();
+      return metadata;
+    } else {
+      console.warn(`Error fetching from ${url}: ${error}`);
+    }
   }
 
   return { image: "" };
@@ -85,12 +92,13 @@ export const fetchWithTimeout = (
   });
 };
 
-export const sanitizeDStorageUrl = (hash?: string): string => {
-  if (!hash) {
-    return "";
-  }
-
-  const ipfsGateway = `${IPFS_GATEWAY}/`;
+export const sanitizeDStorageUrl = (
+  hash: string,
+  fallback?: boolean
+): string => {
+  const ipfsGateway = Boolean(fallback)
+    ? `${IPFS_GATEWAY_FALLBACK}/`
+    : `${IPFS_GATEWAY}/`;
   const arweaveGateway = `${ARWEAVE_GATEWAY}/`;
 
   let link = hash.replace(/^Qm[1-9A-Za-z]{44}/gm, `${IPFS_GATEWAY}/${hash}`);
