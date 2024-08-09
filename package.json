@@ -1,6 +1,6 @@
 {
   "name": "nft-openaction-kit",
-  "version": "1.0.28",
+  "version": "1.0.29",
   "description": "Seamless integration of NFT platforms into the Lens protocol by enabling automatic detection and handling of NFT links within Lens publications.",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
@@ -15,6 +15,7 @@
   "author": "nogo",
   "license": "ISC",
   "devDependencies": {
+    "@changesets/cli": "^2.27.7",
     "@types/jest": "^29.5.11",
     "jest": "^29.7.0",
     "jest-fetch-mock": "^3.0.3",

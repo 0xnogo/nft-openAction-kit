@@ -1,5 +1,10 @@
 import { Chain, extractChain } from "viem";
-import { DESTINATION_CHAINS } from "../config/constants";
+import {
+  ARWEAVE_GATEWAY,
+  DESTINATION_CHAINS,
+  IPFS_GATEWAY,
+  IPFS_GATEWAY_FALLBACK,
+} from "../config/constants";
 
 export const bigintSerializer = (key: string, value: unknown): unknown => {
   if (typeof value === "bigint") {
@@ -22,6 +27,28 @@ export const idToChain = (id: number): Chain => {
     chains: DESTINATION_CHAINS,
     id: id as any,
   });
+};
+
+export const fetchZoraMetadata = async (uri: string) => {
+  try {
+    const url = sanitizeDStorageUrl(uri);
+    const response = await fetchWithTimeout(url, 3000);
+    if (response.ok) {
+      const metadata: any = await response.json();
+      return metadata;
+    }
+  } catch (error) {
+    const url = sanitizeDStorageUrl(uri, true);
+    const response = await fetchWithTimeout(url, 3000);
+    if (response.ok) {
+      const metadata: any = await response.json();
+      return metadata;
+    } else {
+      console.warn(`Error fetching from ${url}: ${error}`);
+    }
+  }
+
+  return { image: "" };
 };
 
 export const fetchIPFSMetadataImageWithFallback = async (
@@ -63,4 +90,22 @@ export const fetchWithTimeout = (
         reject(err);
       });
   });
+};
+
+export const sanitizeDStorageUrl = (
+  hash: string,
+  fallback?: boolean
+): string => {
+  const ipfsGateway = Boolean(fallback)
+    ? `${IPFS_GATEWAY_FALLBACK}/`
+    : `${IPFS_GATEWAY}/`;
+  const arweaveGateway = `${ARWEAVE_GATEWAY}/`;
+
+  let link = hash.replace(/^Qm[1-9A-Za-z]{44}/gm, `${IPFS_GATEWAY}/${hash}`);
+  link = link.replace("https://ipfs.io/ipfs/", ipfsGateway);
+  link = link.replace("ipfs://ipfs/", ipfsGateway);
+  link = link.replace("ipfs://", ipfsGateway);
+  link = link.replace("ar://", arweaveGateway);
+
+  return link;
 };

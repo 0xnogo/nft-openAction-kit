@@ -38,3 +38,8 @@ export const InitData = [
     ],
   },
 ] as const;
+
+export const IPFS_GATEWAY_FALLBACK =
+  "https://ipfs.decentralized-content.com/ipfs";
+export const IPFS_GATEWAY = "https://gw.ipfs-lens.dev/ipfs";
+export const ARWEAVE_GATEWAY = "https://gateway.irys.xyz";
