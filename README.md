@@ -77,13 +77,15 @@ const nftOpenActionKit = new NftOpenActionKit({
 });
 ```
 
-3. When a Lens publication is created, the `detectAndReturnCalldata` method can be used by passing the URI of the publication, it will be parsed and if a supported NFT link is found it will generate the open action calldata to be included within the `post`, `comment`, `quote`, or `mirror` transaction.
+3. When a Lens publication is created, the `detectAndReturnCalldata` method can be used by passing a URL, it will be parsed and if a supported NFT link is found the response type is a `string` containing the open action calldata to be included within the `post`, `comment`, `quote`, or `mirror` transaction.
+
+[Example Usage](https://github.com/heyxyz/hey/blob/ea1b1fb5bde958cb2764bdb0e073f67a0013f527/apps/web/src/components/Composer/OpenActionsPreviews.tsx#L45)
 
 ```js
 const fetchCalldata = async () => {
   try {
     const result = await nftOpenActionKit.detectAndReturnCalldata({
-      contentURI: url,
+      contentURI: url, // url string to parse NFT data from
       publishingClientProfileId: "10", // profileId, the owner address of this profile receives frontend mint rewards
     });
     console.log(result || "No calldata found");
@@ -94,6 +96,8 @@ const fetchCalldata = async () => {
 ```
 
 4. Use `actionDataFromPost` when a publicaiton is rendered on a Lens feed to generate the cross-chain transaction calldata to be included with the `act` transaction.
+
+[Example Usage](https://github.com/heyxyz/hey/blob/ea1b1fb5bde958cb2764bdb0e073f67a0013f527/apps/web/src/components/Publication/OpenAction/UnknownModule/Decent/FeedEmbed.tsx#L127)
 
 ```js
 const publication = {
@@ -124,6 +128,72 @@ try {
 ```
 
 > The `actionDataFromPost` function is accepting a subset of fields from Publication events (example event defined in <https://github.com/wkantaros/lens-openAction>).
+
+## Display UI Elements
+
+The `actionDataFromPost` or `generateUIData` functions return a `uiData` property. This object contains NFT metadata that can be used on a frontend display. All available properties are detailed below:
+
+```
+type UIData = {
+  platformName: string;
+  platformLogoUrl: string;
+  nftName: string;
+  nftUri: string;
+  nftCreatorAddress?: string;
+  tokenStandard: string;
+  dstChainId: number;
+  zoraAdditional?: ZoraAdditional;
+  podsAdditional?: PodsAdditional;
+};
+
+type ZoraAdditional = {
+  name?: string;
+  description?: string;
+  image?: string;
+  animation_url?: string; // video or audio field, if one exists
+  content?: {
+    mime?: string;
+    uri?: string;
+  };
+};
+
+export type PodsAdditional = {
+  animation_url?: string; // podcast audio file
+  artwork?: {
+    kind?: string;
+    type?: string;
+    uri?: string;
+  };
+  collection?: string;
+  credits?: {
+    name?: string;
+    role?: string;
+  }[];
+  description?: string;
+  episodeNumber?: number;
+  episodeTitle?: string;
+  external_url?: string;
+  image?: string;
+  name?: string;
+  podcast?: string;
+  primaryMedia?: {
+    kind?: string;
+    type?: string;
+    uri?: string;
+    duration?: number;
+  };
+  properties?: {
+    Collection?: string;
+    Podcast?: string;
+    guest_1?: Record<string, unknown>;
+    host_1?: Record<string, unknown>;
+    host_2?: Record<string, unknown>;
+    [key: string]: unknown;
+  };
+  publishedAt?: string;
+  version?: string;
+};
+```
 
 ## Add a new NFT platform
 
