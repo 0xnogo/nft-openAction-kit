@@ -1,7 +1,4 @@
-import {
-  Chain,
-  mainnet,
-} from "viem/chains";
+import { Chain } from "viem/chains";
 import {
   NFTExtraction,
   NftPlatformConfig,
@@ -16,21 +13,16 @@ import {
   type PodsSupportedChain,
   type TokenInfoAPIResponse as PodsTokenInfoAPIResponse,
 } from "./platform/PodsService";
-import {
-  SUPER_RARE_ADDRESS,
-  SUPER_RARE_MINTER_ADDRESS,
-  SuperRareService,
-} from "./platform/SuperRareService";
 import { ZORA_CHAIN_ID_MAPPING, ZoraService } from "./platform/ZoraService";
 
 export class DetectionEngine implements IDetectionEngine {
   public nftPlatformConfig: NftPlatformConfig = {};
-  private raribleApiKey: string | undefined;
-  private openSeaApiKey: string | undefined;
+  // private raribleApiKey: string | undefined;
+  // private openSeaApiKey: string | undefined;
 
   constructor(config: SdkConfig) {
-    this.raribleApiKey = config.raribleApiKey;
-    this.openSeaApiKey = config.openSeaApiKey;
+    // this.raribleApiKey = config.raribleApiKey;
+    // this.openSeaApiKey = config.openSeaApiKey;
 
     this.initializePlatformConfig();
   }
@@ -88,72 +80,6 @@ export class DetectionEngine implements IDetectionEngine {
       platformService: ZoraService,
     };
 
-    /* this.nftPlatformConfig.ArtBlocks = {
-      platformName: "ArtBlocks",
-      platformLogoUrl: "https://www.artblocks.io/favicon.ico",
-      urlPattern:
-        /https:\/\/www\.artblocks\.io\/collections\/curated\/projects\/0x99a9b7c1116f9ceeb1652de04d5969cce509b069\/(\d+)/, // other GenArt ommited as no more active projects
-      urlExtractor: (url: string): Promise<NFTExtraction | undefined> => {
-        const match = url.match(
-          /https:\/\/www\.artblocks\.io\/collections\/curated\/projects\/(0x[a-fA-F0-9]{40})\/(\d+)/
-        );
-        if (match) {
-          return Promise.resolve({
-            platform: this.nftPlatformConfig["ArtBlocks"],
-            chain: mainnet,
-            contractAddress: match[1],
-            nftId: match[2], // corresponds to a project ID in ArtBlocks
-            service: new ArtBlocksService({
-              chain: mainnet,
-              platformName: this.nftPlatformConfig["ArtBlocks"].platformName,
-              platformLogoUrl:
-                this.nftPlatformConfig["ArtBlocks"].platformLogoUrl,
-            }),
-          });
-        }
-        return Promise.resolve(undefined);
-      },
-      platformService: ArtBlocksService,
-    }; */
-
-    this.nftPlatformConfig.SuperRare = {
-      platformName: "SuperRare",
-      platformLogoUrl: "https://superrare.com/favicon.ico",
-      urlPattern:
-        /https:\/\/superrare\.com\/(?:artwork-v2\/)?(?:0x[a-fA-F0-9]{40}\/)?[\w-]+(?:\:\s?[\w-]+)?-(\d+)/,
-      urlExtractor: (url: string): Promise<NFTExtraction | undefined> => {
-        const match = url.match(
-          /https:\/\/superrare\.com\/(?:artwork-v2\/)?(?:0x[a-fA-F0-9]{40}\/)?[\w-]+(?:\:\s?[\w-]+)?-(\d+)/
-        );
-        if (match) {
-          const nftId = match[1];
-          let contractAddress = SUPER_RARE_ADDRESS; // Default contract address
-          // Attempt to extract the contract address if present
-          const contractMatch = url.match(
-            /https:\/\/superrare\.com\/(0x[a-fA-F0-9]{40})/
-          );
-          if (contractMatch) {
-            contractAddress = contractMatch[1];
-          }
-          return Promise.resolve({
-            platform: this.nftPlatformConfig["SuperRare"],
-            chain: mainnet,
-            contractAddress,
-            minterAddress: SUPER_RARE_MINTER_ADDRESS,
-            nftId,
-            service: new SuperRareService({
-              chain: mainnet,
-              platformName: this.nftPlatformConfig["SuperRare"].platformName,
-              platformLogoUrl:
-                this.nftPlatformConfig["SuperRare"].platformLogoUrl,
-            }),
-          });
-        }
-        return Promise.resolve(undefined);
-      },
-      platformService: SuperRareService,
-    };
-
     this.nftPlatformConfig.Pods = {
       platformName: "Pods",
       platformLogoUrl: "https://pods.media/icon.svg",
@@ -198,6 +124,72 @@ export class DetectionEngine implements IDetectionEngine {
        */
       platformService: PodsService as unknown as PlatformServiceConstructor,
     };
+
+    /* this.nftPlatformConfig.ArtBlocks = {
+      platformName: "ArtBlocks",
+      platformLogoUrl: "https://www.artblocks.io/favicon.ico",
+      urlPattern:
+        /https:\/\/www\.artblocks\.io\/collections\/curated\/projects\/0x99a9b7c1116f9ceeb1652de04d5969cce509b069\/(\d+)/, // other GenArt ommited as no more active projects
+      urlExtractor: (url: string): Promise<NFTExtraction | undefined> => {
+        const match = url.match(
+          /https:\/\/www\.artblocks\.io\/collections\/curated\/projects\/(0x[a-fA-F0-9]{40})\/(\d+)/
+        );
+        if (match) {
+          return Promise.resolve({
+            platform: this.nftPlatformConfig["ArtBlocks"],
+            chain: mainnet,
+            contractAddress: match[1],
+            nftId: match[2], // corresponds to a project ID in ArtBlocks
+            service: new ArtBlocksService({
+              chain: mainnet,
+              platformName: this.nftPlatformConfig["ArtBlocks"].platformName,
+              platformLogoUrl:
+                this.nftPlatformConfig["ArtBlocks"].platformLogoUrl,
+            }),
+          });
+        }
+        return Promise.resolve(undefined);
+      },
+      platformService: ArtBlocksService,
+    }; */
+
+    /* this.nftPlatformConfig.SuperRare = {
+      platformName: "SuperRare",
+      platformLogoUrl: "https://superrare.com/favicon.ico",
+      urlPattern:
+        /https:\/\/superrare\.com\/(?:artwork-v2\/)?(?:0x[a-fA-F0-9]{40}\/)?[\w-]+(?:\:\s?[\w-]+)?-(\d+)/,
+      urlExtractor: (url: string): Promise<NFTExtraction | undefined> => {
+        const match = url.match(
+          /https:\/\/superrare\.com\/(?:artwork-v2\/)?(?:0x[a-fA-F0-9]{40}\/)?[\w-]+(?:\:\s?[\w-]+)?-(\d+)/
+        );
+        if (match) {
+          const nftId = match[1];
+          let contractAddress = SUPER_RARE_ADDRESS; // Default contract address
+          // Attempt to extract the contract address if present
+          const contractMatch = url.match(
+            /https:\/\/superrare\.com\/(0x[a-fA-F0-9]{40})/
+          );
+          if (contractMatch) {
+            contractAddress = contractMatch[1];
+          }
+          return Promise.resolve({
+            platform: this.nftPlatformConfig["SuperRare"],
+            chain: mainnet,
+            contractAddress,
+            minterAddress: SUPER_RARE_MINTER_ADDRESS,
+            nftId,
+            service: new SuperRareService({
+              chain: mainnet,
+              platformName: this.nftPlatformConfig["SuperRare"].platformName,
+              platformLogoUrl:
+                this.nftPlatformConfig["SuperRare"].platformLogoUrl,
+            }),
+          });
+        }
+        return Promise.resolve(undefined);
+      },
+      platformService: SuperRareService,
+    }; */
 
     // Rarible is conditionally added based on the presence of its API key
     /* if (this.raribleApiKey) {

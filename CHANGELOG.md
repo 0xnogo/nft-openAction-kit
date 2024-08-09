@@ -1,5 +1,13 @@
 # nft-openaction-kit
 
+## 1.0.30
+
+### Patch Changes
+
+- Update Zora mint fee model
+
+  Deprecate SuperRareService (only Pods and Zora currently supported)
+
 ## 1.0.29
 
 ### Patch Changes

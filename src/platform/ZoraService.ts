@@ -280,8 +280,7 @@ export class ZoraService implements IPlatformService {
   ): boolean {
     // check the saleEnd + mint liquidity available
     const now = Math.floor(Date.now() / 1000);
-    const saleOpen =
-      saleStart <= now && (Number(saleEnd) === 0 || saleEnd >= now);
+    const saleOpen = saleStart <= now && saleEnd >= now;
     const quantityAvailable = maxSupply > totalMinted;
     return saleOpen && quantityAvailable;
   }
@@ -289,6 +288,6 @@ export class ZoraService implements IPlatformService {
   private getFees(): bigint {
     // Minting fees
     // https://support.zora.co/en/articles/4981037-zora-mint-collect-fees
-    return parseEther("0.000777");
+    return parseEther("0.000111");
   }
 }
