@@ -288,6 +288,6 @@ export class ZoraService implements IPlatformService {
   private getFees(): bigint {
     // Minting fees
     // https://support.zora.co/en/articles/4981037-zora-mint-collect-fees
-    return parseEther("0.000111");
+    return parseEther("0.000777");
   }
 }
