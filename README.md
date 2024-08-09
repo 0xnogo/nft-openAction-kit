@@ -8,6 +8,24 @@ When a user posts a link to an NFT in a Lens Publication, this package will pars
 
 When a post appears in a Lens application feed with the NFT minting action attached, the app can use this package to populate metadata to appear on a UI and generate calldata to perform the transaction.
 
+## Supported Collections
+
+### Zora
+
+**What is suported**
+
+- Any NFT that is actively minting and is priced in ETH, with the exception of premint (NFT with 0 mints).
+
+**What is not currently supported**
+
+- NFTs that are priced in other ERC20 tokens are not currently supported
+- If an NFT page is listed as "secondary" this means it is no longer a primary mint and is not currently supported
+- If an NFT has 0 mints, premint is not currently supported through open action (NFT must already be deployed onchain, which happens during first mint txn on Zora UI)
+
+### Pods Media
+
+- Any NFT that is actively minting
+
 ## Features
 
 - Function 1: `detectAndReturnCalldata`. Detects the NFT platform and returns the calldata to be used in the post action.
@@ -47,8 +65,6 @@ When a post appears in a Lens application feed with the NFT minting action attac
 
    ```sh
    DECENT_API_KEY=api-key
-   RARIBLE_API_KEY=api-key
-   OPENSEA_API_KEY=api-key
    ```
 
 2. Instantiate the `NFTOpenActionKit` class and use the `detectAndReturnCalldata` and `actionDataFromPost` methods.
@@ -58,21 +74,17 @@ import { NftOpenActionKit } from "nft-openaction-kit";
 
 const nftOpenActionKit = new NftOpenActionKit({
   decentApiKey: process.env.DECENT_API_KEY,
-  raribleApiKey: process.env.RARIBLE_API_KEY,
-  openSeaApiKey: process.env.OPENSEA_API_KEY,
 });
 ```
 
-> Only the `decentApiKey` is required. The `raribleApiKey` and `openSeaApiKey` are optional, which would make the detection available for these platforms.
-
-3. Use `detectAndReturnCalldata`
+3. When a Lens publication is created, the `detectAndReturnCalldata` method can be used by passing the URI of the publication, it will be parsed and if a supported NFT link is found it will generate the open action calldata to be included within the `post`, `comment`, `quote`, or `mirror` transaction.
 
 ```js
 const fetchCalldata = async () => {
   try {
     const result = await nftOpenActionKit.detectAndReturnCalldata({
       contentURI: url,
-      publishingClientProfileId: "10",
+      publishingClientProfileId: "10", // profileId, the owner address of this profile receives frontend mint rewards
     });
     console.log(result || "No calldata found");
   } catch (err) {
@@ -81,7 +93,7 @@ const fetchCalldata = async () => {
 };
 ```
 
-4. Use `actionDataFromPost`
+4. Use `actionDataFromPost` when a publicaiton is rendered on a Lens feed to generate the cross-chain transaction calldata to be included with the `act` transaction.
 
 ```js
 const publication = {
@@ -162,7 +174,10 @@ interface IPlatformService {
     contract: string,
     tokenId: bigint
   ): Promise<string | undefined>;
-  getMintSignature(nftDetails: NFTExtraction): Promise<string | undefined>;
+  getMintSignature(
+    nftDetails: NFTExtraction,
+    ignoreValidSale?: boolean
+  ): Promise<string | undefined>;
   getUIData(
     signature: string,
     contract: string,
