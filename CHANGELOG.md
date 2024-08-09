@@ -1,5 +1,11 @@
 # nft-openaction-kit
 
+## 1.0.31
+
+### Patch Changes
+
+- Revert Zora mint reward to 0.000777
+
 ## 1.0.30
 
 ### Patch Changes
