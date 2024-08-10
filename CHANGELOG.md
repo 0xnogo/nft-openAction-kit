@@ -1,5 +1,11 @@
 # nft-openaction-kit
 
+## 1.0.32
+
+### Patch Changes
+
+- Return rawMetadataURI as fallback option to query ui data
+
 ## 1.0.31
 
 ### Patch Changes
