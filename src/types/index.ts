@@ -83,6 +83,7 @@ export type UIData = {
   nftCreatorAddress?: string;
   tokenStandard: string;
   dstChainId: number;
+  rawMetadataUri?: string;
   zoraAdditional?: ZoraAdditional;
   podsAdditional?: PodsAdditional;
 };

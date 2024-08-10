@@ -163,6 +163,7 @@ export class ZoraService implements IPlatformService {
         platformLogoUrl: this.platformLogoUrl,
         nftName,
         nftUri: response.image,
+        rawMetadataUri: uri,
         nftCreatorAddress,
         tokenStandard: this.isERC1155(signature) ? "erc1155" : "erc721",
         dstChainId: Number(dstChainId),

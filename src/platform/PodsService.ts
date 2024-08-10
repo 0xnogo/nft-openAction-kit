@@ -152,6 +152,7 @@ export class PodsService implements IPlatformService {
         nftName: await podcastContract.read.name(),
         nftUri: response.image,
         nftCreatorAddress: await podcastContract.read.owner(),
+        rawMetadataUri: metadataURI,
         tokenStandard: "erc1155",
         dstChainId: Number(dstChainId),
         podsAdditional: response,
