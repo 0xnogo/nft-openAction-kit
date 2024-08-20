@@ -73,7 +73,7 @@ export class ZoraService implements IPlatformService {
   private client: PublicClient;
 
   private erc1155MintSignature =
-    "function mintWithRewards(address minter, uint256 tokenId, uint256 quantity, bytes calldata minterArguments, address mintReferral)";
+    "function mint(address minter, uint256 tokenId, uint256 quantity, address[] calldata rewardsRecipients, bytes calldata minterArguments)";
 
   constructor(config: ServiceConfig) {
     this.client = createPublicClient({
@@ -192,15 +192,17 @@ export class ZoraService implements IPlatformService {
       ZORA_CHAIN_ID_MAPPING[CHAIN_ID_TO_KEY[Number(this.client.chain!.id)]]
         .erc1155ZoraMinter;
 
+    const rewardsRecipients = [profileOwnerAddress];
+
     return Promise.resolve([
       minter,
       tokenId,
       quantity,
+      rewardsRecipients,
       encodeAbiParameters(
         [{ type: "address" }],
         [senderAddress as `0x${string}`]
       ),
-      profileOwnerAddress,
     ]);
   }
 
