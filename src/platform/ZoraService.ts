@@ -36,34 +36,34 @@ const CHAIN_ID_TO_KEY: { [id: number]: string } = {
 export const ZORA_CHAIN_ID_MAPPING: { [key: string]: ZoraExtendedChain } = {
   zora: {
     ...zora,
-    erc1155ZoraMinter: "0x04E2516A2c207E84a1839755675dfd8eF6302F0a",
-    timedSaleMinter: "0x777777722D078c97c6ad07d9f36801e653E356Ae",
+    fixedPriceStrategy: "0x04E2516A2c207E84a1839755675dfd8eF6302F0a",
+    timedSaleStrategy: "0x777777722D078c97c6ad07d9f36801e653E356Ae",
   },
   eth: {
     ...mainnet,
-    erc1155ZoraMinter: "0x04E2516A2c207E84a1839755675dfd8eF6302F0a",
-    timedSaleMinter: "0x777777722D078c97c6ad07d9f36801e653E356Ae",
+    fixedPriceStrategy: "0x04E2516A2c207E84a1839755675dfd8eF6302F0a",
+    timedSaleStrategy: "0x777777722D078c97c6ad07d9f36801e653E356Ae",
   },
   base: {
     ...base,
-    erc1155ZoraMinter: "0x04E2516A2c207E84a1839755675dfd8eF6302F0a",
-    timedSaleMinter: "0x777777722D078c97c6ad07d9f36801e653E356Ae",
+    fixedPriceStrategy: "0x04E2516A2c207E84a1839755675dfd8eF6302F0a",
+    timedSaleStrategy: "0x777777722D078c97c6ad07d9f36801e653E356Ae",
   },
   oeth: {
     ...optimism,
-    erc1155ZoraMinter: "0x3678862f04290E565cCA2EF163BAeb92Bb76790C",
-    timedSaleMinter: "0x777777722D078c97c6ad07d9f36801e653E356Ae",
+    fixedPriceStrategy: "0x3678862f04290E565cCA2EF163BAeb92Bb76790C",
+    timedSaleStrategy: "0x777777722D078c97c6ad07d9f36801e653E356Ae",
   },
   arb: {
     ...arbitrum,
-    erc1155ZoraMinter: "0x1Cd1C1f3b8B779B50Db23155F2Cb244FCcA06B21",
-    timedSaleMinter: "0x777777722D078c97c6ad07d9f36801e653E356Ae",
+    fixedPriceStrategy: "0x1Cd1C1f3b8B779B50Db23155F2Cb244FCcA06B21",
+    timedSaleStrategy: "0x777777722D078c97c6ad07d9f36801e653E356Ae",
   },
 };
 
 export interface ZoraExtendedChain extends Chain {
-  erc1155ZoraMinter: string;
-  timedSaleMinter: string;
+  fixedPriceStrategy: string;
+  timedSaleStrategy: string;
 }
 
 export class ZoraService implements IPlatformService {
@@ -179,7 +179,7 @@ export class ZoraService implements IPlatformService {
     }
   }
 
-  getArgs(
+  async getArgs(
     contract: string,
     tokenId: bigint,
     senderAddress: string,
@@ -188,9 +188,24 @@ export class ZoraService implements IPlatformService {
     quantity: bigint,
     profileOwnerAddress: string
   ): Promise<any[]> {
-    const minter =
-      ZORA_CHAIN_ID_MAPPING[CHAIN_ID_TO_KEY[Number(this.client.chain!.id)]]
-        .erc1155ZoraMinter;
+    const chain =
+      ZORA_CHAIN_ID_MAPPING[CHAIN_ID_TO_KEY[Number(this.client.chain!.id)]];
+    const fixedPriceSaleStrategyContract = getContract({
+      address: chain.fixedPriceStrategy as `0x${string}`,
+      abi: ZoraCreatorFixedPriceSaleStrategyABI,
+      client: this.client,
+    });
+
+    let result: any = await fixedPriceSaleStrategyContract.read.sale([
+      contract as `0x${string}`,
+      tokenId,
+    ]);
+
+    let minter = chain.fixedPriceStrategy;
+
+    if (result.saleStart === 0n && result.saleEnd === 0n) {
+      minter = chain.timedSaleStrategy;
+    }
 
     const rewardsRecipients = [profileOwnerAddress];
 
@@ -267,7 +282,7 @@ export class ZoraService implements IPlatformService {
     }
 
     const fixedPriceSaleStrategyContract = getContract({
-      address: chain.erc1155ZoraMinter as `0x${string}`,
+      address: chain.fixedPriceStrategy as `0x${string}`,
       abi: ZoraCreatorFixedPriceSaleStrategyABI,
       client: this.client,
     });
@@ -279,7 +294,7 @@ export class ZoraService implements IPlatformService {
 
     if (result.saleStart === 0n && result.saleEnd === 0n) {
       const timedSaleStrategyContract = getContract({
-        address: chain.timedSaleMinter as `0x${string}`,
+        address: chain.timedSaleStrategy as `0x${string}`,
         abi: ZoraCreatorTimedSaleStrategyABI,
         client: this.client,
       });
