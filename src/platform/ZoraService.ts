@@ -10,10 +10,11 @@ import {
 import { IPlatformService } from "../interfaces/IPlatformService";
 
 import { arbitrum, base, mainnet, optimism, zora } from "viem/chains";
-import ZoraCreator1155ImplABI from "../config/abis/Zora/ZoraCreator1155Impl.json";
-import ZoraCreatorFixedPriceSaleStrategyABI from "../config/abis/Zora/ZoraCreatorFixedPriceSaleStrategy.json";
 import { NFTExtraction, ServiceConfig, UIData } from "../types";
 import { fetchZoraMetadata } from "../utils";
+import { ZoraCreatorTimedSaleStrategyABI } from "../config/abis/Zora/ZoraCreatorTimedSaleStrategy";
+import { ZoraCreatorFixedPriceSaleStrategyABI } from "../config/abis/Zora/ZoraCreatorFixedPriceSaleStrategy";
+import { ZoraCreator1155ImplABI } from "../config/abis/Zora/ZoraCreator1155Impl";
 
 type Sale = {
   saleStart: number;
@@ -21,6 +22,7 @@ type Sale = {
   totalMinted: bigint;
   maxSupply: bigint;
   price: bigint;
+  mintFee: bigint;
 };
 
 const CHAIN_ID_TO_KEY: { [id: number]: string } = {
@@ -35,27 +37,33 @@ export const ZORA_CHAIN_ID_MAPPING: { [key: string]: ZoraExtendedChain } = {
   zora: {
     ...zora,
     erc1155ZoraMinter: "0x04E2516A2c207E84a1839755675dfd8eF6302F0a",
+    timedSaleMinter: "0x777777722D078c97c6ad07d9f36801e653E356Ae",
   },
   eth: {
     ...mainnet,
     erc1155ZoraMinter: "0x04E2516A2c207E84a1839755675dfd8eF6302F0a",
+    timedSaleMinter: "0x777777722D078c97c6ad07d9f36801e653E356Ae",
   },
   base: {
     ...base,
     erc1155ZoraMinter: "0x04E2516A2c207E84a1839755675dfd8eF6302F0a",
+    timedSaleMinter: "0x777777722D078c97c6ad07d9f36801e653E356Ae",
   },
   oeth: {
     ...optimism,
     erc1155ZoraMinter: "0x3678862f04290E565cCA2EF163BAeb92Bb76790C",
+    timedSaleMinter: "0x777777722D078c97c6ad07d9f36801e653E356Ae",
   },
   arb: {
     ...arbitrum,
     erc1155ZoraMinter: "0x1Cd1C1f3b8B779B50Db23155F2Cb244FCcA06B21",
+    timedSaleMinter: "0x777777722D078c97c6ad07d9f36801e653E356Ae",
   },
 };
 
 export interface ZoraExtendedChain extends Chain {
   erc1155ZoraMinter: string;
+  timedSaleMinter: string;
 }
 
 export class ZoraService implements IPlatformService {
@@ -130,10 +138,7 @@ export class ZoraService implements IPlatformService {
       return;
     }
 
-    const price = sale.price;
-    const fee = this.getFees();
-
-    return (price + fee) * unit;
+    return (sale.price + sale.mintFee) * unit;
   }
 
   async getUIData(
@@ -242,40 +247,60 @@ export class ZoraService implements IPlatformService {
     contractAddress: string,
     nftId: string
   ): Promise<Sale | undefined> {
-    const fixedPriceSaleStrategyContract = getContract({
-      address: chain.erc1155ZoraMinter as `0x${string}`,
-      abi: ZoraCreatorFixedPriceSaleStrategyABI,
-      client: this.client,
-    });
-
-    const result: any = await fixedPriceSaleStrategyContract.read.sale([
-      contractAddress as `0x${string}`,
-      nftId,
-    ]);
     const erc1155Contract = getContract({
       address: contractAddress as `0x${string}`,
       abi: ZoraCreator1155ImplABI,
       client: this.client,
     });
 
-    const tokenInfo: any = await erc1155Contract.read.getTokenInfo([nftId]);
+    const tokenInfo = await erc1155Contract.read.getTokenInfo([BigInt(nftId)]);
 
-    if (!result || !tokenInfo) {
+    if (!tokenInfo) {
       return;
     }
 
+    let mintFee = await erc1155Contract.read.mintFee();
+    if (!mintFee) {
+      mintFee = this.getFees();
+    }
+
+    const fixedPriceSaleStrategyContract = getContract({
+      address: chain.erc1155ZoraMinter as `0x${string}`,
+      abi: ZoraCreatorFixedPriceSaleStrategyABI,
+      client: this.client,
+    });
+
+    let result: any = await fixedPriceSaleStrategyContract.read.sale([
+      contractAddress as `0x${string}`,
+      BigInt(nftId),
+    ]);
+
+    if (result.saleStart === 0n && result.saleEnd === 0n) {
+      const timedSaleStrategyContract = getContract({
+        address: chain.timedSaleMinter as `0x${string}`,
+        abi: ZoraCreatorTimedSaleStrategyABI,
+        client: this.client,
+      });
+
+      result = await timedSaleStrategyContract.read.sale([
+        contractAddress as `0x${string}`,
+        BigInt(nftId),
+      ]);
+    }
+
     return {
-      saleStart: result.saleStart,
-      saleEnd: result.saleEnd,
+      saleStart: Number(result.saleStart),
+      saleEnd: Number(result.saleEnd),
       totalMinted: tokenInfo.totalMinted,
       maxSupply: tokenInfo.maxSupply,
-      price: result.pricePerToken,
+      price: 0n,
+      mintFee,
     };
   }
 
   private isSaleValid(
-    saleStart: any,
-    saleEnd: any,
+    saleStart: number,
+    saleEnd: number,
     totalMinted: bigint,
     maxSupply: bigint
   ): boolean {
