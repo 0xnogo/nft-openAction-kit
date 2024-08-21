@@ -84,10 +84,10 @@ export class PodsService implements IPlatformService {
   }
 
   getMinterAddress(
-    contract: string,
-    tokenId: bigint
-  ): Promise<string | undefined> {
-    return Promise.resolve(undefined);
+    nftDetails: NFTExtraction,
+    mintSignature: string
+  ): Promise<string> {
+    return Promise.resolve(nftDetails.contractAddress);
   }
 
   async getMintSignature(

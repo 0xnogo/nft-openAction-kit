@@ -14,13 +14,12 @@ When a post appears in a Lens application feed with the NFT minting action attac
 
 **What is suported**
 
-- Any NFT that is actively minting and is priced in ETH, with the exception of premint (NFT with 0 mints).
+- Any NFT that is actively minting and is priced in ETH
 
 **What is not currently supported**
 
 - NFTs that are priced in other ERC20 tokens are not currently supported
 - If an NFT page is listed as "secondary" this means it is no longer a primary mint and is not currently supported
-- If an NFT has 0 mints, premint is not currently supported through open action (NFT must already be deployed onchain, which happens during first mint txn on Zora UI)
 
 ### Pods Media
 
@@ -228,7 +227,6 @@ export type NFTPlatform = {
   platformLogoUrl: string,
   urlPattern: RegExp,
   urlExtractor: (url: string) => Promise<NFTExtraction | undefined>,
-  urlExtractor: (url: string) => Promise<NFTExtraction | undefined>,
   platformService: PlatformServiceConstructor,
   apiKey?: string,
 };
@@ -242,9 +240,9 @@ export type NFTPlatform = {
 interface IPlatformService {
   platformName: string;
   getMinterAddress(
-    contract: string,
-    tokenId: bigint
-  ): Promise<string | undefined>;
+    nftDetails: NFTExtraction,
+    mintSignature: string
+  ): Promise<string>;
   getMintSignature(
     nftDetails: NFTExtraction,
     ignoreValidSale?: boolean
