@@ -9,11 +9,10 @@ import { base, mainnet, optimism, zora } from "viem/chains";
 import type { Address, PublicClient, Transport } from "viem";
 
 import ZoraCreator1155ImplABI from "../config/abis/Pods/ZoraCreator1155Impl";
-import ZoraCreatorFixedPriceSaleStrategyABI from "../config/abis/Zora/ZoraCreatorFixedPriceSaleStrategy.json";
-import { ARWEAVE_GATEWAY } from "../config/endpoints";
 import { IPlatformService } from "../interfaces/IPlatformService";
 import type { NFTExtraction, UIData } from "../types";
 import { fetchZoraMetadata } from "../utils";
+import { ZoraCreatorFixedPriceSaleStrategyABI } from "../config/abis/Zora/ZoraCreatorFixedPriceSaleStrategy";
 
 // Although Pods does have a versioned metadata standard, for the purposes of
 // these platform configuration bindings, this is all we need to care about for
@@ -85,10 +84,10 @@ export class PodsService implements IPlatformService {
   }
 
   getMinterAddress(
-    contract: string,
-    tokenId: bigint
-  ): Promise<string | undefined> {
-    return Promise.resolve(undefined);
+    nftDetails: NFTExtraction,
+    mintSignature: string
+  ): Promise<string> {
+    return Promise.resolve(nftDetails.contractAddress);
   }
 
   async getMintSignature(
@@ -240,7 +239,7 @@ export class PodsService implements IPlatformService {
       client: this.client,
     });
 
-    const result: any = await fixedPriceSaleStrategyContract.read.sale([
+    const result = await fixedPriceSaleStrategyContract.read.sale([
       contractAddress as `0x${string}`,
       BigInt(nftId),
     ]);
@@ -259,8 +258,8 @@ export class PodsService implements IPlatformService {
     }
 
     return {
-      saleStart: result.saleStart,
-      saleEnd: result.saleEnd,
+      saleStart: Number(result.saleStart),
+      saleEnd: Number(result.saleEnd),
       totalMinted: tokenInfo.totalMinted,
       maxSupply: tokenInfo.maxSupply,
       price: result.pricePerToken,

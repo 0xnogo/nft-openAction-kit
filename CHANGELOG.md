@@ -1,5 +1,11 @@
 # nft-openaction-kit
 
+## 1.0.33
+
+### Patch Changes
+
+- Add support for newly created Zora NFTs with TimedSaleStrategy support
+
 ## 1.0.32
 
 ### Patch Changes
