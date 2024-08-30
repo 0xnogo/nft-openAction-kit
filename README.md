@@ -80,11 +80,6 @@ const nftOpenActionKit = new NftOpenActionKit({
     [8453]: "https://base.g.alchemy.com/v2/<apiKey>",
   },
 });
-
-//  type SdkConfig = {
-//    decentApiKey: string;
-//    fallbackRpcs?: Record<number, string>;
-//  };
 ```
 
 3. When a Lens publication is created, the `detectAndReturnCalldata` method can be used by passing a URL, it will be parsed and if a supported NFT link is found the response type is a `string` containing the open action calldata to be included within the `post`, `comment`, `quote`, or `mirror` transaction.
