@@ -76,8 +76,12 @@ import { NftOpenActionKit } from "nft-openaction-kit";
 const nftOpenActionKit = new NftOpenActionKit({
   decentApiKey: process.env.DECENT_API_KEY,
   fallbackRpcs: {
-    [7777777]: "https://zora.g.alchemy.com/v2/<apiKey>",
-    [8453]: "https://base.g.alchemy.com/v2/<apiKey>",
+    [7777777]: `https://zora-mainnet.g.alchemy.com/v2/${process.env.VITE_ALCHEMY_API_KEY}`,
+    [8453]: `https://base-mainnet.g.alchemy.com/v2/${process.env.VITE_ALCHEMY_API_KEY}`,
+    [1]: `https://eth-mainnet.g.alchemy.com/v2/${process.env.VITE_ALCHEMY_API_KEY}`,
+    [10]: `https://opt-mainnet.g.alchemy.com/v2/${process.env.VITE_ALCHEMY_API_KEY}`,
+    [137]: `https://polygon-mainnet.g.alchemy.com/v2/${process.env.VITE_ALCHEMY_API_KEY}`,
+    [42161]: `https://arb-mainnet.g.alchemy.com/v2/${process.env.VITE_ALCHEMY_API_KEY}`,
   },
 });
 ```
