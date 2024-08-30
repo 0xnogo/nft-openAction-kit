@@ -1,5 +1,11 @@
 # nft-openaction-kit
 
+## 1.0.35
+
+### Patch Changes
+
+- Handle Zora NFTs with saleEnd timestamp of 0 (unlimited mint)
+
 ## 1.0.34
 
 ### Patch Changes
