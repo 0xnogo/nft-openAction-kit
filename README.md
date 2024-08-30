@@ -71,21 +71,20 @@ When a post appears in a Lens application feed with the NFT minting action attac
 ```js
 import { NftOpenActionKit } from "nft-openaction-kit";
 
+// @param decentApiKey - string, required decent.xyz API key
+// @param option fallbackRpcs - mapping of chainId to fallback RPC url
 const nftOpenActionKit = new NftOpenActionKit({
   decentApiKey: process.env.DECENT_API_KEY,
   fallbackRpcs: {
     [7777777]: "https://zora.g.alchemy.com/v2/<apiKey>",
     [8453]: "https://base.g.alchemy.com/v2/<apiKey>",
-  }
+  },
 });
 
 //  type SdkConfig = {
 //    decentApiKey: string;
 //    fallbackRpcs?: Record<number, string>;
 //  };
-
- * /
-
 ```
 
 3. When a Lens publication is created, the `detectAndReturnCalldata` method can be used by passing a URL, it will be parsed and if a supported NFT link is found the response type is a `string` containing the open action calldata to be included within the `post`, `comment`, `quote`, or `mirror` transaction.
