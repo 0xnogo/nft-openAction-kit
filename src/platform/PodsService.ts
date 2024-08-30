@@ -16,10 +16,10 @@ import type {
 } from "viem";
 
 import ZoraCreator1155ImplABI from "../config/abis/Pods/ZoraCreator1155Impl";
-import ZoraCreatorFixedPriceSaleStrategyABI from "../config/abis/Zora/ZoraCreatorFixedPriceSaleStrategy.json";
-import { ARWEAVE_GATEWAY } from "../config/endpoints";
 import { IPlatformService } from "../interfaces/IPlatformService";
 import type { NFTExtraction, UIData } from "../types";
+import { fetchZoraMetadata } from "../utils";
+import { ZoraCreatorFixedPriceSaleStrategyABI } from "../config/abis/Zora/ZoraCreatorFixedPriceSaleStrategy";
 
 // Although Pods does have a versioned metadata standard, for the purposes of
 // these platform configuration bindings, this is all we need to care about for
@@ -100,10 +100,10 @@ export class PodsService implements IPlatformService {
   }
 
   getMinterAddress(
-    contract: string,
-    tokenId: bigint
-  ): Promise<string | undefined> {
-    return Promise.resolve(undefined);
+    nftDetails: NFTExtraction,
+    mintSignature: string
+  ): Promise<string> {
+    return Promise.resolve(nftDetails.contractAddress);
   }
 
   async getMintSignature(
@@ -158,21 +158,19 @@ export class PodsService implements IPlatformService {
         client: this.client,
       });
 
-      const metadataURI = (await podcastContract.read.uri([tokenId])).replace(
-        // Ensure `ar://` scheme is replaced with an Arweave gateway instead.
-        /^ar:\/\//,
-        `${ARWEAVE_GATEWAY}/`
-      );
-      const response = await fetch(metadataURI);
+      const metadataURI = await podcastContract.read.uri([tokenId]);
+      const response = await fetchZoraMetadata(metadataURI);
 
       return {
         platformName: this.platformName,
         platformLogoUrl: this.platformLogoUrl,
         nftName: await podcastContract.read.name(),
-        nftUri: ((await response.json()) as PodsMetadataStandard).image,
+        nftUri: response.image,
         nftCreatorAddress: await podcastContract.read.owner(),
+        rawMetadataUri: metadataURI,
         tokenStandard: "erc1155",
         dstChainId: Number(dstChainId),
+        podsAdditional: response,
       };
     } catch (err) {
       console.error(err);
@@ -257,7 +255,7 @@ export class PodsService implements IPlatformService {
       client: this.client,
     });
 
-    const result: any = await fixedPriceSaleStrategyContract.read.sale([
+    const result = await fixedPriceSaleStrategyContract.read.sale([
       contractAddress as `0x${string}`,
       BigInt(nftId),
     ]);
@@ -276,8 +274,8 @@ export class PodsService implements IPlatformService {
     }
 
     return {
-      saleStart: result.saleStart,
-      saleEnd: result.saleEnd,
+      saleStart: Number(result.saleStart),
+      saleEnd: Number(result.saleEnd),
       totalMinted: tokenInfo.totalMinted,
       maxSupply: tokenInfo.maxSupply,
       price: result.pricePerToken,
