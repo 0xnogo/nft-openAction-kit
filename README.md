@@ -266,7 +266,8 @@ interface IPlatformService {
     signature: string,
     userAddress: string,
     unit?: bigint,
-    sourceUrl?: string
+    sourceUrl?: string,
+    paymentToken?: string
   ): Promise<bigint | undefined>;
   getArgs(
     contractAddress: string,
@@ -276,7 +277,8 @@ interface IPlatformService {
     price: bigint,
     quantity: bigint,
     profileOwnerAddress: string,
-    sourceUrl?: string
+    sourceUrl?: string,
+    paymentToken?: string
   ): Promise<any[]>;
 }
 ```

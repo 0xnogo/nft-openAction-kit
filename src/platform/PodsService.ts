@@ -17,7 +17,7 @@ import type {
 
 import ZoraCreator1155ImplABI from "../config/abis/Pods/ZoraCreator1155Impl";
 import { IPlatformService } from "../interfaces/IPlatformService";
-import type { NFTExtraction, UIData } from "../types";
+import type { NFTExtraction, UIData, MintSignature } from "../types";
 import { fetchZoraMetadata } from "../utils";
 import { ZoraCreatorFixedPriceSaleStrategyABI } from "../config/abis/Zora/ZoraCreatorFixedPriceSaleStrategy";
 
@@ -108,16 +108,16 @@ export class PodsService implements IPlatformService {
   async getMintSignature(
     nftDetails: NFTExtraction<PodsSupportedChain>,
     ignoreValidSale?: boolean
-  ): Promise<string | undefined> {
+  ): Promise<MintSignature> {
     const contractTypeResult = await this.getContractType(
       nftDetails,
       ignoreValidSale
     );
     if (!contractTypeResult) {
-      return;
+      return {};
     }
 
-    return contractTypeResult.signature;
+    return { mintSignature: contractTypeResult.signature };
   }
 
   async getPrice(

@@ -133,3 +133,8 @@ export type NFTExtraction<TChain extends Chain = Chain> = {
   nftId: string;
   service: IPlatformService;
 };
+
+export type MintSignature = {
+  mintSignature?: string;
+  paymentToken?: string;
+};
