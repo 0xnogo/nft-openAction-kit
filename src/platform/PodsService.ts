@@ -1,12 +1,19 @@
 import {
   createPublicClient,
   encodeAbiParameters,
+  fallback,
   getContract,
   http,
   parseEther,
 } from "viem";
 import { base, mainnet, optimism, zora } from "viem/chains";
-import type { Address, PublicClient, Transport } from "viem";
+import type {
+  Address,
+  FallbackTransport,
+  HttpTransport,
+  PublicClient,
+  Transport,
+} from "viem";
 
 import ZoraCreator1155ImplABI from "../config/abis/Pods/ZoraCreator1155Impl";
 import { IPlatformService } from "../interfaces/IPlatformService";
@@ -63,6 +70,7 @@ type PodsServiceConfig = {
   chain: PodsSupportedChain;
   platformName: string;
   platformLogoUrl: string;
+  fallbackRpcs?: Record<number, string>;
 };
 
 export class PodsService implements IPlatformService {
@@ -75,9 +83,16 @@ export class PodsService implements IPlatformService {
     "function mintWithRewards(address minter, uint256 tokenId, uint256 quantity, bytes calldata minterArguments, address mintReferral)";
 
   constructor(config: PodsServiceConfig) {
+    let transportConfig: HttpTransport | FallbackTransport = http();
+    if (config.fallbackRpcs && config.fallbackRpcs[config.chain.id]) {
+      transportConfig = fallback([
+        http(),
+        http(config.fallbackRpcs[config.chain.id]),
+      ]);
+    }
     this.client = createPublicClient({
       chain: config.chain,
-      transport: http(),
+      transport: transportConfig,
     });
     this.platformName = config.platformName;
     this.platformLogoUrl = config.platformLogoUrl;

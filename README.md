@@ -71,8 +71,14 @@ When a post appears in a Lens application feed with the NFT minting action attac
 ```js
 import { NftOpenActionKit } from "nft-openaction-kit";
 
+// @param decentApiKey - string, required decent.xyz API key
+// @param option fallbackRpcs - mapping of chainId to fallback RPC url
 const nftOpenActionKit = new NftOpenActionKit({
   decentApiKey: process.env.DECENT_API_KEY,
+  fallbackRpcs: {
+    [7777777]: "https://zora.g.alchemy.com/v2/<apiKey>",
+    [8453]: "https://base.g.alchemy.com/v2/<apiKey>",
+  },
 });
 ```
 

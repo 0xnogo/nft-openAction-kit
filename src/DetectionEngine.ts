@@ -17,12 +17,13 @@ import { ZORA_CHAIN_ID_MAPPING, ZoraService } from "./platform/ZoraService";
 
 export class DetectionEngine implements IDetectionEngine {
   public nftPlatformConfig: NftPlatformConfig = {};
-  // private raribleApiKey: string | undefined;
-  // private openSeaApiKey: string | undefined;
+  private fallbackRpcs: Record<number, string> | undefined;
+
+
 
   constructor(config: SdkConfig) {
-    // this.raribleApiKey = config.raribleApiKey;
-    // this.openSeaApiKey = config.openSeaApiKey;
+
+    this.fallbackRpcs = config.fallbackRpcs;
 
     this.initializePlatformConfig();
   }
@@ -72,6 +73,7 @@ export class DetectionEngine implements IDetectionEngine {
               chain: ZORA_CHAIN_ID_MAPPING[match[1]],
               platformName: this.nftPlatformConfig["Zora"].platformName,
               platformLogoUrl: this.nftPlatformConfig["Zora"].platformLogoUrl,
+              fallbackRpcs: this.fallbackRpcs
             }),
           });
         }
@@ -111,6 +113,7 @@ export class DetectionEngine implements IDetectionEngine {
                 chain: PODS_CHAIN_ID_MAPPING[chainId],
                 platformName: this.nftPlatformConfig["Pods"].platformName,
                 platformLogoUrl: this.nftPlatformConfig["Pods"].platformLogoUrl,
+                fallbackRpcs: this.fallbackRpcs,
               }),
             } satisfies NFTExtraction<PodsSupportedChain>);
           }

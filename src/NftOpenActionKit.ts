@@ -30,7 +30,6 @@ export class NftOpenActionKit implements INftOpenActionKit {
   private decentApiKey: string;
   private detectionEngine: IDetectionEngine;
 
-  // TODO: add the RPC url as input
   constructor(config: SdkConfig) {
     if (!config.decentApiKey) {
       throw new Error("Decent API key is mandatory.");
@@ -222,7 +221,7 @@ export class NftOpenActionKit implements INftOpenActionKit {
       bridgeFeeNative =
         Number(
           BigInt(resp.tx.bridgeFee.amount) +
-            BigInt(resp.tx.applicationFee.amount)
+          BigInt(resp.tx.applicationFee.amount)
         ) /
         10 ** 18;
     } else {
@@ -313,17 +312,17 @@ export class NftOpenActionKit implements INftOpenActionKit {
     post: PublicationInfo
   ):
     | readonly [
-        {
-          targetContract: `0x${string}`;
-          tokenId: bigint;
-          paymentToken: `0x${string}`;
-          chainId: bigint;
-          cost: bigint;
-          publishingClientProfileId: bigint;
-          signature: `0x${string}`;
-          platformName: `0x${string}`;
-        }
-      ]
+      {
+        targetContract: `0x${string}`;
+        tokenId: bigint;
+        paymentToken: `0x${string}`;
+        chainId: bigint;
+        cost: bigint;
+        publishingClientProfileId: bigint;
+        signature: `0x${string}`;
+        platformName: `0x${string}`;
+      }
+    ]
     | undefined => {
     const actionModules = post.actionModules;
     const index = actionModules.indexOf(

@@ -6,14 +6,14 @@ export type ServiceConfig = {
   platformName: string;
   platformLogoUrl: string;
   apiKey?: string;
+  fallbackRpcs?: Record<number, string>;
 };
 
 export type NftPlatformConfig = { [key: string]: NFTPlatform };
 
 export type SdkConfig = {
   decentApiKey: string;
-  raribleApiKey?: string;
-  openSeaApiKey?: string;
+  fallbackRpcs?: Record<number, string>;
 };
 
 export type ChainConfig = {

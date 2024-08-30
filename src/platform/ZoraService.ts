@@ -1,8 +1,11 @@
 import {
   Chain,
+  FallbackTransport,
+  HttpTransport,
   PublicClient,
   createPublicClient,
   encodeAbiParameters,
+  fallback,
   getContract,
   http,
   parseEther,
@@ -79,9 +82,16 @@ export class ZoraService implements IPlatformService {
     "function mint(address mintTo, uint256 quantity, address collection, uint256 tokenId, address mintReferral, string comment)";
 
   constructor(config: ServiceConfig) {
+    let transportConfig: HttpTransport | FallbackTransport = http();
+    if (config.fallbackRpcs && config.fallbackRpcs[config.chain.id]) {
+      transportConfig = fallback([
+        http(),
+        http(config.fallbackRpcs[config.chain.id]),
+      ]);
+    }
     this.client = createPublicClient({
       chain: config.chain,
-      transport: http(),
+      transport: transportConfig,
     });
     this.platformName = config.platformName;
     this.platformLogoUrl = config.platformLogoUrl;

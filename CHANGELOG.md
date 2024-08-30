@@ -1,5 +1,11 @@
 # nft-openaction-kit
 
+## 1.0.34
+
+### Patch Changes
+
+- Fallback RPC optional constructor parameter
+
 ## 1.0.33
 
 ### Patch Changes
