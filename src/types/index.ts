@@ -6,14 +6,14 @@ export type ServiceConfig = {
   platformName: string;
   platformLogoUrl: string;
   apiKey?: string;
+  fallbackRpcs?: Record<number, string>;
 };
 
 export type NftPlatformConfig = { [key: string]: NFTPlatform };
 
 export type SdkConfig = {
   decentApiKey: string;
-  raribleApiKey?: string;
-  openSeaApiKey?: string;
+  fallbackRpcs?: Record<number, string>;
 };
 
 export type ChainConfig = {
@@ -27,6 +27,54 @@ type Token = {
   chainId: string;
 };
 
+type ZoraAdditional = {
+  name?: string;
+  description?: string;
+  image?: string;
+  animation_url?: string;
+  content?: {
+    mime?: string;
+    uri?: string;
+  };
+};
+
+export type PodsAdditional = {
+  animation_url?: string;
+  artwork?: {
+    kind?: string;
+    type?: string;
+    uri?: string;
+  };
+  collection?: string;
+  credits?: {
+    name?: string;
+    role?: string;
+  }[];
+  description?: string;
+  episodeNumber?: number;
+  episodeTitle?: string;
+  external_url?: string;
+  image?: string;
+  name?: string;
+  podcast?: string;
+  primaryMedia?: {
+    kind?: string;
+    type?: string;
+    uri?: string;
+    duration?: number;
+  };
+  properties?: {
+    Collection?: string;
+    Podcast?: string;
+    guest_1?: Record<string, unknown>;
+    host_1?: Record<string, unknown>;
+    host_2?: Record<string, unknown>;
+    [key: string]: unknown;
+  };
+  publishedAt?: string;
+  version?: string;
+};
+
 export type UIData = {
   platformName: string;
   platformLogoUrl: string;
@@ -35,6 +83,9 @@ export type UIData = {
   nftCreatorAddress?: string;
   tokenStandard: string;
   dstChainId: number;
+  rawMetadataUri?: string;
+  zoraAdditional?: ZoraAdditional;
+  podsAdditional?: PodsAdditional;
 };
 
 export type ActionData = {

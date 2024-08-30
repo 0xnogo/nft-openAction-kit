@@ -11,9 +11,9 @@ import { MintSignature, NFTExtraction, UIData } from "../types";
 export interface IPlatformService {
   platformName: string;
   getMinterAddress(
-    contract: string,
-    tokenId: bigint
-  ): Promise<string | undefined>;
+    nftDetails: NFTExtraction,
+    mintSignature: string
+  ): Promise<string>;
   getMintSignature(
     nftDetails: NFTExtraction,
     ignoreValidSale?: boolean

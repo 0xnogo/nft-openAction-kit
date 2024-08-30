@@ -30,7 +30,6 @@ export class NftOpenActionKit implements INftOpenActionKit {
   private decentApiKey: string;
   private detectionEngine: IDetectionEngine;
 
-  // TODO: add the RPC url as input
   constructor(config: SdkConfig) {
     if (!config.decentApiKey) {
       throw new Error("Decent API key is mandatory.");
@@ -50,6 +49,7 @@ export class NftOpenActionKit implements INftOpenActionKit {
     publishingClientProfileId,
   }: DetectAndReturnCalldataParams): Promise<string | undefined> {
     const nftDetails = await this.detectionEngine.detectNFTDetails(contentURI);
+
     if (nftDetails) {
       const service: IPlatformService = nftDetails.service;
       const { mintSignature, paymentToken } = await service.getMintSignature(
@@ -60,15 +60,17 @@ export class NftOpenActionKit implements INftOpenActionKit {
         return;
       }
 
-      const nftAddress = nftDetails.minterAddress
-        ? nftDetails.minterAddress
-        : nftDetails.contractAddress;
+      const minterAddress = await service.getMinterAddress(
+        nftDetails,
+        mintSignature
+      );
+
       const nftId = nftDetails.nftId != null ? BigInt(nftDetails.nftId) : 0n;
       const paymentTokenParam = paymentToken ?? ZERO_ADDRESS;
       const cost = parseUnits("0", 18); // workaround - price fetched in actionDataFromPost
       const dstChainId = nftDetails.chain.id;
       return this.calldataGenerator(
-        nftAddress,
+        minterAddress,
         nftId,
         paymentTokenParam,
         BigInt(dstChainId),
@@ -141,11 +143,7 @@ export class NftOpenActionKit implements INftOpenActionKit {
         functionCall: "processPublicationAction",
         pubId: post.pubId,
         profileId: post.profileId,
-        contractAddress:
-          (await platformService.getMinterAddress(
-            initData[0].targetContract,
-            initData[0].tokenId
-          )) ?? initData[0].targetContract,
+        contractAddress: initData[0].targetContract,
         chainId: Number(initData[0].chainId),
         cost: {
           isNative: true,
@@ -279,7 +277,8 @@ export class NftOpenActionKit implements INftOpenActionKit {
       mintSignature,
       nftAddress,
       nftId,
-      BigInt(dstChainId)
+      BigInt(dstChainId),
+      contentURI
     );
 
     if (!uiData) {

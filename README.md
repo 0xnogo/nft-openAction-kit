@@ -8,6 +8,23 @@ When a user posts a link to an NFT in a Lens Publication, this package will pars
 
 When a post appears in a Lens application feed with the NFT minting action attached, the app can use this package to populate metadata to appear on a UI and generate calldata to perform the transaction.
 
+## Supported Collections
+
+### Zora
+
+**What is suported**
+
+- Any NFT that is actively minting and is priced in ETH
+
+**What is not currently supported**
+
+- NFTs that are priced in other ERC20 tokens are not currently supported
+- If an NFT page is listed as "secondary" this means it is no longer a primary mint and is not currently supported
+
+### Pods Media
+
+- Any NFT that is actively minting
+
 ## Features
 
 - Function 1: `detectAndReturnCalldata`. Detects the NFT platform and returns the calldata to be used in the post action.
@@ -47,8 +64,6 @@ When a post appears in a Lens application feed with the NFT minting action attac
 
    ```sh
    DECENT_API_KEY=api-key
-   RARIBLE_API_KEY=api-key
-   OPENSEA_API_KEY=api-key
    ```
 
 2. Instantiate the `NFTOpenActionKit` class and use the `detectAndReturnCalldata` and `actionDataFromPost` methods.
@@ -56,23 +71,27 @@ When a post appears in a Lens application feed with the NFT minting action attac
 ```js
 import { NftOpenActionKit } from "nft-openaction-kit";
 
+// @param decentApiKey - string, required decent.xyz API key
+// @param option fallbackRpcs - mapping of chainId to fallback RPC url
 const nftOpenActionKit = new NftOpenActionKit({
   decentApiKey: process.env.DECENT_API_KEY,
-  raribleApiKey: process.env.RARIBLE_API_KEY,
-  openSeaApiKey: process.env.OPENSEA_API_KEY,
+  fallbackRpcs: {
+    [7777777]: "https://zora.g.alchemy.com/v2/<apiKey>",
+    [8453]: "https://base.g.alchemy.com/v2/<apiKey>",
+  },
 });
 ```
 
-> Only the `decentApiKey` is required. The `raribleApiKey` and `openSeaApiKey` are optional, which would make the detection available for these platforms.
+3. When a Lens publication is created, the `detectAndReturnCalldata` method can be used by passing a URL, it will be parsed and if a supported NFT link is found the response type is a `string` containing the open action calldata to be included within the `post`, `comment`, `quote`, or `mirror` transaction.
 
-3. Use `detectAndReturnCalldata`
+[Example Usage](https://github.com/heyxyz/hey/blob/ea1b1fb5bde958cb2764bdb0e073f67a0013f527/apps/web/src/components/Composer/OpenActionsPreviews.tsx#L45)
 
 ```js
 const fetchCalldata = async () => {
   try {
     const result = await nftOpenActionKit.detectAndReturnCalldata({
-      contentURI: url,
-      publishingClientProfileId: "10",
+      contentURI: url, // url string to parse NFT data from
+      publishingClientProfileId: "10", // profileId, the owner address of this profile receives frontend mint rewards
     });
     console.log(result || "No calldata found");
   } catch (err) {
@@ -81,7 +100,9 @@ const fetchCalldata = async () => {
 };
 ```
 
-4. Use `actionDataFromPost`
+4. Use `actionDataFromPost` when a publicaiton is rendered on a Lens feed to generate the cross-chain transaction calldata to be included with the `act` transaction.
+
+[Example Usage](https://github.com/heyxyz/hey/blob/ea1b1fb5bde958cb2764bdb0e073f67a0013f527/apps/web/src/components/Publication/OpenAction/UnknownModule/Decent/FeedEmbed.tsx#L127)
 
 ```js
 const publication = {
@@ -112,6 +133,73 @@ try {
 ```
 
 > The `actionDataFromPost` function is accepting a subset of fields from Publication events (example event defined in <https://github.com/wkantaros/lens-openAction>).
+
+## Display UI Elements
+
+The `actionDataFromPost` or `generateUIData` functions return a `uiData` property. This object contains NFT metadata that can be used on a frontend display. All available properties are detailed below:
+
+```
+type UIData = {
+  platformName: string;
+  platformLogoUrl: string;
+  nftName: string;
+  nftUri: string;
+  nftCreatorAddress?: string;
+  tokenStandard: string;
+  dstChainId: number;
+  rawMetadataUri?: string;
+  zoraAdditional?: ZoraAdditional;
+  podsAdditional?: PodsAdditional;
+};
+
+type ZoraAdditional = {
+  name?: string;
+  description?: string;
+  image?: string;
+  animation_url?: string; // video or audio field, if one exists
+  content?: {
+    mime?: string;
+    uri?: string;
+  };
+};
+
+export type PodsAdditional = {
+  animation_url?: string; // podcast audio file
+  artwork?: {
+    kind?: string;
+    type?: string;
+    uri?: string;
+  };
+  collection?: string;
+  credits?: {
+    name?: string;
+    role?: string;
+  }[];
+  description?: string;
+  episodeNumber?: number;
+  episodeTitle?: string;
+  external_url?: string;
+  image?: string;
+  name?: string;
+  podcast?: string;
+  primaryMedia?: {
+    kind?: string;
+    type?: string;
+    uri?: string;
+    duration?: number;
+  };
+  properties?: {
+    Collection?: string;
+    Podcast?: string;
+    guest_1?: Record<string, unknown>;
+    host_1?: Record<string, unknown>;
+    host_2?: Record<string, unknown>;
+    [key: string]: unknown;
+  };
+  publishedAt?: string;
+  version?: string;
+};
+```
 
 ## Add a new NFT platform
 
@@ -145,7 +233,6 @@ export type NFTPlatform = {
   platformLogoUrl: string,
   urlPattern: RegExp,
   urlExtractor: (url: string) => Promise<NFTExtraction | undefined>,
-  urlExtractor: (url: string) => Promise<NFTExtraction | undefined>,
   platformService: PlatformServiceConstructor,
   apiKey?: string,
 };
@@ -159,10 +246,13 @@ export type NFTPlatform = {
 interface IPlatformService {
   platformName: string;
   getMinterAddress(
-    contract: string,
-    tokenId: bigint
+    nftDetails: NFTExtraction,
+    mintSignature: string
+  ): Promise<string>;
+  getMintSignature(
+    nftDetails: NFTExtraction,
+    ignoreValidSale?: boolean
   ): Promise<string | undefined>;
-  getMintSignature(nftDetails: NFTExtraction): Promise<MintSignature>;
   getUIData(
     signature: string,
     contract: string,

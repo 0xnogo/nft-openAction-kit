@@ -1,4 +1,4 @@
-[
+export const ZoraERC20MinterABI = [
   {
     "inputs": [],
     "name": "AddressZero",
@@ -770,4 +770,4 @@
     "stateMutability": "view",
     "type": "function"
   }
-]
+] as const;
