@@ -52,7 +52,9 @@ export class NftOpenActionKit implements INftOpenActionKit {
 
     if (nftDetails) {
       const service: IPlatformService = nftDetails.service;
-      const mintSignature = await service.getMintSignature(nftDetails);
+      const { mintSignature, paymentToken } = await service.getMintSignature(
+        nftDetails
+      );
 
       if (!mintSignature) {
         return;
@@ -64,13 +66,13 @@ export class NftOpenActionKit implements INftOpenActionKit {
       );
 
       const nftId = nftDetails.nftId != null ? BigInt(nftDetails.nftId) : 0n;
-      const paymentToken = ZERO_ADDRESS;
+      const paymentTokenParam = paymentToken ?? ZERO_ADDRESS;
       const cost = parseUnits("0", 18); // workaround - price fetched in actionDataFromPost
       const dstChainId = nftDetails.chain.id;
       return this.calldataGenerator(
         minterAddress,
         nftId,
-        paymentToken,
+        paymentTokenParam,
         BigInt(dstChainId),
         cost,
         BigInt(publishingClientProfileId),
@@ -121,7 +123,8 @@ export class NftOpenActionKit implements INftOpenActionKit {
       signature,
       senderAddress,
       undefined,
-      sourceUrl
+      sourceUrl,
+      initData[0].paymentToken
     );
 
     if (!price) {
@@ -155,7 +158,8 @@ export class NftOpenActionKit implements INftOpenActionKit {
           price,
           BigInt(quantity),
           profileOwnerAddress,
-          sourceUrl
+          sourceUrl,
+          initData[0].paymentToken
         ),
       },
     };
@@ -221,7 +225,7 @@ export class NftOpenActionKit implements INftOpenActionKit {
       bridgeFeeNative =
         Number(
           BigInt(resp.tx.bridgeFee.amount) +
-          BigInt(resp.tx.applicationFee.amount)
+            BigInt(resp.tx.applicationFee.amount)
         ) /
         10 ** 18;
     } else {
@@ -253,7 +257,7 @@ export class NftOpenActionKit implements INftOpenActionKit {
       throw new Error("NFT details not found");
     }
     const service: IPlatformService = nftDetails.service;
-    const mintSignature = await service.getMintSignature(nftDetails, true);
+    const { mintSignature } = await service.getMintSignature(nftDetails, true);
 
     if (!mintSignature) {
       throw new Error("Mint signature not found");
@@ -312,17 +316,17 @@ export class NftOpenActionKit implements INftOpenActionKit {
     post: PublicationInfo
   ):
     | readonly [
-      {
-        targetContract: `0x${string}`;
-        tokenId: bigint;
-        paymentToken: `0x${string}`;
-        chainId: bigint;
-        cost: bigint;
-        publishingClientProfileId: bigint;
-        signature: `0x${string}`;
-        platformName: `0x${string}`;
-      }
-    ]
+        {
+          targetContract: `0x${string}`;
+          tokenId: bigint;
+          paymentToken: `0x${string}`;
+          chainId: bigint;
+          cost: bigint;
+          publishingClientProfileId: bigint;
+          signature: `0x${string}`;
+          platformName: `0x${string}`;
+        }
+      ]
     | undefined => {
     const actionModules = post.actionModules;
     const index = actionModules.indexOf(

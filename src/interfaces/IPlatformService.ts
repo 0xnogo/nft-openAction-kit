@@ -1,4 +1,4 @@
-import { NFTExtraction, UIData } from "../types";
+import { MintSignature, NFTExtraction, UIData } from "../types";
 
 /**
  * Interface for platform services
@@ -17,7 +17,7 @@ export interface IPlatformService {
   getMintSignature(
     nftDetails: NFTExtraction,
     ignoreValidSale?: boolean
-  ): Promise<string | undefined>;
+  ): Promise<MintSignature>;
   getUIData(
     signature: string,
     contract: string,
@@ -31,7 +31,8 @@ export interface IPlatformService {
     signature: string,
     userAddress: string,
     unit?: bigint,
-    sourceUrl?: string
+    sourceUrl?: string,
+    paymentToken?: string
   ): Promise<bigint | undefined>;
   getArgs(
     contractAddress: string,
@@ -41,6 +42,7 @@ export interface IPlatformService {
     price: bigint,
     quantity: bigint,
     profileOwnerAddress: string,
-    sourceUrl?: string
+    sourceUrl?: string,
+    paymentToken?: string
   ): Promise<any[]>;
 }
